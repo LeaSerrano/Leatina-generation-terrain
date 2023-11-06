@@ -1,1 +1,3 @@
-build
+# Ignorer le dossier build
+build/
+
