@@ -1,4 +1,4 @@
-# Install script for directory: /home/christina/Documents/M1/hai819i/TP2_code
+# Install script for directory: /home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,7 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/christina/Documents/M1/hai819i/TP2_code/build/external/cmake_install.cmake")
+  include("/home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/build/external/cmake_install.cmake")
 
 endif()
 
@@ -56,5 +56,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/christina/Documents/M1/hai819i/TP2_code/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -1,7 +1,7 @@
 external/glfw-3.1.2/tests/CMakeFiles/threads.dir/__/deps/tinycthread.c.o: \
- /home/christina/Documents/M1/hai819i/TP2_code/external/glfw-3.1.2/deps/tinycthread.c \
+ /home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/external/glfw-3.1.2/deps/tinycthread.c \
  /usr/include/stdc-predef.h \
- /home/christina/Documents/M1/hai819i/TP2_code/external/glfw-3.1.2/deps/tinycthread.h \
+ /home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/external/glfw-3.1.2/deps/tinycthread.h \
  /usr/include/time.h /usr/include/features.h \
  /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \

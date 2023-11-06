@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/christina/Documents/M1/hai819i/TP2_code/external/glew-1.13.0/src/glew.c" "external/CMakeFiles/GLEW_1130.dir/glew-1.13.0/src/glew.c.o" "gcc" "external/CMakeFiles/GLEW_1130.dir/glew-1.13.0/src/glew.c.o.d"
+  "/home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/external/glew-1.13.0/src/glew.c" "external/CMakeFiles/GLEW_1130.dir/glew-1.13.0/src/glew.c.o" "gcc" "external/CMakeFiles/GLEW_1130.dir/glew-1.13.0/src/glew.c.o.d"
   )
 
 # Targets to which this target links.

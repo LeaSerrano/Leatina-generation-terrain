@@ -1,9 +1,9 @@
 
-if (NOT EXISTS "/home/christina/Documents/M1/hai819i/TP2_code/build/external/glfw-3.1.2/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: \"/home/christina/Documents/M1/hai819i/TP2_code/build/external/glfw-3.1.2/install_manifest.txt\"")
+if (NOT EXISTS "/home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/build/external/glfw-3.1.2/install_manifest.txt")
+  message(FATAL_ERROR "Cannot find install manifest: \"/home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/build/external/glfw-3.1.2/install_manifest.txt\"")
 endif()
 
-file(READ "/home/christina/Documents/M1/hai819i/TP2_code/build/external/glfw-3.1.2/install_manifest.txt" files)
+file(READ "/home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/build/external/glfw-3.1.2/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 
 foreach (file ${files})

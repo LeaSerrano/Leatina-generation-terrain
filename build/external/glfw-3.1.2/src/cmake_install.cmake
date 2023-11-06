@@ -1,4 +1,4 @@
-# Install script for directory: /home/christina/Documents/M1/hai819i/TP2_code/external/glfw-3.1.2/src
+# Install script for directory: /home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/external/glfw-3.1.2/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -43,6 +43,6 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "/home/christina/Documents/M1/hai819i/TP2_code/build/external/glfw-3.1.2/src/libglfw3.a")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "/home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/build/external/glfw-3.1.2/src/libglfw3.a")
 endif()
 

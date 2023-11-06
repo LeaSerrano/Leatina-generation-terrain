@@ -1,4 +1,4 @@
-# Install script for directory: /home/christina/Documents/M1/hai819i/TP2_code/external/glfw-3.1.2/examples
+# Install script for directory: /home/lea/M2-IMAGINE/Projet3D/Leatina-generation-terrain/external/glfw-3.1.2/examples
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
