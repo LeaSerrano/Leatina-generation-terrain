@@ -25,6 +25,9 @@ using namespace glm;
 #include <common/vboindexer.hpp>
 #include <common/texture.hpp>
 
+#include "image_ppm.h"
+#include "map_gen_noise.cpp"
+
 void processInput(GLFWwindow *window);
 
 // settings
@@ -176,6 +179,53 @@ int main( void )
         getchar();
         return -1;
     }
+
+
+    //Generation perlin noise
+    int nH = 512, nW = 512, nTaille;
+    char cNomImg[250];
+    std::string perlinNoiseImage = "perlinNoise.pgm";
+    strcpy(cNomImg, perlinNoiseImage.c_str());
+
+    OCTET *ImgOut;
+
+    nTaille = nH * nW;
+    allocation_tableau(ImgOut, OCTET, nTaille);
+
+    int octaves = 6;
+    double frequency = 0.9;
+    double persistence = 0.5;
+
+    int seed = generateRandomSeed();
+
+    for (int i = 0; i < nH; ++i) {
+        for (int j = 0; j < nW; ++j) {
+
+            double x = static_cast<double>(i) / nW;
+            double y = static_cast<double>(j) / nH;
+
+            double perlin = perlinNoise(octaves, frequency, persistence, x, y, seed) * 255;
+
+            if (x < nW / 4) {
+                perlin -= 25;
+            } else if (x >= 3 * nW / 4) {
+                perlin += 25;
+            }
+
+            if (perlin > 255) {
+                perlin = 255;
+            }
+            else if (perlin < 0) {
+                perlin = 0;
+            }
+
+            ImgOut[i*nW + j] = perlin;
+        }
+    }
+
+    ecrire_image_pgm(cNomImg, ImgOut, nH, nW);
+    free(ImgOut);
+
 
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
