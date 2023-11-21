@@ -237,7 +237,9 @@ void GLWidget::paintGL()
     // Set normal matrix
     m_program->setUniformValue(m_normal_matrix_loc, normal_matrix);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawElements(GL_TRIANGLES, m_logo.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     m_program->release();
 }
