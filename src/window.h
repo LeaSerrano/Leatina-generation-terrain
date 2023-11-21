@@ -72,23 +72,10 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
-    void dockUndock();
-    void xRotationSlider(int x);
-    void yRotationSlider(int y);
-    void zRotationSlider(int z);
-
-    void xUpdateSlider(int x);
-    void yUpdateSlider(int y);
-    void zUpdateSlider(int z);
 
 private:
-    QSlider *createSlider();
 
     GLWidget *glWidget;
-    QSlider *xSlider;
-    QSlider *ySlider;
-    QSlider *zSlider;
-    QPushButton *dockBtn;
     MainWindow *mainWindow;
 };
 

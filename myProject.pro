@@ -32,7 +32,7 @@ SOURCES += ./src/main.cpp \
 RESOURCES += \
     src/shaders.qrc
 
-EXT_DIR = /home/usr/libQGLViewer-main
+EXT_DIR = /home/usr/libQGLViewer-main/build
 
 
 

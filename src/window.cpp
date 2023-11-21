@@ -65,54 +65,17 @@ Window::Window(MainWindow *mw)
 {
     glWidget = new GLWidget;
 
-    xSlider = createSlider();
-    ySlider = createSlider();
-    zSlider = createSlider();
-
-
-    //A completer, connecter les sliders de cette classe avec le glWidget pour mettre à jour la rotation
-    // et inversement
-    connect(xSlider, &QSlider::valueChanged, this, &Window::xRotationSlider);
-    connect(ySlider, &QSlider::valueChanged, this, &Window::yRotationSlider);
-    connect(zSlider, &QSlider::valueChanged, this, &Window::zRotationSlider);
-
-    connect(glWidget, &GLWidget::xChanged, this, &Window::xUpdateSlider);
-    connect(glWidget, &GLWidget::yChanged, this, &Window::yUpdateSlider);
-    connect(glWidget, &GLWidget::zChanged, this, &Window::zUpdateSlider);
-
-
     QVBoxLayout *mainLayout = new QVBoxLayout;
     QHBoxLayout *container = new QHBoxLayout;
     container->addWidget(glWidget);
-    container->addWidget(xSlider);
-    container->addWidget(ySlider);
-    container->addWidget(zSlider);
 
     QWidget *w = new QWidget;
     w->setLayout(container);
     mainLayout->addWidget(w);
-    dockBtn = new QPushButton(tr("Undock"), this);
-    connect(dockBtn, &QPushButton::clicked, this, &Window::dockUndock);
-    mainLayout->addWidget(dockBtn);
 
     setLayout(mainLayout);
 
-    xSlider->setValue(15 * 16);
-    ySlider->setValue(345 * 16);
-    zSlider->setValue(0 * 16);
-
     setWindowTitle(tr("Qt OpenGL"));
-}
-
-QSlider *Window::createSlider()
-{
-    QSlider *slider = new QSlider(Qt::Vertical);
-    slider->setRange(0, 360 * 16);
-    slider->setSingleStep(16);
-    slider->setPageStep(15 * 16);
-    slider->setTickInterval(15 * 16);
-    slider->setTickPosition(QSlider::TicksRight);
-    return slider;
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -121,52 +84,4 @@ void Window::keyPressEvent(QKeyEvent *e)
         close();
     else
         QWidget::keyPressEvent(e);
-}
-
-void Window::dockUndock()
-{
-    if (parent()) {
-        setParent(0);
-        setAttribute(Qt::WA_DeleteOnClose);
-        move(QApplication::desktop()->width() / 2 - width() / 2,
-             QApplication::desktop()->height() / 2 - height() / 2);
-        dockBtn->setText(tr("Dock"));
-        show();
-    } else {
-        if (!mainWindow->centralWidget()) {
-            if (mainWindow->isVisible()) {
-                setAttribute(Qt::WA_DeleteOnClose, false);
-                dockBtn->setText(tr("Undock"));
-                mainWindow->setCentralWidget(this);
-            } else {
-                QMessageBox::information(0, tr("Cannot dock"), tr("Main window already closed"));
-            }
-        } else {
-            QMessageBox::information(0, tr("Cannot dock"), tr("Main window already occupied"));
-        }
-    }
-}
-
-void Window::xRotationSlider (int x) {
-    glWidget->setXRotation(x);
-}
-
-void Window::xUpdateSlider (int x) {
-    xSlider->setValue(x);
-}
-
-void Window::yRotationSlider (int y) {
-    glWidget->setYRotation(y);
-}
-
-void Window::yUpdateSlider (int y) {
-    ySlider->setValue(y);
-}
-
-void Window::zRotationSlider (int z) {
-    glWidget->setZRotation(z);
-}
-
-void Window::zUpdateSlider (int z) {
-    zSlider->setValue(z);
 }
