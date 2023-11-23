@@ -3,32 +3,38 @@
 #include <qmath.h>
 #include <QDebug>
 
-TerrainMesh::TerrainMesh() : m_count(0) {
-
-    generatePlan(1.0, 1.0, 16);
-    generateIndices(16);
+TerrainMesh::TerrainMesh() {
+    perlinNoise = new PerlinNoise();
+    generatePlan();
+    generateIndices();
+    averageHeight = calculateAverageHeight();
 }
 
 
-void TerrainMesh::generatePlan(float sizeX, float sizeY, int resolution) {
+void TerrainMesh::generatePlan() {
     vertex_buffer.clear();
 
-    float stepX = sizeX/(float)resolution;
-    float stepY = sizeY/(float)resolution;
+    float stepX = sizeX / static_cast<float>(resolution);
+    float stepY = sizeY / static_cast<float>(resolution);
 
-    for(int i=0; i <= resolution; i ++){
-        for(int j=0; j <= resolution; j ++){
+    perlinNoise->generatePerlinNoise();
 
-            GLfloat x = i*stepX;
-            GLfloat y = j*stepY;
+    for (int i = 0; i <= resolution; ++i) {
+        for (int j = 0; j <= resolution; ++j) {
+            GLfloat x = i * stepX;
+            GLfloat z = j * stepY;
 
-            vertex_buffer.push_back(QVector3D(x, 0.0f, y));
+            float perlin = perlinNoise->getPerlinAt(i, j, resolution);
 
-       }
+            GLfloat y = 0.9 - (static_cast<int>(perlin) / 25) * 0.1;
+
+            vertex_buffer.push_back(QVector3D(x, y, z));
+        }
     }
 }
 
-void TerrainMesh::generateIndices(int resolution){
+
+void TerrainMesh::generateIndices(){
     index_buffer.clear();
 
     for(int i=0; i <= resolution-1; i++){
@@ -47,5 +53,15 @@ void TerrainMesh::generateIndices(int resolution){
 
         }
     }
+}
+
+float TerrainMesh::calculateAverageHeight() const {
+    float totalHeight = 0.0f;
+
+    for (const auto& vertex : vertex_buffer) {
+        totalHeight += vertex.y();
+    }
+
+    return totalHeight / vertex_buffer.size();
 }
 

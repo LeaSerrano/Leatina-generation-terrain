@@ -206,9 +206,26 @@ void GLWidget::initializeGL()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 
-    // Our camera never changes in this example.
+    //Camera position
+    int chosenI = m_logo.resolution/2;
+    int chosenJ = m_logo.resolution/2;
+
+    float chosenHeight = m_logo.vertex_buffer[chosenI * (m_logo.resolution + 1) + chosenJ].y();
+    float stepX = m_logo.sizeX/(float)m_logo.resolution;
+    float stepY = m_logo.sizeY/(float)m_logo.resolution;
+
+    float centerX = chosenI * stepX;
+    float centerY = -chosenHeight + 0.4;
+    float centerZ = chosenJ * stepY;
+
+    QVector3D cameraPosition(centerX, centerY + 0.2f, centerZ + 0.5f);
+
+    QVector3D target(centerX, centerY, centerZ);
+
+    QVector3D upDirection(0.0f, 0.1f, 0.0f);
+
     m_view.setToIdentity();
-    m_view.translate(0, 0, -1);
+    m_view.lookAt(cameraPosition, target, upDirection);
 
     // Light position is fixed.
     m_program->setUniformValue(m_light_pos_loc, QVector3D(0, 0, 70));

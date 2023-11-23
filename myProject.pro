@@ -18,6 +18,7 @@ HEADERS += ./src/point3.h \
     src/glwidget.h \
     src/image_ppm.h \
     src/mainwindow.h \
+    src/perlinNoise.h \
     src/terrainMesh.h \
     src/window.h
 SOURCES += ./src/main.cpp \
@@ -33,8 +34,6 @@ RESOURCES += \
     src/shaders.qrc
 
 EXT_DIR = /home/usr/libQGLViewer-main/build
-
-
 
 
 #QGLViewer
