@@ -17,16 +17,17 @@ public:
 
     PerlinNoise* perlinNoise;
 
-    float ymax = 1.0, ymin = 0;
+    float ymax = 1.0;
     float sizeX = 1.0, sizeY = 1.0;
     float averageHeight;
-    int resolution = 16;
+    int resolution = 50;
+    int heightRange = 10;
 
 private:
 
     void generatePlan();
     void generateIndices();
-    float calculateAverageHeight() const;
+    void getHeightAtPerlinPx(GLfloat &y, float perlin);
 
 };
 

@@ -7,9 +7,35 @@ TerrainMesh::TerrainMesh() {
     perlinNoise = new PerlinNoise();
     generatePlan();
     generateIndices();
-    averageHeight = calculateAverageHeight();
 }
 
+void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
+    float step = (float)255/heightRange;
+
+    float stepMin = 0.0;
+    float stepMax = step;
+
+    float stepValue = ymax/heightRange;
+    float value = 0.0;
+
+    for (int p = 0; p < heightRange; p++) {
+        if (perlin >= stepMin && perlin < stepMax) {
+            y = value;
+            return;
+        }
+
+        if (p == heightRange-1) {
+            if (perlin >= stepMin && perlin <= stepMax) {
+                y = value;
+                return;
+            }
+        }
+
+        value += stepValue;
+        stepMin = stepMax;
+        stepMax += step;
+    }
+}
 
 void TerrainMesh::generatePlan() {
     vertex_buffer.clear();
@@ -26,7 +52,8 @@ void TerrainMesh::generatePlan() {
 
             float perlin = perlinNoise->getPerlinAt(i, j, resolution);
 
-            GLfloat y = 0.9 - (static_cast<int>(perlin) / 25) * 0.1;
+            GLfloat y;
+            getHeightAtPerlinPx(y, perlin);
 
             vertex_buffer.push_back(QVector3D(x, y, z));
         }
@@ -54,14 +81,3 @@ void TerrainMesh::generateIndices(){
         }
     }
 }
-
-float TerrainMesh::calculateAverageHeight() const {
-    float totalHeight = 0.0f;
-
-    for (const auto& vertex : vertex_buffer) {
-        totalHeight += vertex.y();
-    }
-
-    return totalHeight / vertex_buffer.size();
-}
-

@@ -29,13 +29,15 @@
 
 
 #include "qt/QSmartAction.h"
+#include "terrainMesh.h"
 
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
 
-    Mesh mesh;
+    //Mesh mesh;
+    TerrainMesh terrainMesh;
 
     QWidget * controls;
 
@@ -70,8 +72,8 @@ public :
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
         glColor3f(0.5,0.5,0.8);
-        glBegin(GL_TRIANGLES);
-        for( unsigned int t = 0 ; t < mesh.triangles.size() ; ++t ) {
+        //glBegin(GL_TRIANGLES);
+        /*for( unsigned int t = 0 ; t < mesh.triangles.size() ; ++t ) {
             point3d const & p0 = mesh.vertices[ mesh.triangles[t][0] ].p;
             point3d const & p1 = mesh.vertices[ mesh.triangles[t][1] ].p;
             point3d const & p2 = mesh.vertices[ mesh.triangles[t][2] ].p;
@@ -80,8 +82,12 @@ public :
             glVertex3f(p0[0],p0[1],p0[2]);
             glVertex3f(p1[0],p1[1],p1[2]);
             glVertex3f(p2[0],p2[1],p2[2]);
-        }
-        glEnd();
+        }*/
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        //glEnd();
     }
 
     void pickBackgroundColor() {
@@ -100,7 +106,7 @@ public :
     }
 
 
-    /*void init() {
+    void init() {
         makeCurrent();
         initializeOpenGLFunctions();
 
@@ -110,8 +116,8 @@ public :
 
         // Lights:
         GLTools::initLights();
-        GLTools::setSunsetLight();
-        GLTools::setDefaultMaterial();
+        //GLTools::setSunsetLight();
+        //GLTools::setDefaultMaterial();
 
         //
         glShadeModel(GL_SMOOTH);
@@ -128,47 +134,38 @@ public :
         glEnable(GL_COLOR_MATERIAL);
 
         //
-        setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
+        GLuint vertexbuffer;
+        glGenBuffers(1, &vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.vertex_buffer.size() * sizeof(QVector3D), &terrainMesh.vertex_buffer[0], GL_STATIC_DRAW);
+
+        GLuint indexbuffer;
+        glGenBuffers(1, &indexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, indexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.index_buffer.size() * sizeof(short), &terrainMesh.index_buffer[0], GL_STATIC_DRAW);
+
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+
+        //glGenBuffers(1, &normalBuffer);
+        //glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        //glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), &normals[0], GL_STATIC_DRAW);
+
+        //glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+        //glEnableVertexAttribArray(1);
+
+        //
+        /*setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
         setSceneRadius( 10.f );
-        showEntireScene();
-    }*/
+        showEntireScene();*/
 
-    void init() {
-        qDebug() << "Initializing the viewer...";
-
-        //makeCurrent();
-        initializeOpenGLFunctions();
-
-        setMouseTracking(true); // Needed for MouseGrabber.
-
-        qDebug() << "Setting background color...";
-        setBackgroundColor(QColor(255, 255, 255));
-
-        qDebug() << "Initializing lights and materials...";
-        // Lights:
-        GLTools::initLights();
-        GLTools::setSunsetLight();
-        GLTools::setDefaultMaterial();
-
-        qDebug() << "Setting OpenGL rendering properties...";
-        glShadeModel(GL_SMOOTH);
-        glFrontFace(GL_CCW);
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-
-        glEnable(GL_CLIP_PLANE0);
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glEnable(GL_COLOR_MATERIAL);
-
-        qDebug() << "Setting scene center and radius...";
-        setSceneCenter(qglviewer::Vec(0, 0, 0));
-        setSceneRadius(10.f);
-        showEntireScene();
-
-        qDebug() << "Initialization completed.";
+        point3d bbmin(0.25, 0.25, 0.25) , BBmax(0.75, 0.75, 0.75);
+        adjustCamera(bbmin, BBmax);
     }
 
 
@@ -245,7 +242,7 @@ signals:
     void windowTitleUpdated( const QString & );
 
 public slots:
-    void open_mesh() {
+    /*void open_mesh() {
         bool success = false;
         QString fileName = QFileDialog::getOpenFileName(NULL,"","");
         if ( !fileName.isNull() ) { // got a file name
@@ -281,7 +278,7 @@ public slots:
             else
                 std::cout << fileName.toStdString() << " could not be saved" << std::endl;
         }
-    }
+    }*/
 
     void showControls()
     {
