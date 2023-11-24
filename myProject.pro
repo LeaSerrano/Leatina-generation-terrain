@@ -18,6 +18,7 @@ HEADERS += ./src/point3.h \
     src/glwidget.h \
     src/image_ppm.h \
     src/mainwindow.h \
+    src/mySimpleViewer.h \
     src/perlinNoise.h \
     src/terrainMesh.h \
     src/window.h
@@ -26,6 +27,7 @@ SOURCES += ./src/main.cpp \
     ./src/gl/BasicColors.cpp \
     src/glwidget.cpp \
     src/mainwindow.cpp \
+    src/mySimpleViewer.cpp \
     src/perlinNoise.cpp \
     src/terrainMesh.cpp \
     src/window.cpp

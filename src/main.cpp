@@ -9,6 +9,7 @@
 #include <QDir>
 
 #include <QToolBar>
+//#include "mySimpleViewer.h"
 #include "MyViewer.h"
 
 #include "glwidget.h"
@@ -26,7 +27,7 @@ int main( int argc , char** argv )
     toolBar->setIconSize(QSize(35,35));
     toolBar->setAutoFillBackground(true);
     toolBar->setStyleSheet("QToolBar { background: white; }");
-    viewer->add_actions_to_toolBar(toolBar);
+    //viewer->add_actions_to_toolBar(toolBar);
 
     mainWindow->addToolBar(toolBar);
 
@@ -39,6 +40,41 @@ int main( int argc , char** argv )
     mainWindow->show();
 
     return app.exec();*/
+
+    /*QApplication application(argc, argv);
+
+    // Create an instance of MyViewer
+    MyViewer viewer;
+
+    // Set up the viewer and add actions to the toolbar
+    //viewer.init();
+    QToolBar *toolBar = new QToolBar();
+    viewer.add_actions_to_toolBar(toolBar);
+
+    // Set up the main window
+    QMainWindow mainWindow;
+    mainWindow.setCentralWidget(&viewer);
+    mainWindow.addToolBar(toolBar);
+
+    // Set the window properties
+    mainWindow.setWindowTitle("My 3D Viewer");
+    mainWindow.setGeometry(100, 100, 800, 600);
+
+    // Show the main window
+    mainWindow.show();
+
+    // Open a mesh (you can replace this with your own logic)
+    viewer.open_mesh();*/
+
+    /*QMainWindow mainWindow;
+    MySimpleViewer *myOpenGLWidget = new MySimpleViewer(&mainWindow);
+    mainWindow.setCentralWidget(myOpenGLWidget);
+
+    mainWindow.resize(800, 600);
+    mainWindow.show();*/
+
+    // Start the application event loop
+    //return application.exec();
 
     QCoreApplication::setApplicationName("Leatina-generation-terrain");
     QCoreApplication::setOrganizationName("QtProject");
