@@ -13,6 +13,7 @@ public:
     TerrainMesh();
 
     QVector<QVector3D> vertex_buffer;
+    QVector<float> normal_buffer;
     QVector<short> index_buffer;
 
     PerlinNoise* perlinNoise;
@@ -28,6 +29,7 @@ private:
     void generatePlan();
     void generateIndices();
     void getHeightAtPerlinPx(GLfloat &y, float perlin);
+    void calculateNormals();
 
 };
 

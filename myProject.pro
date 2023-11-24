@@ -36,24 +36,24 @@ RESOURCES += \
     src/shaders.qrc
 
 #Ordi de la maison
-#EXT_DIR = /home/usr/libQGLViewer-main/build
-
-#QGLViewer
-#{
-# INCLUDEPATH += $${EXT_DIR}
-# LIBS +=    -L$${EXT_DIR}/QGLViewer \
-#            -lQGLViewer
-#}
-
-#Ordi de la fac
-EXT_DIR = extern
+EXT_DIR = /home/usr/libQGLViewer-main/build
 
 #QGLViewer
 {
- INCLUDEPATH += $${EXT_DIR}/libQGLViewer-2.6.1
- LIBS +=    -L$${EXT_DIR}/libQGLViewer-2.6.1/QGLViewer \
-            -lQGLViewer-qt5
+ INCLUDEPATH += $${EXT_DIR}
+ LIBS +=    -L$${EXT_DIR}/QGLViewer \
+            -lQGLViewer
 }
+
+#Ordi de la fac
+#EXT_DIR = extern
+
+#QGLViewer
+#{
+# INCLUDEPATH += $${EXT_DIR}/libQGLViewer-2.6.1
+# LIBS +=    -L$${EXT_DIR}/libQGLViewer-2.6.1/QGLViewer \
+#            -lQGLViewer-qt5
+#}
 
 
 

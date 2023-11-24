@@ -7,6 +7,7 @@ TerrainMesh::TerrainMesh() {
     perlinNoise = new PerlinNoise();
     generatePlan();
     generateIndices();
+    calculateNormals();
 }
 
 void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
@@ -37,6 +38,7 @@ void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
     }
 }
 
+
 void TerrainMesh::generatePlan() {
     vertex_buffer.clear();
 
@@ -61,6 +63,7 @@ void TerrainMesh::generatePlan() {
 }
 
 
+
 void TerrainMesh::generateIndices(){
     index_buffer.clear();
 
@@ -81,3 +84,40 @@ void TerrainMesh::generateIndices(){
         }
     }
 }
+
+void TerrainMesh::calculateNormals() {
+    normal_buffer.clear();
+
+    // Initialize normals
+    QVector<QVector3D> normals(vertex_buffer.size(), QVector3D(0.0, 0.0, 0.0));
+
+    // Calculate normals for each triangle
+    for (int i = 0; i < index_buffer.size(); i += 3) {
+        int idx1 = index_buffer[i];
+        int idx2 = index_buffer[i + 1];
+        int idx3 = index_buffer[i + 2];
+
+        QVector3D v1 = vertex_buffer[idx1];
+        QVector3D v2 = vertex_buffer[idx2];
+        QVector3D v3 = vertex_buffer[idx3];
+
+        QVector3D normal = QVector3D::crossProduct(v2 - v1, v3 - v1);
+
+        normals[idx1] += normal;
+        normals[idx2] += normal;
+        normals[idx3] += normal;
+    }
+
+    // Normalize normals
+    for (int i = 0; i < normals.size(); ++i) {
+        normals[i].normalize();
+    }
+
+    // Flatten the normals into the float buffer
+    for (int i = 0; i < normals.size(); ++i) {
+        normal_buffer.push_back(normals[i].x());
+        normal_buffer.push_back(normals[i].y());
+        normal_buffer.push_back(normals[i].z());
+    }
+}
+

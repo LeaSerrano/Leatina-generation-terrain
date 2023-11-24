@@ -26,10 +26,14 @@
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QDebug>
+#include <QOpenGLShaderProgram>
 
 
 #include "qt/QSmartAction.h"
 #include "terrainMesh.h"
+
+#include <fstream>
+#include <sstream>
 
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
@@ -40,6 +44,10 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     TerrainMesh terrainMesh;
 
     QWidget * controls;
+
+    GLuint shaderProgram;
+    GLuint vertexShader, fragmentShader;
+
 
 public :
 
@@ -69,6 +77,7 @@ public :
 
 
     void draw() {
+        glUseProgram(shaderProgram);
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
         glColor3f(0.5,0.5,0.8);
@@ -86,7 +95,7 @@ public :
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+        glUseProgram(0);
         //glEnd();
     }
 
@@ -103,6 +112,65 @@ public :
         setSceneCenter( qglviewer::Vec( center[0] , center[1] , center[2] ) );
         setSceneRadius( 1.5f * ( BB - bb ).norm() );
         showEntireScene();
+    }
+
+    GLuint compileShader(const char* shaderSource, GLenum shaderType) {
+        GLuint shader = glCreateShader(shaderType);
+        glShaderSource(shader, 1, &shaderSource, NULL);
+        glCompileShader(shader);
+
+        // Check for compilation errors (you might want to add more detailed error checking)
+        GLint success;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            char infoLog[512];
+            glGetShaderInfoLog(shader, 512, NULL, infoLog);
+            qDebug() << "Shader compilation error:\n" << infoLog;
+            return 0;
+        }
+
+        return shader;
+    }
+
+    GLuint createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
+        GLuint vertexShader = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
+        GLuint fragmentShader = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
+
+        GLuint shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+
+        // Check for linking errors (you might want to add more detailed error checking)
+        GLint success;
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+        if (!success) {
+            char infoLog[512];
+            glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+            qDebug() << "Shader program linking error:\n" << infoLog;
+            return 0;
+        }
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        return shaderProgram;
+    }
+
+    QString readShaderFile(const char* filePath) {
+        qDebug() << "Trying to open file: " << filePath;
+
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            qDebug() << "Unable to open file: " << filePath;
+            return QString();  // Return an empty QString
+        }
+
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+
+        // Convert the std::string to QString before returning
+        return QString::fromStdString(buffer.str());
     }
 
 
@@ -144,27 +212,40 @@ public :
         glBindBuffer(GL_ARRAY_BUFFER, indexbuffer);
         glBufferData(GL_ARRAY_BUFFER, terrainMesh.index_buffer.size() * sizeof(short), &terrainMesh.index_buffer[0], GL_STATIC_DRAW);
 
+        GLuint normalBuffer;
+        glGenBuffers(1, &normalBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.normal_buffer.size() * sizeof(float), &terrainMesh.normal_buffer[0], GL_STATIC_DRAW);
+
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 
-        //glGenBuffers(1, &normalBuffer);
-        //glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-        //glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), &normals[0], GL_STATIC_DRAW);
 
-        //glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-        //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
-        //glEnableVertexAttribArray(1);
+        QString vertexShaderSource = readShaderFile("vshader.glsl");
+        QString fragmentShaderSource = readShaderFile("fshader.glsl");
+
+        if (vertexShaderSource.isEmpty() || fragmentShaderSource.isEmpty()) {
+            // Handle shader loading error
+            return;
+        }
+
+        shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
+
 
         //
         /*setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
         setSceneRadius( 10.f );
         showEntireScene();*/
 
-        point3d bbmin(0.25, 0.25, 0.25) , BBmax(0.75, 0.75, 0.75);
+        point3d bbmin(0.0, 0.0, 0.0) , BBmax(1, 1, 1);
         adjustCamera(bbmin, BBmax);
     }
 
