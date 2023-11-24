@@ -57,6 +57,7 @@ SOURCES       = src/main.cpp \
 		src/gl/BasicColors.cpp \
 		src/glwidget.cpp \
 		src/mainwindow.cpp \
+		src/mySimpleViewer.cpp \
 		src/perlinNoise.cpp \
 		src/terrainMesh.cpp \
 		src/window.cpp qrc_shaders.cpp \
@@ -69,6 +70,7 @@ OBJECTS       = tmp/obj/main.o \
 		tmp/obj/BasicColors.o \
 		tmp/obj/glwidget.o \
 		tmp/obj/mainwindow.o \
+		tmp/obj/mySimpleViewer.o \
 		tmp/obj/perlinNoise.o \
 		tmp/obj/terrainMesh.o \
 		tmp/obj/window.o \
@@ -171,6 +173,7 @@ DIST          = src/fshader.glsl \
 		src/glwidget.h \
 		src/image_ppm.h \
 		src/mainwindow.h \
+		src/mySimpleViewer.h \
 		src/perlinNoise.h \
 		src/terrainMesh.h \
 		src/window.h src/main.cpp \
@@ -178,6 +181,7 @@ DIST          = src/fshader.glsl \
 		src/gl/BasicColors.cpp \
 		src/glwidget.cpp \
 		src/mainwindow.cpp \
+		src/mySimpleViewer.cpp \
 		src/perlinNoise.cpp \
 		src/terrainMesh.cpp \
 		src/window.cpp
@@ -381,8 +385,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents src/shaders.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/point3.h src/Mesh.h src/MyViewer.h src/gl/GLUtilityMethods.h src/gl/BasicColors.h src/glwidget.h src/image_ppm.h src/mainwindow.h src/perlinNoise.h src/terrainMesh.h src/window.h $(DISTDIR)/
-	$(COPY_FILE) --parents src/main.cpp src/gl/GLUtilityMethods.cpp src/gl/BasicColors.cpp src/glwidget.cpp src/mainwindow.cpp src/perlinNoise.cpp src/terrainMesh.cpp src/window.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/point3.h src/Mesh.h src/MyViewer.h src/gl/GLUtilityMethods.h src/gl/BasicColors.h src/glwidget.h src/image_ppm.h src/mainwindow.h src/mySimpleViewer.h src/perlinNoise.h src/terrainMesh.h src/window.h $(DISTDIR)/
+	$(COPY_FILE) --parents src/main.cpp src/gl/GLUtilityMethods.cpp src/gl/BasicColors.cpp src/glwidget.cpp src/mainwindow.cpp src/mySimpleViewer.cpp src/perlinNoise.cpp src/terrainMesh.cpp src/window.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -469,17 +473,10 @@ compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_heade
 
 ####### Compile
 
-tmp/obj/main.o: src/main.cpp src/MyViewer.h \
-		src/Mesh.h \
-		src/point3.h \
-		src/BasicIO.h \
-		src/gl/openglincludeQtComp.h \
-		src/gl/GLUtilityMethods.h \
-		src/gl/BasicColors.h \
-		qt/QSmartAction.h \
-		src/glwidget.h \
+tmp/obj/main.o: src/main.cpp src/mySimpleViewer.h \
 		src/terrainMesh.h \
 		src/perlinNoise.h \
+		src/glwidget.h \
 		src/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/main.o src/main.cpp
 
@@ -498,6 +495,11 @@ tmp/obj/glwidget.o: src/glwidget.cpp src/glwidget.h \
 tmp/obj/mainwindow.o: src/mainwindow.cpp src/mainwindow.h \
 		src/window.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/mainwindow.o src/mainwindow.cpp
+
+tmp/obj/mySimpleViewer.o: src/mySimpleViewer.cpp src/mySimpleViewer.h \
+		src/terrainMesh.h \
+		src/perlinNoise.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/mySimpleViewer.o src/mySimpleViewer.cpp
 
 tmp/obj/perlinNoise.o: src/perlinNoise.cpp src/perlinNoise.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/perlinNoise.o src/perlinNoise.cpp

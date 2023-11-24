@@ -25,6 +25,7 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QDebug>
 
 
 #include "qt/QSmartAction.h"
@@ -99,7 +100,7 @@ public :
     }
 
 
-    void init() {
+    /*void init() {
         makeCurrent();
         initializeOpenGLFunctions();
 
@@ -130,7 +131,46 @@ public :
         setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
         setSceneRadius( 10.f );
         showEntireScene();
+    }*/
+
+    void init() {
+        qDebug() << "Initializing the viewer...";
+
+        //makeCurrent();
+        initializeOpenGLFunctions();
+
+        setMouseTracking(true); // Needed for MouseGrabber.
+
+        qDebug() << "Setting background color...";
+        setBackgroundColor(QColor(255, 255, 255));
+
+        qDebug() << "Initializing lights and materials...";
+        // Lights:
+        GLTools::initLights();
+        GLTools::setSunsetLight();
+        GLTools::setDefaultMaterial();
+
+        qDebug() << "Setting OpenGL rendering properties...";
+        glShadeModel(GL_SMOOTH);
+        glFrontFace(GL_CCW);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+
+        glEnable(GL_CLIP_PLANE0);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glEnable(GL_COLOR_MATERIAL);
+
+        qDebug() << "Setting scene center and radius...";
+        setSceneCenter(qglviewer::Vec(0, 0, 0));
+        setSceneRadius(10.f);
+        showEntireScene();
+
+        qDebug() << "Initialization completed.";
     }
+
 
     QString helpString() const {
         QString text("<h2>Our cool project</h2>");

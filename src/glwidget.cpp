@@ -210,15 +210,15 @@ void GLWidget::initializeGL()
     int chosenI = m_logo.resolution/2;
     int chosenJ = m_logo.resolution/2;
 
-    float chosenHeight = m_logo.vertex_buffer[chosenI * (m_logo.resolution + 1) + chosenJ].y();
+    //float chosenHeight = m_logo.vertex_buffer[chosenI * (m_logo.resolution + 1) + chosenJ].y();
     float stepX = m_logo.sizeX/(float)m_logo.resolution;
     float stepY = m_logo.sizeY/(float)m_logo.resolution;
 
     float centerX = chosenI * stepX;
-    float centerY = -chosenHeight + 0.4;
+    float centerY = m_logo.ymax - 0.9;
     float centerZ = chosenJ * stepY;
 
-    QVector3D cameraPosition(centerX, centerY + 0.2f, centerZ + 0.5f);
+    QVector3D cameraPosition(centerX, centerY + 0.2f, centerZ + 0.3f);
 
     QVector3D target(centerX, centerY, centerZ);
 
