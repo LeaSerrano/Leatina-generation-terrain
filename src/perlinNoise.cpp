@@ -76,9 +76,9 @@ void PerlinNoise::generatePerlinNoise() {
 
     ImgPerlin = QImage(nW, nH, QImage::Format_Grayscale8);
 
-    int octaves = 6;
-    double frequency = 0.9;
-    double persistence = 0.5;
+    int octaves = 5;
+    double frequency = 1.5;
+    double persistence = 0.7;
 
     int seed = generateRandomSeed();
 
@@ -113,11 +113,10 @@ void PerlinNoise::generatePerlinNoise() {
 
 float PerlinNoise::getPerlinAt(int i, int j, int resolution) {
     if (!ImgPerlin.isNull()) {
-        // Mettez à l'échelle les indices en fonction de la taille de l'image
         int scaledI = static_cast<int>(i * (ImgPerlin.width() / static_cast<float>(resolution)));
         int scaledJ = static_cast<int>(j * (ImgPerlin.height() / static_cast<float>(resolution)));
 
-        if (scaledI >= 0 && scaledI < ImgPerlin.width() && scaledJ >= 0 && scaledJ < ImgPerlin.height()) {
+        if (scaledI > 0 && scaledI < ImgPerlin.width() && scaledJ > 0 && scaledJ < ImgPerlin.height()) {
             QRgb pixelValue = ImgPerlin.pixel(scaledI, scaledJ);
             return qGray(pixelValue);
         }

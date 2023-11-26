@@ -436,6 +436,8 @@ tmp/moc/moc_MyViewer.cpp: src/MyViewer.h \
 		src/gl/GLUtilityMethods.h \
 		src/gl/BasicColors.h \
 		qt/QSmartAction.h \
+		src/terrainMesh.h \
+		src/perlinNoise.h \
 		tmp/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain/src -I/home/usr/libQGLViewer-main/build -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/MyViewer.h -o tmp/moc/moc_MyViewer.cpp
@@ -476,6 +478,14 @@ compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_heade
 tmp/obj/main.o: src/main.cpp src/mySimpleViewer.h \
 		src/terrainMesh.h \
 		src/perlinNoise.h \
+		src/MyViewer.h \
+		src/Mesh.h \
+		src/point3.h \
+		src/BasicIO.h \
+		src/gl/openglincludeQtComp.h \
+		src/gl/GLUtilityMethods.h \
+		src/gl/BasicColors.h \
+		qt/QSmartAction.h \
 		src/glwidget.h \
 		src/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/main.o src/main.cpp

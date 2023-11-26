@@ -1,4 +1,4 @@
-#version 150
+/*#version 150
 in vec4 vertex;
 in vec3 normal;
 
@@ -13,4 +13,19 @@ void main() {
 
     // Calculate vertex position in screen space
     gl_Position = mvp_matrix * vertex;
+}
+*/
+
+#version 330 core
+
+uniform mat4 MVP;
+
+in vec3 inPosition; // Your vertex attribute
+in vec3 inNormal;   // Your normal attribute
+
+out vec3 fragNormal;
+
+void main() {
+    gl_Position = MVP * vec4(inPosition, 1.0);
+    fragNormal = inNormal;
 }

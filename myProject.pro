@@ -35,8 +35,8 @@ SOURCES += ./src/main.cpp \
 RESOURCES += \
     src/shaders.qrc
 
+#Ordi de la maison
 EXT_DIR = /home/usr/libQGLViewer-main/build
-
 
 #QGLViewer
 {
@@ -44,6 +44,16 @@ EXT_DIR = /home/usr/libQGLViewer-main/build
  LIBS +=    -L$${EXT_DIR}/QGLViewer \
             -lQGLViewer
 }
+
+#Ordi de la fac
+#EXT_DIR = extern
+
+#QGLViewer
+#{
+# INCLUDEPATH += $${EXT_DIR}/libQGLViewer-2.6.1
+# LIBS +=    -L$${EXT_DIR}/libQGLViewer-2.6.1/QGLViewer \
+#            -lQGLViewer-qt5
+#}
 
 
 
