@@ -9,7 +9,6 @@
 #include <QDir>
 
 #include <QToolBar>
-#include "mySimpleViewer.h"
 #include "MyViewer.h"
 
 #include "glwidget.h"

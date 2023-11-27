@@ -27,6 +27,7 @@
 #include <QLineEdit>
 #include <QDebug>
 #include <QOpenGLShaderProgram>
+#include <QtMath>
 
 
 #include "qt/QSmartAction.h"
@@ -40,7 +41,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
 
-    //Mesh mesh;
     TerrainMesh terrainMesh;
 
     QWidget * controls;
@@ -75,26 +75,82 @@ public :
         toolBar->addAction( saveSnapShotPlusPlus );
     }
 
+    void drawBuffers() {
+        GLuint vertexbuffer;
+        glGenBuffers(1, &vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.vertex_buffer.size() * sizeof(QVector3D), &terrainMesh.vertex_buffer[0], GL_STATIC_DRAW);
+
+        GLuint indexbuffer;
+        glGenBuffers(1, &indexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, indexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.index_buffer.size() * sizeof(short), &terrainMesh.index_buffer[0], GL_STATIC_DRAW);
+
+        GLuint normalBuffer;
+        glGenBuffers(1, &normalBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.normal_buffer.size() * sizeof(float), &terrainMesh.normal_buffer[0], GL_STATIC_DRAW);
+
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+
+
+        QString vertexShaderSource = readShaderFile("src/vshader.glsl");
+        QString fragmentShaderSource = readShaderFile("src/fshader.glsl");
+
+        shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
+    }
+
 
     void draw() {
         glUseProgram(shaderProgram);
+
+        QMatrix4x4 modelMatrix = QMatrix4x4();
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, modelMatrix.data());
+
+        GLfloat projectionMatrix[16];
+        camera()->getProjectionMatrix(projectionMatrix);
+        GLuint projectionMatrixLocation = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix);
+
+        GLfloat viewMatrix[16];
+        camera()->getModelViewMatrix(viewMatrix);
+        float zoomFactor = 0.5;
+        viewMatrix[14] *= zoomFactor;
+        GLuint viewMatrixLocation = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix);
+
+
+        glUniform3f(glGetUniformLocation(shaderProgram, "color"), 0.5, 0.5, 0.5);
+        glUniform3f(glGetUniformLocation(shaderProgram, "lightColor"), 1.0, 1.0, 1.0);
+        glUniform3f(glGetUniformLocation(shaderProgram, "ambientMaterial"), 0.2, 0.2, 0.2);
+        glUniform3f(glGetUniformLocation(shaderProgram, "diffuseMaterial"), 0.5, 0.5, 0.5);
+        glUniform3f(glGetUniformLocation(shaderProgram, "specularMaterial"), 0.3, 0.3, 0.3);
+        glUniform1f(glGetUniformLocation(shaderProgram, "shininessMaterial"), 0.2);
+
+        qglviewer::Vec cameraPosition = camera()->position();
+        glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+
+        qglviewer::Vec cameraView = camera()->viewDirection();
+        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), /*0.0, 3.0, -7.0*/ cameraView[0], cameraView[1], cameraView[2]);
+
+        drawBuffers();
+
+
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
-        glColor3f(0.5,0.5,0.8);
-        //glBegin(GL_TRIANGLES);
-        /*for( unsigned int t = 0 ; t < mesh.triangles.size() ; ++t ) {
-            point3d const & p0 = mesh.vertices[ mesh.triangles[t][0] ].p;
-            point3d const & p1 = mesh.vertices[ mesh.triangles[t][1] ].p;
-            point3d const & p2 = mesh.vertices[ mesh.triangles[t][2] ].p;
-            point3d const & n = point3d::cross( p1-p0 , p2-p0 ).direction();
-            glNormal3f(n[0],n[1],n[2]);
-            glVertex3f(p0[0],p0[1],p0[2]);
-            glVertex3f(p1[0],p1[1],p1[2]);
-            glVertex3f(p2[0],p2[1],p2[2]);
-        }*/
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glUseProgram(0);
         //glEnd();
     }
@@ -180,7 +236,7 @@ public :
 
         setMouseTracking(true);// Needed for MouseGrabber.
 
-        setBackgroundColor(QColor(255,255,255));
+        setBackgroundColor(QColor(10, 10, 10));
 
         // Lights:
         GLTools::initLights();
@@ -202,48 +258,6 @@ public :
         glEnable(GL_COLOR_MATERIAL);
 
         //
-        GLuint vertexbuffer;
-        glGenBuffers(1, &vertexbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glBufferData(GL_ARRAY_BUFFER, terrainMesh.vertex_buffer.size() * sizeof(QVector3D), &terrainMesh.vertex_buffer[0], GL_STATIC_DRAW);
-
-        GLuint indexbuffer;
-        glGenBuffers(1, &indexbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, indexbuffer);
-        glBufferData(GL_ARRAY_BUFFER, terrainMesh.index_buffer.size() * sizeof(short), &terrainMesh.index_buffer[0], GL_STATIC_DRAW);
-
-        GLuint normalBuffer;
-        glGenBuffers(1, &normalBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-        glBufferData(GL_ARRAY_BUFFER, terrainMesh.normal_buffer.size() * sizeof(float), &terrainMesh.normal_buffer[0], GL_STATIC_DRAW);
-
-
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
-
-
-        QString vertexShaderSource = readShaderFile("vshader.glsl");
-        QString fragmentShaderSource = readShaderFile("fshader.glsl");
-
-        if (vertexShaderSource.isEmpty() || fragmentShaderSource.isEmpty()) {
-            // Handle shader loading error
-            return;
-        }
-
-        shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
-
-
-        //
-        /*setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
-        setSceneRadius( 10.f );
-        showEntireScene();*/
 
         point3d bbmin(0.0, 0.0, 0.0) , BBmax(1, 1, 1);
         adjustCamera(bbmin, BBmax);
