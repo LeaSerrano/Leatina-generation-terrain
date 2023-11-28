@@ -48,7 +48,6 @@
 **
 ****************************************************************************/
 
-#include "glwidget.h"
 #include "window.h"
 #include "mainwindow.h"
 #include <QSlider>
@@ -63,7 +62,7 @@
 Window::Window(MainWindow *mw)
     : mainWindow(mw)
 {
-    glWidget = new GLWidget;
+    /*glWidget = new GLWidget;
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     QHBoxLayout *container = new QHBoxLayout;
@@ -75,7 +74,7 @@ Window::Window(MainWindow *mw)
 
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Qt OpenGL"));
+    setWindowTitle(tr("Qt OpenGL"));*/
 }
 
 void Window::keyPressEvent(QKeyEvent *e)

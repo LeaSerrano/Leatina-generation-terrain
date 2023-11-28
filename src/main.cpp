@@ -11,7 +11,6 @@
 #include <QToolBar>
 #include "MyViewer.h"
 
-#include "glwidget.h"
 #include "mainwindow.h"
 
 int main( int argc , char** argv )

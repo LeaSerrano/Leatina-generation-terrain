@@ -55,26 +55,22 @@ OBJECTS_DIR   = tmp/obj/
 SOURCES       = src/main.cpp \
 		src/gl/GLUtilityMethods.cpp \
 		src/gl/BasicColors.cpp \
-		src/glwidget.cpp \
 		src/mainwindow.cpp \
 		src/perlinNoise.cpp \
 		src/terrainMesh.cpp \
 		src/window.cpp qrc_shaders.cpp \
 		tmp/moc/moc_MyViewer.cpp \
-		tmp/moc/moc_glwidget.cpp \
 		tmp/moc/moc_mainwindow.cpp \
 		tmp/moc/moc_window.cpp
 OBJECTS       = tmp/obj/main.o \
 		tmp/obj/GLUtilityMethods.o \
 		tmp/obj/BasicColors.o \
-		tmp/obj/glwidget.o \
 		tmp/obj/mainwindow.o \
 		tmp/obj/perlinNoise.o \
 		tmp/obj/terrainMesh.o \
 		tmp/obj/window.o \
 		tmp/obj/qrc_shaders.o \
 		tmp/obj/moc_MyViewer.o \
-		tmp/obj/moc_glwidget.o \
 		tmp/obj/moc_mainwindow.o \
 		tmp/obj/moc_window.o
 DIST          = src/fshader.glsl \
@@ -164,18 +160,16 @@ DIST          = src/fshader.glsl \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		myProject.pro src/point3.h \
-		src/Mesh.h \
+		./src/Mesh.h \
 		src/MyViewer.h \
 		src/gl/GLUtilityMethods.h \
 		src/gl/BasicColors.h \
-		src/glwidget.h \
 		src/mainwindow.h \
 		src/perlinNoise.h \
 		src/terrainMesh.h \
 		src/window.h src/main.cpp \
 		src/gl/GLUtilityMethods.cpp \
 		src/gl/BasicColors.cpp \
-		src/glwidget.cpp \
 		src/mainwindow.cpp \
 		src/perlinNoise.cpp \
 		src/terrainMesh.cpp \
@@ -380,8 +374,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents src/shaders.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/point3.h src/Mesh.h src/MyViewer.h src/gl/GLUtilityMethods.h src/gl/BasicColors.h src/glwidget.h src/mainwindow.h src/perlinNoise.h src/terrainMesh.h src/window.h $(DISTDIR)/
-	$(COPY_FILE) --parents src/main.cpp src/gl/GLUtilityMethods.cpp src/gl/BasicColors.cpp src/glwidget.cpp src/mainwindow.cpp src/perlinNoise.cpp src/terrainMesh.cpp src/window.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/point3.h ./src/Mesh.h src/MyViewer.h src/gl/GLUtilityMethods.h src/gl/BasicColors.h src/mainwindow.h src/perlinNoise.h src/terrainMesh.h src/window.h $(DISTDIR)/
+	$(COPY_FILE) --parents src/main.cpp src/gl/GLUtilityMethods.cpp src/gl/BasicColors.cpp src/mainwindow.cpp src/perlinNoise.cpp src/terrainMesh.cpp src/window.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -420,12 +414,10 @@ compiler_moc_predefs_clean:
 tmp/moc/moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -O2 -O3 -fopenmp -dM -E -o tmp/moc/moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: tmp/moc/moc_MyViewer.cpp tmp/moc/moc_glwidget.cpp tmp/moc/moc_mainwindow.cpp tmp/moc/moc_window.cpp
+compiler_moc_header_make_all: tmp/moc/moc_MyViewer.cpp tmp/moc/moc_mainwindow.cpp tmp/moc/moc_window.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) tmp/moc/moc_MyViewer.cpp tmp/moc/moc_glwidget.cpp tmp/moc/moc_mainwindow.cpp tmp/moc/moc_window.cpp
+	-$(DEL_FILE) tmp/moc/moc_MyViewer.cpp tmp/moc/moc_mainwindow.cpp tmp/moc/moc_window.cpp
 tmp/moc/moc_MyViewer.cpp: src/MyViewer.h \
-		src/Mesh.h \
-		src/point3.h \
 		src/BasicIO.h \
 		src/gl/openglincludeQtComp.h \
 		src/gl/GLUtilityMethods.h \
@@ -436,13 +428,6 @@ tmp/moc/moc_MyViewer.cpp: src/MyViewer.h \
 		tmp/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain/src -I/home/usr/libQGLViewer-main/build -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/MyViewer.h -o tmp/moc/moc_MyViewer.cpp
-
-tmp/moc/moc_glwidget.cpp: src/glwidget.h \
-		src/terrainMesh.h \
-		src/perlinNoise.h \
-		tmp/moc/moc_predefs.h \
-		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain -I/home/lea/M2-IMAGINE/Projets_3D_VR/Leatina-generation-terrain/src -I/home/usr/libQGLViewer-main/build -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/glwidget.h -o tmp/moc/moc_glwidget.cpp
 
 tmp/moc/moc_mainwindow.cpp: src/mainwindow.h \
 		tmp/moc/moc_predefs.h \
@@ -471,8 +456,6 @@ compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_heade
 ####### Compile
 
 tmp/obj/main.o: src/main.cpp src/MyViewer.h \
-		src/Mesh.h \
-		src/point3.h \
 		src/BasicIO.h \
 		src/gl/openglincludeQtComp.h \
 		src/gl/GLUtilityMethods.h \
@@ -480,7 +463,6 @@ tmp/obj/main.o: src/main.cpp src/MyViewer.h \
 		qt/QSmartAction.h \
 		src/terrainMesh.h \
 		src/perlinNoise.h \
-		src/glwidget.h \
 		src/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/main.o src/main.cpp
 
@@ -490,11 +472,6 @@ tmp/obj/GLUtilityMethods.o: src/gl/GLUtilityMethods.cpp src/gl/GLUtilityMethods.
 
 tmp/obj/BasicColors.o: src/gl/BasicColors.cpp src/gl/BasicColors.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/BasicColors.o src/gl/BasicColors.cpp
-
-tmp/obj/glwidget.o: src/glwidget.cpp src/glwidget.h \
-		src/terrainMesh.h \
-		src/perlinNoise.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/glwidget.o src/glwidget.cpp
 
 tmp/obj/mainwindow.o: src/mainwindow.cpp src/mainwindow.h \
 		src/window.h
@@ -507,10 +484,7 @@ tmp/obj/terrainMesh.o: src/terrainMesh.cpp src/terrainMesh.h \
 		src/perlinNoise.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/terrainMesh.o src/terrainMesh.cpp
 
-tmp/obj/window.o: src/window.cpp src/glwidget.h \
-		src/terrainMesh.h \
-		src/perlinNoise.h \
-		src/window.h \
+tmp/obj/window.o: src/window.cpp src/window.h \
 		src/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/window.o src/window.cpp
 
@@ -519,9 +493,6 @@ tmp/obj/qrc_shaders.o: qrc_shaders.cpp
 
 tmp/obj/moc_MyViewer.o: tmp/moc/moc_MyViewer.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/moc_MyViewer.o tmp/moc/moc_MyViewer.cpp
-
-tmp/obj/moc_glwidget.o: tmp/moc/moc_glwidget.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/moc_glwidget.o tmp/moc/moc_glwidget.cpp
 
 tmp/obj/moc_mainwindow.o: tmp/moc/moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/moc_mainwindow.o tmp/moc/moc_mainwindow.cpp
