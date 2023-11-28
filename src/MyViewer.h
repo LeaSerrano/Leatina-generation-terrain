@@ -1,8 +1,7 @@
 #ifndef MYVIEWER_H
 #define MYVIEWER_H
 
-// Mesh stuff:
-#include "Mesh.h"
+#include "point3.h"
 
 // Parsing:
 #include "BasicIO.h"
@@ -47,6 +46,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
     GLuint shaderProgram;
     GLuint vertexShader, fragmentShader;
+    QMatrix4x4 modelMatrix;
 
 
 public :
@@ -113,7 +113,6 @@ public :
     void draw() {
         glUseProgram(shaderProgram);
 
-        QMatrix4x4 modelMatrix = QMatrix4x4();
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, modelMatrix.data());
 
         GLfloat projectionMatrix[16];
@@ -123,8 +122,7 @@ public :
 
         GLfloat viewMatrix[16];
         camera()->getModelViewMatrix(viewMatrix);
-        float zoomFactor = 0.5;
-        viewMatrix[14] *= zoomFactor;
+
         GLuint viewMatrixLocation = glGetUniformLocation(shaderProgram, "view");
         glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix);
 
@@ -163,12 +161,15 @@ public :
         }
     }
 
-    void adjustCamera( point3d const & bb , point3d const & BB ) {
-        point3d const & center = ( bb + BB )/2.f;
-        setSceneCenter( qglviewer::Vec( center[0] , center[1] , center[2] ) );
-        setSceneRadius( 1.5f * ( BB - bb ).norm() );
+    void adjustCamera(point3d const & bb, point3d const & BB) {
+        point3d const & center = (bb + BB) / 2.f;
+        setSceneCenter(qglviewer::Vec(center[0], center[1], center[2]));
+        setSceneRadius(0.5f * (BB - bb).norm());
+        camera()->setPosition(qglviewer::Vec(center[0], center[1], center[2] - 2.0 * (BB - bb).norm()));
+
         showEntireScene();
     }
+
 
     GLuint compileShader(const char* shaderSource, GLenum shaderType) {
         GLuint shader = glCreateShader(shaderType);
@@ -234,7 +235,7 @@ public :
         makeCurrent();
         initializeOpenGLFunctions();
 
-        setMouseTracking(true);// Needed for MouseGrabber.
+        //setMouseTracking(true);// Needed for MouseGrabber.
 
         setBackgroundColor(QColor(10, 10, 10));
 
@@ -261,6 +262,8 @@ public :
 
         point3d bbmin(0.0, 0.0, 0.0) , BBmax(1, 1, 1);
         adjustCamera(bbmin, BBmax);
+
+        modelMatrix = QMatrix4x4();
     }
 
 
@@ -302,9 +305,58 @@ public :
                 }
             }
         }
+        else if (event->key() == Qt::Key_Left) {
+            rotateObjectLeft();
+        } else if (event->key() == Qt::Key_Right) {
+            rotateObjectRight();
+        }
+        /*else if (event->key() == Qt::Key_Up) {
+            rotateObjectUp();
+        }
+        else if (event->key() == Qt::Key_Down) {
+            rotateObjectDown();
+        }*/
     }
 
-    void mouseDoubleClickEvent( QMouseEvent * e )
+    void rotateObjectLeft() {
+        GLfloat angle = 5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 0.0f, 1.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void rotateObjectRight() {
+        GLfloat angle = -5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 0.0f, 1.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void rotateObjectUp() {
+        GLfloat angle = 5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 1.0f, 0.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void rotateObjectDown() {
+        GLfloat angle = -5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 1.0f, 0.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void applyRotation(const QMatrix4x4& rotationMatrix) {
+        QVector3D objectCenter(0.5, 0.5, 0.5);
+
+        QMatrix4x4 translationMatrix;
+        translationMatrix.translate(objectCenter);
+        modelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * modelMatrix;
+
+        update();
+    }
+
+    /*void mouseDoubleClickEvent( QMouseEvent * e )
     {
         if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::RightButton) )
         {
@@ -319,19 +371,19 @@ public :
         }
 
         QGLViewer::mouseDoubleClickEvent( e );
-    }
+    }*/
 
     void mousePressEvent(QMouseEvent* e ) {
-        QGLViewer::mousePressEvent(e);
+        //QGLViewer::mousePressEvent(e);
     }
 
-    void mouseMoveEvent(QMouseEvent* e  ){
+    /*void mouseMoveEvent(QMouseEvent* e  ){
         QGLViewer::mouseMoveEvent(e);
     }
 
     void mouseReleaseEvent(QMouseEvent* e  ) {
         QGLViewer::mouseReleaseEvent(e);
-    }
+    }*/
 
 signals:
     void windowTitleUpdated( const QString & );
