@@ -80,7 +80,7 @@ void PerlinNoise::generatePerlinNoise() {
     double frequency = 1.0;
     double persistence = 0.6;
 
-    int seed = generateRandomSeed();
+    seed = generateRandomSeed();
 
     for (int i = 0; i < nH; ++i) {
         for (int j = 0; j < nW; ++j) {
@@ -122,5 +122,9 @@ float PerlinNoise::getPerlinAt(int i, int j, int resolution) {
         }
     }
     return 0.0f;
+}
+
+int PerlinNoise::getSeed() {
+    return seed;
 }
 

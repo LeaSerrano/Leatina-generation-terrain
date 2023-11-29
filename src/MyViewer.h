@@ -40,8 +40,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
 
-    TerrainMesh terrainMesh;
-
     QWidget * controls;
 
     GLuint shaderProgram;
@@ -50,6 +48,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
 
 public :
+    TerrainMesh terrainMesh;
 
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_4_3_Core() {
     }
@@ -215,7 +214,6 @@ public :
     }
 
     QString readShaderFile(const char* filePath) {
-        qDebug() << "Trying to open file: " << filePath;
 
         std::ifstream file(filePath);
         if (!file.is_open()) {

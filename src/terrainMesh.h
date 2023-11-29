@@ -23,6 +23,7 @@ public:
     float averageHeight;
     int resolution = 50;
     int heightRange = 50;
+    void regenerateMesh();
 
 private:
 

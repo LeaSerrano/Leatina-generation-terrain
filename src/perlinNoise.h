@@ -17,9 +17,11 @@ public :
     QImage ImgPerlin;
     void generatePerlinNoise();
     float getPerlinAt(int i, int j, int resolution);
+    int seed;
 
 private :
     int nH = 512, nW = 512;
+
 
     unsigned int generateRandomSeed();
     double noise(int x, int y, int seed);
@@ -27,6 +29,7 @@ private :
     double smoothNoiseFirstDim(int x, int y, double fractionalX, int seed);
     double smoothNoise(double x, double y, int seed);
     double perlinNoise(int octaves, double frequency, double persistence, double x, double y, int seed);
+    int getSeed();
 
 };
 

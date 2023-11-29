@@ -88,10 +88,8 @@ void TerrainMesh::generateIndices(){
 void TerrainMesh::calculateNormals() {
     normal_buffer.clear();
 
-    // Initialize normals
     QVector<QVector3D> normals(vertex_buffer.size(), QVector3D(0.0, 0.0, 0.0));
 
-    // Calculate normals for each triangle
     for (int i = 0; i < index_buffer.size(); i += 3) {
         int idx1 = index_buffer[i];
         int idx2 = index_buffer[i + 1];
@@ -108,12 +106,10 @@ void TerrainMesh::calculateNormals() {
         normals[idx3] += normal;
     }
 
-    // Normalize normals
     for (int i = 0; i < normals.size(); ++i) {
         normals[i].normalize();
     }
 
-    // Flatten the normals into the float buffer
     for (int i = 0; i < normals.size(); ++i) {
         normal_buffer.push_back(normals[i].x());
         normal_buffer.push_back(normals[i].y());
@@ -121,3 +117,8 @@ void TerrainMesh::calculateNormals() {
     }
 }
 
+void TerrainMesh::regenerateMesh() {
+    generatePlan();
+    generateIndices();
+    calculateNormals();
+}

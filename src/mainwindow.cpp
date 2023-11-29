@@ -49,29 +49,32 @@
 ****************************************************************************/
 
 #include "mainwindow.h"
-#include "window.h"
-#include <QMenuBar>
-#include <QMenu>
-#include <QMessageBox>
+#include "ui_mainwindow.h"
 
-MainWindow::MainWindow()
-{
-    QMenuBar *menuBar = new QMenuBar;
-    QMenu *menuWindow = menuBar->addMenu(tr("&Window"));
-    QAction *addNew = new QAction(menuWindow);
-    addNew->setText(tr("Add new"));
-    menuWindow->addAction(addNew);
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow) {
+    ui->setupUi(this);
 
-    connect(addNew, &QAction::triggered, this, &MainWindow::onAddNew);
-    setMenuBar(menuBar);
+     viewer = new MyViewer;
 
-    onAddNew();
+    viewer->setParent(ui->widget_affichage_terrain);
+    viewer->setGeometry(ui->widget_affichage_terrain->geometry());
+
+    ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
+    ui->horizontalSlider_resolution->setMinimum(1);
+    QObject::connect(ui->horizontalSlider_resolution, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
+
 }
 
-void MainWindow::onAddNew()
-{
-    if (!centralWidget())
-        setCentralWidget(new Window(this));
-    else
-        QMessageBox::information(0, tr("Cannot add new window"), tr("Already occupied. Undock first."));
+MainWindow::~MainWindow() {
+    delete ui;
 }
+
+void MainWindow::onSpinBoxValueChanged(int value) {
+    viewer->terrainMesh.resolution = value;
+    viewer->terrainMesh.regenerateMesh();
+
+    qDebug() << viewer->terrainMesh.resolution;
+}
+
