@@ -76,9 +76,9 @@ void PerlinNoise::generatePerlinNoise() {
 
     ImgPerlin = QImage(nW, nH, QImage::Format_Grayscale8);
 
-    int octaves = 5;
-    double frequency = 1.5;
-    double persistence = 0.7;
+    int octaves = 4;
+    double frequency = 1.0;
+    double persistence = 0.6;
 
     int seed = generateRandomSeed();
 

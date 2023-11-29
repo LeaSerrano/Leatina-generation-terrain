@@ -22,7 +22,7 @@ public:
     float sizeX = 1.0, sizeY = 1.0;
     float averageHeight;
     int resolution = 50;
-    int heightRange = 10;
+    int heightRange = 50;
 
 private:
 

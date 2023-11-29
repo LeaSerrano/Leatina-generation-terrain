@@ -237,7 +237,7 @@ public :
 
         //setMouseTracking(true);// Needed for MouseGrabber.
 
-        setBackgroundColor(QColor(10, 10, 10));
+        setBackgroundColor(QColor(20, 20, 20));
 
         // Lights:
         GLTools::initLights();
