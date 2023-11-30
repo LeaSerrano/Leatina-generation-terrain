@@ -24,9 +24,6 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
 
     // Code de base dans la base de code
-    MyViewer* viewer = new MyViewer;
-
-    TerrainMesh tm;
 
     //QMainWindow* mainWindow = new QMainWindow;
     MainWindow* mainWindow = new MainWindow;
