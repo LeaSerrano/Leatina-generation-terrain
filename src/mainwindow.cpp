@@ -56,25 +56,46 @@ MainWindow::MainWindow(QWidget *parent)
       ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
-     viewer = new MyViewer;
+    viewer = new MyViewer;
 
     viewer->setParent(ui->widget_affichage_terrain);
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(1);
-    QObject::connect(ui->horizontalSlider_resolution, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
+    ui->horizontalSlider_resolution->setMaximum(200);
+    QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
+    ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);
+    ui->horizontalSlider_heightRange->setMinimum(1);
+    ui->horizontalSlider_heightRange->setMaximum(200);
+    QObject::connect(ui->horizontalSlider_heightRange, SIGNAL(sliderReleased()), this, SLOT(onHeightRangeSliderReleased()));
+
+    viewer->setFocus();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::onSpinBoxValueChanged(int value) {
+void MainWindow::onResolutionSliderReleased() {
+    int value = ui->horizontalSlider_resolution->value();
     viewer->terrainMesh.resolution = value;
     viewer->terrainMesh.regenerateMesh();
 
-    qDebug() << viewer->terrainMesh.resolution;
+    qDebug() << "Resolution : " << viewer->terrainMesh.resolution;
+
+    viewer->setFocus();
 }
+
+void MainWindow::onHeightRangeSliderReleased() {
+    int value = ui->horizontalSlider_heightRange->value();
+    viewer->terrainMesh.heightRange = value;
+    viewer->terrainMesh.regenerateMesh();
+
+    qDebug() << "Height range : " << viewer->terrainMesh.heightRange;
+
+    viewer->setFocus();
+}
+
 

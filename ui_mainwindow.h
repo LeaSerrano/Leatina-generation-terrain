@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QSlider>
@@ -25,6 +26,9 @@ public:
     QWidget *centralwidget;
     QWidget *widget_affichage_terrain;
     QSlider *horizontalSlider_resolution;
+    QLabel *label_resolution;
+    QSlider *horizontalSlider_heightRange;
+    QLabel *label_heightRange;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -42,6 +46,16 @@ public:
         horizontalSlider_resolution->setObjectName(QString::fromUtf8("horizontalSlider_resolution"));
         horizontalSlider_resolution->setGeometry(QRect(680, 140, 160, 16));
         horizontalSlider_resolution->setOrientation(Qt::Horizontal);
+        label_resolution = new QLabel(centralwidget);
+        label_resolution->setObjectName(QString::fromUtf8("label_resolution"));
+        label_resolution->setGeometry(QRect(680, 100, 91, 25));
+        horizontalSlider_heightRange = new QSlider(centralwidget);
+        horizontalSlider_heightRange->setObjectName(QString::fromUtf8("horizontalSlider_heightRange"));
+        horizontalSlider_heightRange->setGeometry(QRect(680, 290, 160, 16));
+        horizontalSlider_heightRange->setOrientation(Qt::Horizontal);
+        label_heightRange = new QLabel(centralwidget);
+        label_heightRange->setObjectName(QString::fromUtf8("label_heightRange"));
+        label_heightRange->setGeometry(QRect(680, 250, 141, 25));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -59,6 +73,8 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
+        label_resolution->setText(QCoreApplication::translate("MainWindow", "Resolution : ", nullptr));
+        label_heightRange->setText(QCoreApplication::translate("MainWindow", "Plage de hauteurs : ", nullptr));
     } // retranslateUi
 
 };

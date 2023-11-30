@@ -11,6 +11,7 @@ class TerrainMesh
 {
 public:
     TerrainMesh();
+    ~TerrainMesh();
 
     QVector<QVector3D> vertex_buffer;
     QVector<float> normal_buffer;
@@ -26,7 +27,7 @@ public:
     void regenerateMesh();
 
 private:
-
+    bool perlinNoiseCreated;
     void generatePlan();
     void generateIndices();
     void getHeightAtPerlinPx(GLfloat &y, float perlin);

@@ -87,7 +87,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void onSpinBoxValueChanged(int value);
+    void onResolutionSliderReleased();
+    void onHeightRangeSliderReleased();
 
 private:
     Ui::MainWindow *ui;

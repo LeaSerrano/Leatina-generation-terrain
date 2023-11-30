@@ -4,11 +4,16 @@
 #include <QDebug>
 
 TerrainMesh::TerrainMesh() {
-    perlinNoise = new PerlinNoise();
+    perlinNoiseCreated = false;
     generatePlan();
     generateIndices();
     calculateNormals();
 }
+
+TerrainMesh::~TerrainMesh() {
+    delete perlinNoise;
+}
+
 
 void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
     float step = (float)255/heightRange;
@@ -42,10 +47,13 @@ void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
 void TerrainMesh::generatePlan() {
     vertex_buffer.clear();
 
+    if (!perlinNoiseCreated) {
+        perlinNoise = new PerlinNoise();
+        perlinNoiseCreated = true;
+    }
+
     float stepX = sizeX / static_cast<float>(resolution);
     float stepY = sizeY / static_cast<float>(resolution);
-
-    perlinNoise->generatePerlinNoise();
 
     for (int i = 0; i <= resolution; ++i) {
         for (int j = 0; j <= resolution; ++j) {

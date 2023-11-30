@@ -3,7 +3,7 @@
 #include <QDebug>
 
 PerlinNoise::PerlinNoise() {
-
+    generatePerlinNoise();
 };
 
 unsigned int PerlinNoise::generateRandomSeed() {
