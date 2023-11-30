@@ -89,6 +89,7 @@ public:
 private slots:
     void onResolutionSliderReleased();
     void onHeightRangeSliderReleased();
+    void onReloadButtonClicked();
 
 private:
     Ui::MainWindow *ui;

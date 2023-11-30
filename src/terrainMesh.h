@@ -22,12 +22,12 @@ public:
     float ymax = 1.0;
     float sizeX = 1.0, sizeY = 1.0;
     float averageHeight;
-    int resolution = 50;
+    int resolution = 100;
     int heightRange = 50;
     void regenerateMesh();
+    bool perlinNoiseCreated;
 
 private:
-    bool perlinNoiseCreated;
     void generatePlan();
     void generateIndices();
     void getHeightAtPerlinPx(GLfloat &y, float perlin);

@@ -62,14 +62,18 @@ MainWindow::MainWindow(QWidget *parent)
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
-    ui->horizontalSlider_resolution->setMinimum(1);
-    ui->horizontalSlider_resolution->setMaximum(200);
+    ui->horizontalSlider_resolution->setMinimum(10);
+    ui->horizontalSlider_resolution->setMaximum(150);
     QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
     ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);
-    ui->horizontalSlider_heightRange->setMinimum(1);
-    ui->horizontalSlider_heightRange->setMaximum(200);
+    ui->horizontalSlider_heightRange->setMinimum(10);
+    ui->horizontalSlider_heightRange->setMaximum(150);
     QObject::connect(ui->horizontalSlider_heightRange, SIGNAL(sliderReleased()), this, SLOT(onHeightRangeSliderReleased()));
+
+    ui->pushButton_reload->setIcon(QIcon("./icons/reload_icon_black.png"));
+    ui->pushButton_reload->setStyleSheet("background-color : white");
+   QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
     viewer->setFocus();
 }
@@ -83,8 +87,6 @@ void MainWindow::onResolutionSliderReleased() {
     viewer->terrainMesh.resolution = value;
     viewer->terrainMesh.regenerateMesh();
 
-    qDebug() << "Resolution : " << viewer->terrainMesh.resolution;
-
     viewer->setFocus();
 }
 
@@ -93,7 +95,12 @@ void MainWindow::onHeightRangeSliderReleased() {
     viewer->terrainMesh.heightRange = value;
     viewer->terrainMesh.regenerateMesh();
 
-    qDebug() << "Height range : " << viewer->terrainMesh.heightRange;
+    viewer->setFocus();
+}
+
+void MainWindow::onReloadButtonClicked() {
+    viewer->terrainMesh.perlinNoiseCreated = false;
+    viewer->terrainMesh.regenerateMesh();
 
     viewer->setFocus();
 }

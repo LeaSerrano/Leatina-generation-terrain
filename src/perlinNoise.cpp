@@ -113,8 +113,8 @@ void PerlinNoise::generatePerlinNoise() {
 
 float PerlinNoise::getPerlinAt(int i, int j, int resolution) {
     if (!ImgPerlin.isNull()) {
-        int scaledI = static_cast<int>(i * (ImgPerlin.width() / static_cast<float>(resolution)));
-        int scaledJ = static_cast<int>(j * (ImgPerlin.height() / static_cast<float>(resolution)));
+        int scaledI = static_cast<int>(i * ImgPerlin.width() / resolution);
+        int scaledJ = static_cast<int>(j * ImgPerlin.height() / resolution);
 
         if (scaledI > 0 && scaledI < ImgPerlin.width() && scaledJ > 0 && scaledJ < ImgPerlin.height()) {
             QRgb pixelValue = ImgPerlin.pixel(scaledI, scaledJ);
