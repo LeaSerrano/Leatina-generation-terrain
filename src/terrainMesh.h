@@ -19,12 +19,11 @@ public:
 
     PerlinNoise* perlinNoise;
 
-    float ymax = 1.0;
-    float sizeX = 1.0, sizeY = 1.0;
+    float sizeX = 1.0, sizeY = 1.0, sizeZ = 1.0;
     float averageHeight;
     int resolution = 100;
-    int heightRange = 50;
-    void regenerateMesh();
+    int heightRange = 100;
+    void generateMesh();
     bool perlinNoiseCreated;
 
 private:

@@ -101,7 +101,6 @@ public :
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 
-
         QString vertexShaderSource = readShaderFile("src/vshader.glsl");
         QString fragmentShaderSource = readShaderFile("src/fshader.glsl");
 
@@ -148,8 +147,9 @@ public :
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //update();
+
         glUseProgram(0);
-        //glEnd();
     }
 
     void pickBackgroundColor() {
