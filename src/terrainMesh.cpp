@@ -5,9 +5,7 @@
 
 TerrainMesh::TerrainMesh() {
     perlinNoiseCreated = false;
-    generatePlan();
-    generateIndices();
-    calculateNormals();
+    generateMesh();
 }
 
 TerrainMesh::~TerrainMesh() {
@@ -21,7 +19,7 @@ void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
     float stepMin = 0.0;
     float stepMax = step;
 
-    float stepValue = ymax/heightRange;
+    float stepValue = sizeY/heightRange;
     float value = 0.0;
 
     for (int p = 0; p < heightRange; p++) {
@@ -52,13 +50,13 @@ void TerrainMesh::generatePlan() {
         perlinNoiseCreated = true;
     }
 
-    float stepX = sizeX / static_cast<float>(resolution);
-    float stepY = sizeY / static_cast<float>(resolution);
+    float stepX = sizeX / resolution;
+    float stepZ = sizeZ / resolution;
 
     for (int i = 0; i <= resolution; ++i) {
         for (int j = 0; j <= resolution; ++j) {
             GLfloat x = i * stepX;
-            GLfloat z = j * stepY;
+            GLfloat z = j * stepZ;
 
             float perlin = perlinNoise->getPerlinAt(i, j, resolution);
 
@@ -70,17 +68,15 @@ void TerrainMesh::generatePlan() {
     }
 }
 
-
-
-void TerrainMesh::generateIndices(){
+void TerrainMesh::generateIndices() {
     index_buffer.clear();
 
-    for(int i=0; i <= resolution-1; i++){
-        for(int j=0; j <= resolution-1; j++){
-            int p1 = i*(resolution+1)+j;
-            int p2 = p1+1;
-            int p3 = (i+1)*(resolution+1)+j;
-            int p4 = p3+1;
+    for (int i = 0; i < resolution; ++i) {
+        for (int j = 0; j < resolution; ++j) {
+            int p1 = i * (resolution + 1) + j;
+            int p2 = p1 + 1;
+            int p3 = (i + 1) * (resolution + 1) + j;
+            int p4 = p3 + 1;
 
             index_buffer.push_back(p1);
             index_buffer.push_back(p4);
@@ -88,10 +84,10 @@ void TerrainMesh::generateIndices(){
             index_buffer.push_back(p1);
             index_buffer.push_back(p3);
             index_buffer.push_back(p4);
-
         }
     }
 }
+
 
 void TerrainMesh::calculateNormals() {
     normal_buffer.clear();
@@ -125,7 +121,10 @@ void TerrainMesh::calculateNormals() {
     }
 }
 
-void TerrainMesh::regenerateMesh() {
+
+
+
+void TerrainMesh::generateMesh() {
     generatePlan();
     generateIndices();
     calculateNormals();

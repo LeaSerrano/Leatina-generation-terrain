@@ -63,12 +63,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(10);
-    ui->horizontalSlider_resolution->setMaximum(150);
+    ui->horizontalSlider_resolution->setMaximum(180);
     QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
     ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);
     ui->horizontalSlider_heightRange->setMinimum(10);
-    ui->horizontalSlider_heightRange->setMaximum(150);
+    ui->horizontalSlider_heightRange->setMaximum(180);
     QObject::connect(ui->horizontalSlider_heightRange, SIGNAL(sliderReleased()), this, SLOT(onHeightRangeSliderReleased()));
 
     ui->pushButton_reload->setIcon(QIcon("./icons/reload_icon_black.png"));
@@ -84,8 +84,11 @@ MainWindow::~MainWindow() {
 
 void MainWindow::onResolutionSliderReleased() {
     int value = ui->horizontalSlider_resolution->value();
+
+    qDebug() << "resolution : " << value;
+
     viewer->terrainMesh.resolution = value;
-    viewer->terrainMesh.regenerateMesh();
+    viewer->terrainMesh.generateMesh();
 
     viewer->setFocus();
 }
@@ -93,14 +96,14 @@ void MainWindow::onResolutionSliderReleased() {
 void MainWindow::onHeightRangeSliderReleased() {
     int value = ui->horizontalSlider_heightRange->value();
     viewer->terrainMesh.heightRange = value;
-    viewer->terrainMesh.regenerateMesh();
+    viewer->terrainMesh.generateMesh();
 
     viewer->setFocus();
 }
 
 void MainWindow::onReloadButtonClicked() {
     viewer->terrainMesh.perlinNoiseCreated = false;
-    viewer->terrainMesh.regenerateMesh();
+    viewer->terrainMesh.generateMesh();
 
     viewer->setFocus();
 }
