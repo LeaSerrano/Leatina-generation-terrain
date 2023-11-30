@@ -31,6 +31,7 @@ public:
     QSlider *horizontalSlider_heightRange;
     QLabel *label_heightRange;
     QPushButton *pushButton_reload;
+    QLabel *label_perlinNoise;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -61,6 +62,9 @@ public:
         pushButton_reload = new QPushButton(centralwidget);
         pushButton_reload->setObjectName(QString::fromUtf8("pushButton_reload"));
         pushButton_reload->setGeometry(QRect(660, 0, 28, 28));
+        label_perlinNoise = new QLabel(centralwidget);
+        label_perlinNoise->setObjectName(QString::fromUtf8("label_perlinNoise"));
+        label_perlinNoise->setGeometry(QRect(0, 440, 300, 300));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -81,6 +85,7 @@ public:
         label_resolution->setText(QCoreApplication::translate("MainWindow", "Resolution : ", nullptr));
         label_heightRange->setText(QCoreApplication::translate("MainWindow", "Plage de hauteurs : ", nullptr));
         pushButton_reload->setText(QString());
+        label_perlinNoise->setText(QString());
     } // retranslateUi
 
 };

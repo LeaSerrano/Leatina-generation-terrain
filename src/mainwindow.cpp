@@ -75,6 +75,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_reload->setStyleSheet("background-color : white");
    QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
+    QPixmap pixmap("perlinNoise.png");
+   ui->label_perlinNoise->setPixmap(pixmap);
+
     viewer->setFocus();
 }
 
