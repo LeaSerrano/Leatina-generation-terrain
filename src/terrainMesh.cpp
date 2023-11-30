@@ -3,32 +3,68 @@
 #include <qmath.h>
 #include <QDebug>
 
-TerrainMesh::TerrainMesh() : m_count(0) {
-
-    generatePlan(1.0, 1.0, 16);
-    generateIndices(16);
+TerrainMesh::TerrainMesh() {
+    perlinNoise = new PerlinNoise();
+    generatePlan();
+    generateIndices();
+    calculateNormals();
 }
 
+void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
+    float step = (float)255/heightRange;
 
-void TerrainMesh::generatePlan(float sizeX, float sizeY, int resolution) {
-    vertex_buffer.clear();
+    float stepMin = 0.0;
+    float stepMax = step;
 
-    float stepX = sizeX/(float)resolution;
-    float stepY = sizeY/(float)resolution;
+    float stepValue = ymax/heightRange;
+    float value = 0.0;
 
-    for(int i=0; i <= resolution; i ++){
-        for(int j=0; j <= resolution; j ++){
+    for (int p = 0; p < heightRange; p++) {
+        if (perlin >= stepMin && perlin < stepMax) {
+            y = value;
+            return;
+        }
 
-            GLfloat x = i*stepX;
-            GLfloat y = j*stepY;
+        if (p == heightRange-1) {
+            if (perlin >= stepMin && perlin <= stepMax) {
+                y = value;
+                return;
+            }
+        }
 
-            vertex_buffer.push_back(QVector3D(x, 0.0f, y));
-
-       }
+        value += stepValue;
+        stepMin = stepMax;
+        stepMax += step;
     }
 }
 
-void TerrainMesh::generateIndices(int resolution){
+
+void TerrainMesh::generatePlan() {
+    vertex_buffer.clear();
+
+    float stepX = sizeX / static_cast<float>(resolution);
+    float stepY = sizeY / static_cast<float>(resolution);
+
+    perlinNoise->generatePerlinNoise();
+
+    for (int i = 0; i <= resolution; ++i) {
+        for (int j = 0; j <= resolution; ++j) {
+            GLfloat x = i * stepX;
+            GLfloat z = j * stepY;
+
+            float perlin = perlinNoise->getPerlinAt(i, j, resolution);
+
+            GLfloat y;
+            getHeightAtPerlinPx(y, perlin);
+
+            vertex_buffer.push_back(QVector3D(x, y, z));
+        }
+    }
+}
+
+
+
+void TerrainMesh::generateIndices(){
     index_buffer.clear();
 
     for(int i=0; i <= resolution-1; i++){
@@ -49,3 +85,40 @@ void TerrainMesh::generateIndices(int resolution){
     }
 }
 
+void TerrainMesh::calculateNormals() {
+    normal_buffer.clear();
+
+    QVector<QVector3D> normals(vertex_buffer.size(), QVector3D(0.0, 0.0, 0.0));
+
+    for (int i = 0; i < index_buffer.size(); i += 3) {
+        int idx1 = index_buffer[i];
+        int idx2 = index_buffer[i + 1];
+        int idx3 = index_buffer[i + 2];
+
+        QVector3D v1 = vertex_buffer[idx1];
+        QVector3D v2 = vertex_buffer[idx2];
+        QVector3D v3 = vertex_buffer[idx3];
+
+        QVector3D normal = QVector3D::crossProduct(v2 - v1, v3 - v1);
+
+        normals[idx1] += normal;
+        normals[idx2] += normal;
+        normals[idx3] += normal;
+    }
+
+    for (int i = 0; i < normals.size(); ++i) {
+        normals[i].normalize();
+    }
+
+    for (int i = 0; i < normals.size(); ++i) {
+        normal_buffer.push_back(normals[i].x());
+        normal_buffer.push_back(normals[i].y());
+        normal_buffer.push_back(normals[i].z());
+    }
+}
+
+void TerrainMesh::regenerateMesh() {
+    generatePlan();
+    generateIndices();
+    calculateNormals();
+}

@@ -1,8 +1,12 @@
-#include <iostream>
-#include <cmath>
-#include <random>
 
-unsigned int generateRandomSeed() {
+#include "perlinNoise.h"
+#include <QDebug>
+
+PerlinNoise::PerlinNoise() {
+
+};
+
+unsigned int PerlinNoise::generateRandomSeed() {
     std::random_device rd;
     std::mt19937 rng(rd());
 
@@ -11,13 +15,13 @@ unsigned int generateRandomSeed() {
     return distribution(rng);
 }
 
-double noise(int x, int y, int seed) {
+double PerlinNoise::noise(int x, int y, int seed) {
     int n = x + y * 57 + seed;
     n = (n << 13) ^ n;
     return (1.0 - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0);
 }
 
-double cubicInterpolate(double beforeP0, double p0, double p1, double afterP1, double t) {
+double PerlinNoise::cubicInterpolate(double beforeP0, double p0, double p1, double afterP1, double t) {
     double c3 = -0.5 * beforeP0 + 1.5 * p0 - 1.5 * p1 + 0.5 * afterP1;
     double c2 = beforeP0 - 2.5 * p0 + 2 * p1 - 0.5 * afterP1;
     double c1 = -0.5 * beforeP0 + 0.5 * p1;
@@ -26,7 +30,7 @@ double cubicInterpolate(double beforeP0, double p0, double p1, double afterP1, d
     return (c3 * t * t * t) + (c2 * t * t) + (c1 * t) + c0;
 }
 
-double smoothNoiseFirstDim(int x, int y, double fractionalX, int seed) {
+double PerlinNoise::smoothNoiseFirstDim(int x, int y, double fractionalX, int seed) {
     double v0 = noise(x - 1, y, seed);
     double v1 = noise(x, y, seed);
     double v2 = noise(x + 1, y, seed);
@@ -35,7 +39,7 @@ double smoothNoiseFirstDim(int x, int y, double fractionalX, int seed) {
     return cubicInterpolate(v0, v1, v2, v3, fractionalX);
 }
 
-double smoothNoise(double x, double y, int seed) {
+double PerlinNoise::smoothNoise(double x, double y, int seed) {
     int integerX = static_cast<int>(x);
     double fractionalX = x - integerX;
 
@@ -50,7 +54,7 @@ double smoothNoise(double x, double y, int seed) {
     return cubicInterpolate(t0, t1, t2, t3, fractionalY);
 }
 
-double perlinNoise(int octaves, double frequency, double persistence, double x, double y, int seed) {
+double PerlinNoise::perlinNoise(int octaves, double frequency, double persistence, double x, double y, int seed) {
     double r = 0.0;
     double f = frequency;
     double amplitude = 1.0;
@@ -68,7 +72,59 @@ double perlinNoise(int octaves, double frequency, double persistence, double x, 
     return result;
 }
 
-/*void createPerlinNoise(OCTET *ImgOut) {
+void PerlinNoise::generatePerlinNoise() {
 
+    ImgPerlin = QImage(nW, nH, QImage::Format_Grayscale8);
 
-}*/
+    int octaves = 4;
+    double frequency = 1.0;
+    double persistence = 0.6;
+
+    seed = generateRandomSeed();
+
+    for (int i = 0; i < nH; ++i) {
+        for (int j = 0; j < nW; ++j) {
+
+            double x = static_cast<double>(i) / nW;
+            double y = static_cast<double>(j) / nH;
+
+            double perlin = perlinNoise(octaves, frequency, persistence, x, y, seed) * 255;
+
+            if (x < nW / 4) {
+                perlin -= 25;
+            } else if (x >= 3 * nW / 4) {
+                perlin += 25;
+            }
+
+            if (perlin > 255) {
+                perlin = 255;
+            }
+            else if (perlin < 0) {
+                perlin = 0;
+            }
+
+            ImgPerlin.setPixel(j, i, QColor(perlin, perlin, perlin).rgb());
+
+        }
+    }
+
+    ImgPerlin.save("perlinNoise.png");
+}
+
+float PerlinNoise::getPerlinAt(int i, int j, int resolution) {
+    if (!ImgPerlin.isNull()) {
+        int scaledI = static_cast<int>(i * (ImgPerlin.width() / static_cast<float>(resolution)));
+        int scaledJ = static_cast<int>(j * (ImgPerlin.height() / static_cast<float>(resolution)));
+
+        if (scaledI > 0 && scaledI < ImgPerlin.width() && scaledJ > 0 && scaledJ < ImgPerlin.height()) {
+            QRgb pixelValue = ImgPerlin.pixel(scaledI, scaledJ);
+            return qGray(pixelValue);
+        }
+    }
+    return 0.0f;
+}
+
+int PerlinNoise::getSeed() {
+    return seed;
+}
+

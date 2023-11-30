@@ -1,8 +1,7 @@
 #ifndef MYVIEWER_H
 #define MYVIEWER_H
 
-// Mesh stuff:
-#include "Mesh.h"
+#include "point3.h"
 
 // Parsing:
 #include "BasicIO.h"
@@ -25,20 +24,31 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QDebug>
+#include <QOpenGLShaderProgram>
+#include <QtMath>
 
 
 #include "qt/QSmartAction.h"
+#include "terrainMesh.h"
+
+#include <fstream>
+#include <sstream>
 
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
 
-    Mesh mesh;
-
     QWidget * controls;
 
+    GLuint shaderProgram;
+    GLuint vertexShader, fragmentShader;
+    QMatrix4x4 modelMatrix;
+
+
 public :
+    TerrainMesh terrainMesh;
 
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_4_3_Core() {
     }
@@ -64,23 +74,82 @@ public :
         toolBar->addAction( saveSnapShotPlusPlus );
     }
 
+    void drawBuffers() {
+        GLuint vertexbuffer;
+        glGenBuffers(1, &vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.vertex_buffer.size() * sizeof(QVector3D), &terrainMesh.vertex_buffer[0], GL_STATIC_DRAW);
+
+        GLuint indexbuffer;
+        glGenBuffers(1, &indexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, indexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.index_buffer.size() * sizeof(short), &terrainMesh.index_buffer[0], GL_STATIC_DRAW);
+
+        GLuint normalBuffer;
+        glGenBuffers(1, &normalBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.normal_buffer.size() * sizeof(float), &terrainMesh.normal_buffer[0], GL_STATIC_DRAW);
+
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+
+
+        QString vertexShaderSource = readShaderFile("src/vshader.glsl");
+        QString fragmentShaderSource = readShaderFile("src/fshader.glsl");
+
+        shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
+    }
+
 
     void draw() {
+        glUseProgram(shaderProgram);
+
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, modelMatrix.data());
+
+        GLfloat projectionMatrix[16];
+        camera()->getProjectionMatrix(projectionMatrix);
+        GLuint projectionMatrixLocation = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix);
+
+        GLfloat viewMatrix[16];
+        camera()->getModelViewMatrix(viewMatrix);
+
+        GLuint viewMatrixLocation = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix);
+
+
+        glUniform3f(glGetUniformLocation(shaderProgram, "color"), 0.5, 0.5, 0.5);
+        glUniform3f(glGetUniformLocation(shaderProgram, "lightColor"), 1.0, 1.0, 1.0);
+        glUniform3f(glGetUniformLocation(shaderProgram, "ambientMaterial"), 0.2, 0.2, 0.2);
+        glUniform3f(glGetUniformLocation(shaderProgram, "diffuseMaterial"), 0.5, 0.5, 0.5);
+        glUniform3f(glGetUniformLocation(shaderProgram, "specularMaterial"), 0.3, 0.3, 0.3);
+        glUniform1f(glGetUniformLocation(shaderProgram, "shininessMaterial"), 0.2);
+
+        qglviewer::Vec cameraPosition = camera()->position();
+        glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+
+        qglviewer::Vec cameraView = camera()->viewDirection();
+        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), /*0.0, 3.0, -7.0*/ cameraView[0], cameraView[1], cameraView[2]);
+
+        drawBuffers();
+
+
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
-        glColor3f(0.5,0.5,0.8);
-        glBegin(GL_TRIANGLES);
-        for( unsigned int t = 0 ; t < mesh.triangles.size() ; ++t ) {
-            point3d const & p0 = mesh.vertices[ mesh.triangles[t][0] ].p;
-            point3d const & p1 = mesh.vertices[ mesh.triangles[t][1] ].p;
-            point3d const & p2 = mesh.vertices[ mesh.triangles[t][2] ].p;
-            point3d const & n = point3d::cross( p1-p0 , p2-p0 ).direction();
-            glNormal3f(n[0],n[1],n[2]);
-            glVertex3f(p0[0],p0[1],p0[2]);
-            glVertex3f(p1[0],p1[1],p1[2]);
-            glVertex3f(p2[0],p2[1],p2[2]);
-        }
-        glEnd();
+
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glUseProgram(0);
+        //glEnd();
     }
 
     void pickBackgroundColor() {
@@ -91,11 +160,72 @@ public :
         }
     }
 
-    void adjustCamera( point3d const & bb , point3d const & BB ) {
-        point3d const & center = ( bb + BB )/2.f;
-        setSceneCenter( qglviewer::Vec( center[0] , center[1] , center[2] ) );
-        setSceneRadius( 1.5f * ( BB - bb ).norm() );
+    void adjustCamera(point3d const & bb, point3d const & BB) {
+        point3d const & center = (bb + BB) / 2.f;
+        setSceneCenter(qglviewer::Vec(center[0], center[1], center[2]));
+        setSceneRadius(0.5f * (BB - bb).norm());
+        camera()->setPosition(qglviewer::Vec(center[0], center[1], center[2] - 2.0 * (BB - bb).norm()));
+
         showEntireScene();
+    }
+
+
+    GLuint compileShader(const char* shaderSource, GLenum shaderType) {
+        GLuint shader = glCreateShader(shaderType);
+        glShaderSource(shader, 1, &shaderSource, NULL);
+        glCompileShader(shader);
+
+        // Check for compilation errors (you might want to add more detailed error checking)
+        GLint success;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            char infoLog[512];
+            glGetShaderInfoLog(shader, 512, NULL, infoLog);
+            qDebug() << "Shader compilation error:\n" << infoLog;
+            return 0;
+        }
+
+        return shader;
+    }
+
+    GLuint createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
+        GLuint vertexShader = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
+        GLuint fragmentShader = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
+
+        GLuint shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+
+        // Check for linking errors (you might want to add more detailed error checking)
+        GLint success;
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+        if (!success) {
+            char infoLog[512];
+            glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+            qDebug() << "Shader program linking error:\n" << infoLog;
+            return 0;
+        }
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        return shaderProgram;
+    }
+
+    QString readShaderFile(const char* filePath) {
+
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            qDebug() << "Unable to open file: " << filePath;
+            return QString();  // Return an empty QString
+        }
+
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+
+        // Convert the std::string to QString before returning
+        return QString::fromStdString(buffer.str());
     }
 
 
@@ -103,14 +233,14 @@ public :
         makeCurrent();
         initializeOpenGLFunctions();
 
-        setMouseTracking(true);// Needed for MouseGrabber.
+        //setMouseTracking(true);// Needed for MouseGrabber.
 
-        setBackgroundColor(QColor(255,255,255));
+        setBackgroundColor(QColor(20, 20, 20));
 
         // Lights:
         GLTools::initLights();
-        GLTools::setSunsetLight();
-        GLTools::setDefaultMaterial();
+        //GLTools::setSunsetLight();
+        //GLTools::setDefaultMaterial();
 
         //
         glShadeModel(GL_SMOOTH);
@@ -127,10 +257,13 @@ public :
         glEnable(GL_COLOR_MATERIAL);
 
         //
-        setSceneCenter( qglviewer::Vec( 0 , 0 , 0 ) );
-        setSceneRadius( 10.f );
-        showEntireScene();
+
+        point3d bbmin(0.0, 0.0, 0.0) , BBmax(1, 1, 1);
+        adjustCamera(bbmin, BBmax);
+
+        modelMatrix = QMatrix4x4();
     }
+
 
     QString helpString() const {
         QString text("<h2>Our cool project</h2>");
@@ -170,9 +303,58 @@ public :
                 }
             }
         }
+        else if (event->key() == Qt::Key_Left) {
+            rotateObjectLeft();
+        } else if (event->key() == Qt::Key_Right) {
+            rotateObjectRight();
+        }
+        /*else if (event->key() == Qt::Key_Up) {
+            rotateObjectUp();
+        }
+        else if (event->key() == Qt::Key_Down) {
+            rotateObjectDown();
+        }*/
     }
 
-    void mouseDoubleClickEvent( QMouseEvent * e )
+    void rotateObjectLeft() {
+        GLfloat angle = 5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 0.0f, 1.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void rotateObjectRight() {
+        GLfloat angle = -5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 0.0f, 1.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void rotateObjectUp() {
+        GLfloat angle = 5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 1.0f, 0.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void rotateObjectDown() {
+        GLfloat angle = -5.0f;
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(angle, 1.0f, 0.0f, 0.0f);
+        applyRotation(rotationMatrix);
+    }
+
+    void applyRotation(const QMatrix4x4& rotationMatrix) {
+        QVector3D objectCenter(0.5, 0.5, 0.5);
+
+        QMatrix4x4 translationMatrix;
+        translationMatrix.translate(objectCenter);
+        modelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * modelMatrix;
+
+        update();
+    }
+
+    /*void mouseDoubleClickEvent( QMouseEvent * e )
     {
         if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::RightButton) )
         {
@@ -187,25 +369,25 @@ public :
         }
 
         QGLViewer::mouseDoubleClickEvent( e );
-    }
+    }*/
 
     void mousePressEvent(QMouseEvent* e ) {
-        QGLViewer::mousePressEvent(e);
+        //QGLViewer::mousePressEvent(e);
     }
 
-    void mouseMoveEvent(QMouseEvent* e  ){
+    /*void mouseMoveEvent(QMouseEvent* e  ){
         QGLViewer::mouseMoveEvent(e);
     }
 
     void mouseReleaseEvent(QMouseEvent* e  ) {
         QGLViewer::mouseReleaseEvent(e);
-    }
+    }*/
 
 signals:
     void windowTitleUpdated( const QString & );
 
 public slots:
-    void open_mesh() {
+    /*void open_mesh() {
         bool success = false;
         QString fileName = QFileDialog::getOpenFileName(NULL,"","");
         if ( !fileName.isNull() ) { // got a file name
@@ -241,7 +423,7 @@ public slots:
             else
                 std::cout << fileName.toStdString() << " could not be saved" << std::endl;
         }
-    }
+    }*/
 
     void showControls()
     {

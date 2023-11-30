@@ -48,6 +48,7 @@
 **
 ****************************************************************************/
 
+/*
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -65,3 +66,32 @@ private slots:
 };
 
 #endif
+*/
+
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+#include <QSpinBox>
+#include "MyViewer.h"
+
+namespace Ui {
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow {
+    Q_OBJECT
+
+public:
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    void onSpinBoxValueChanged(int value);
+
+private:
+    Ui::MainWindow *ui;
+    MyViewer* viewer;
+};
+
+#endif // MAINWINDOW_H
