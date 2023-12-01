@@ -56,14 +56,14 @@ MainWindow::MainWindow(QWidget *parent)
       ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
-    viewer = new MyViewer;
+    viewer = new MyViewer();
 
     viewer->setParent(ui->widget_affichage_terrain);
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(10);
-    ui->horizontalSlider_resolution->setMaximum(180);
+    ui->horizontalSlider_resolution->setMaximum(300);
     QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
     ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);

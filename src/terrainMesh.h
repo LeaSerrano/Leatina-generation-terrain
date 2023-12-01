@@ -22,7 +22,7 @@ public:
     float sizeX = 1.0, sizeY = 1.0, sizeZ = 1.0;
     float averageHeight;
     int resolution = 100;
-    int heightRange = 100;
+    int heightRange = 300;
     void generateMesh();
     bool perlinNoiseCreated;
 
