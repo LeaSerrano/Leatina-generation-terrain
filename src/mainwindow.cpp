@@ -84,6 +84,9 @@ MainWindow::MainWindow(QWidget *parent)
     //ui->label_perlinNoise->setPixmap(pixmap);
     ui->label_perlinNoise->setMouseTracking(true);
     ui->label_perlinNoise->installEventFilter(this);
+    int coin_x = ui->label_perlinNoise->geometry().x();
+    int coin_y = ui->label_perlinNoise->geometry().y();
+    ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
 
@@ -129,8 +132,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 }
             } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-                //int mouseX = mouseEvent->pos().x();
-                //int mouseY = mouseEvent->pos().y();
+                //int mouseY = mouseEvent->y();
+                //int mouseX = mouseEvent->x();
 
                 drawingPath(static_cast<QMouseEvent*>(event));
 
@@ -146,24 +149,41 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
         return QMainWindow::eventFilter(obj, event);
 }
 
-void MainWindow::drawingPath(QMouseEvent *mouseEvent)
+void MainWindow::drawingPath(QMouseEvent* mouseEvent)
 {
-//    // Vérifier que les coordonnées sont valides
-//    if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
-//        // Modifier le pixel en blanc (RGB: 255, 255, 255)
-//        editedImage.setPixel(x, y, qRgb(255, 255, 255));
-//        qDebug() << "Draw !";
-//    }
+    // Obtenir les coordonnées de la souris en virgule flottante
+    QPointF mousePos = mouseEvent->localPos();
+    QPoint globalPos = ui->label_perlinNoise->mapToGlobal(QPoint(0, 0));
+
+    int x = qRound(mousePos.x());
+    int y = qRound(mousePos.y());
+
     // Vérifier que les coordonnées sont valides
-    // Obtenir les coordonnées de la souris
-        int x = mouseEvent->pos().x();
-        int y = mouseEvent->pos().y();
-        if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
-            // Modifier le pixel en blanc (RGB: 255, 255, 255)
-            editedImage.setPixel(x, y, qRgb(255, 255, 255));
-            qDebug() << "Draw !";
+    if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
+        // Modifier le pixel en blanc (RGB: 255, 255, 255)
+        editedImage.setPixel(x, y, qRgb(255, 255, 255));
+        qDebug() << "Draw ! X =" << x << ", Y =" << y;
+
+   // // Vérifier que les coordonnées sont valides
+   // if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
+   //     // Modifier le pixel en blanc (RGB: 255, 255, 255)
+   //     editedImage.setPixel(x, y, qRgb(255, 255, 255));
+   //     qDebug() << "Draw !";
+   // }
+    // // Vérifier que les coordonnées sont valides
+    // // Obtenir les coordonnées de la souris
+    //     int x = mouseEvent->pos().x();
+    //     int y = mouseEvent->pos().y();
+    //     if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
+    //         // Modifier le pixel en blanc (RGB: 255, 255, 255)
+    //         editedImage.setPixel(x, y, qRgb(255, 255, 255));
+    //         qDebug() << "Draw !";
 
             // Actualiser l'affichage de l'image
+            int coin_x = ui->label_perlinNoise->geometry().x();
+            int coin_y = ui->label_perlinNoise->geometry().y();
+            ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
+
             ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
         }
 }
