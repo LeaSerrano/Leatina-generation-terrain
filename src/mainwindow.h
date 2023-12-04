@@ -94,6 +94,12 @@ private slots:
 private:
     Ui::MainWindow *ui;
     MyViewer* viewer;
+    bool isLeftButtonPressed;
+    QImage editedImage;
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+    void drawingPath(QMouseEvent *mouseEvent);
 };
 
 #endif // MAINWINDOW_H
