@@ -3,7 +3,7 @@
 #include <QDebug>
 
 PerlinNoise::PerlinNoise() {
-
+    generatePerlinNoise();
 };
 
 unsigned int PerlinNoise::generateRandomSeed() {
@@ -77,7 +77,7 @@ void PerlinNoise::generatePerlinNoise() {
     ImgPerlin = QImage(nW, nH, QImage::Format_Grayscale8);
 
     int octaves = 4;
-    double frequency = 1.0;
+    double frequency = 0.9;
     double persistence = 0.6;
 
     seed = generateRandomSeed();
@@ -113,12 +113,12 @@ void PerlinNoise::generatePerlinNoise() {
 
 float PerlinNoise::getPerlinAt(int i, int j, int resolution) {
     if (!ImgPerlin.isNull()) {
-        int scaledI = static_cast<int>(i * (ImgPerlin.width() / static_cast<float>(resolution)));
-        int scaledJ = static_cast<int>(j * (ImgPerlin.height() / static_cast<float>(resolution)));
+        int scaledI = static_cast<int>(i * ImgPerlin.width() / resolution);
+        int scaledJ = static_cast<int>(j * ImgPerlin.height() / resolution);
 
         if (scaledI > 0 && scaledI < ImgPerlin.width() && scaledJ > 0 && scaledJ < ImgPerlin.height()) {
             QRgb pixelValue = ImgPerlin.pixel(scaledI, scaledJ);
-            return qGray(pixelValue);
+            return static_cast<float>(qGray(pixelValue));
         }
     }
     return 0.0f;

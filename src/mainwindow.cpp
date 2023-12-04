@@ -51,30 +51,119 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QPainter>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-      ui(new Ui::MainWindow) {
+      ui(new Ui::MainWindow), isLeftButtonPressed(false) {
     ui->setupUi(this);
 
-     viewer = new MyViewer;
+    viewer = new MyViewer();
 
     viewer->setParent(ui->widget_affichage_terrain);
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
-    ui->horizontalSlider_resolution->setMinimum(1);
-    QObject::connect(ui->horizontalSlider_resolution, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
+    ui->horizontalSlider_resolution->setMinimum(10);
+    ui->horizontalSlider_resolution->setMaximum(300);
+    QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
+    ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);
+    ui->horizontalSlider_heightRange->setMinimum(10);
+    ui->horizontalSlider_heightRange->setMaximum(180);
+    QObject::connect(ui->horizontalSlider_heightRange, SIGNAL(sliderReleased()), this, SLOT(onHeightRangeSliderReleased()));
+
+    ui->pushButton_reload->setIcon(QIcon("./icons/reload_icon_black.png"));
+    ui->pushButton_reload->setStyleSheet("background-color : white");
+    QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
+
+    //QPixmap pixmap("perlinNoise.png");
+    QImage originalImage("perlinNoise.png");
+    editedImage = originalImage.copy();
+
+    //ui->label_perlinNoise->setPixmap(pixmap);
+    ui->label_perlinNoise->setMouseTracking(true);
+    ui->label_perlinNoise->installEventFilter(this);
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
+
+
+    viewer->setFocus();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::onSpinBoxValueChanged(int value) {
-    viewer->terrainMesh.resolution = value;
-    viewer->terrainMesh.regenerateMesh();
+void MainWindow::onResolutionSliderReleased() {
+    int value = ui->horizontalSlider_resolution->value();
 
-    qDebug() << viewer->terrainMesh.resolution;
+    qDebug() << "resolution : " << value;
+
+    viewer->terrainMesh.resolution = value;
+    viewer->terrainMesh.generateMesh();
+
+    viewer->setFocus();
 }
 
+void MainWindow::onHeightRangeSliderReleased() {
+    int value = ui->horizontalSlider_heightRange->value();
+    viewer->terrainMesh.heightRange = value;
+    viewer->terrainMesh.generateMesh();
+
+    viewer->setFocus();
+}
+
+void MainWindow::onReloadButtonClicked() {
+    viewer->terrainMesh.perlinNoiseCreated = false;
+    viewer->terrainMesh.generateMesh();
+
+    viewer->setFocus();
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event){
+    if (obj == ui->label_perlinNoise) {
+            if (event->type() == QEvent::MouseButtonPress) {
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+                if (mouseEvent->button() == Qt::LeftButton) {
+                    isLeftButtonPressed = true;
+                }
+            } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+                //int mouseX = mouseEvent->pos().x();
+                //int mouseY = mouseEvent->pos().y();
+
+                drawingPath(static_cast<QMouseEvent*>(event));
+
+                //qDebug() << "Position de la souris : X =" << mouseX << ", Y =" << mouseY;
+            } else if (event->type() == QEvent::MouseButtonRelease) {
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+                if (mouseEvent->button() == Qt::LeftButton) {
+                    isLeftButtonPressed = false;
+
+                }
+            }
+        }
+        return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::drawingPath(QMouseEvent *mouseEvent)
+{
+//    // Vérifier que les coordonnées sont valides
+//    if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
+//        // Modifier le pixel en blanc (RGB: 255, 255, 255)
+//        editedImage.setPixel(x, y, qRgb(255, 255, 255));
+//        qDebug() << "Draw !";
+//    }
+    // Vérifier que les coordonnées sont valides
+    // Obtenir les coordonnées de la souris
+        int x = mouseEvent->pos().x();
+        int y = mouseEvent->pos().y();
+        if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
+            // Modifier le pixel en blanc (RGB: 255, 255, 255)
+            editedImage.setPixel(x, y, qRgb(255, 255, 255));
+            qDebug() << "Draw !";
+
+            // Actualiser l'affichage de l'image
+            ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
+        }
+}
