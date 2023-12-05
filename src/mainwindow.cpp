@@ -181,6 +181,7 @@ void MainWindow::updateMesh(QImage image){
     viewer->terrainMesh.generateMesh();
 
     viewer->setFocus();
+    ui->widget_affichage_terrain->setFocus();
 }
 
 
@@ -231,7 +232,7 @@ void MainWindow::drawingPath(QMouseEvent* mouseEvent)
 
     // viewer->setFocus();
     updateMesh(tempImage);
-    viewer->setFocus();
+
 }
 
 
