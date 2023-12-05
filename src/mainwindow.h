@@ -111,7 +111,7 @@ private:
     QStack<QPainterPath> previousPaths;
     QStack<QPainterPath> redoPaths;
 
-
+    QPen pathPen;
 
 
 
@@ -121,6 +121,7 @@ protected:
     void undoDrawingPth();
     void redoDrawingPth();
     void updateDrawingPath();
+    void updateMesh(QImage image);
 
 };
 

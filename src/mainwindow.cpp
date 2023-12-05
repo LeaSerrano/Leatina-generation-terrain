@@ -89,9 +89,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
+    //concerne le tracé
     QObject::connect(ui->button_undo, &QPushButton::clicked, this, &MainWindow::undoDrawingPath);
     QObject::connect(ui->button_redo, &QPushButton::clicked, this, &MainWindow::redoDrawingPath);
-
+    pathPen.setColor(Qt::white);
+    pathPen.setWidth(3);
+    pathPen.setJoinStyle(Qt::RoundJoin);
 
     viewer->setFocus();
 }
@@ -153,6 +156,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 }
             }
         }
+
         return QMainWindow::eventFilter(obj, event);
 }
 
@@ -172,6 +176,14 @@ void MainWindow::redoDrawingPath() {
     }
 }
 
+void MainWindow::updateMesh(QImage image){
+    viewer->terrainMesh.perlinNoise->ImgPerlin = image;
+    viewer->terrainMesh.generateMesh();
+
+    viewer->setFocus();
+}
+
+
 void MainWindow::updateDrawingPath() {
     QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
     tempImage.fill(Qt::transparent);
@@ -179,12 +191,12 @@ void MainWindow::updateDrawingPath() {
     QPainter painter(&tempImage);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, editedImage);
-    painter.setPen(QPen(Qt::white, 1));
+    painter.setPen(pathPen);
     painter.drawPath(currentPath);
     painter.end();
 
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
-
+    updateMesh(tempImage);
 }
 
 void MainWindow::drawingPath(QMouseEvent* mouseEvent)
@@ -207,11 +219,19 @@ void MainWindow::drawingPath(QMouseEvent* mouseEvent)
     QPainter painter(&tempImage);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, editedImage);
-    painter.setPen(QPen(Qt::white, 1));
+    painter.setPen(pathPen);
     painter.drawPath(currentPath);
     painter.end();
 
     // Afficher l'image temporaire sur le QLabel
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
+
+    // viewer->terrainMesh.perlinNoise->ImgPerlin = tempImage;
+    // viewer->terrainMesh.generateMesh();
+
+    // viewer->setFocus();
+    updateMesh(tempImage);
+    viewer->setFocus();
 }
+
 
