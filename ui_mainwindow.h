@@ -34,6 +34,8 @@ public:
     QLabel *label_perlinNoise;
     QPushButton *button_undo;
     QPushButton *button_redo;
+    QPushButton *button_save_map;
+    QPushButton *button_open_map;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -73,6 +75,12 @@ public:
         button_redo = new QPushButton(centralwidget);
         button_redo->setObjectName(QString::fromUtf8("button_redo"));
         button_redo->setGeometry(QRect(340, 480, 89, 25));
+        button_save_map = new QPushButton(centralwidget);
+        button_save_map->setObjectName(QString::fromUtf8("button_save_map"));
+        button_save_map->setGeometry(QRect(340, 550, 89, 25));
+        button_open_map = new QPushButton(centralwidget);
+        button_open_map->setObjectName(QString::fromUtf8("button_open_map"));
+        button_open_map->setGeometry(QRect(340, 520, 89, 25));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -96,6 +104,8 @@ public:
         label_perlinNoise->setText(QString());
         button_undo->setText(QCoreApplication::translate("MainWindow", "undo", nullptr));
         button_redo->setText(QCoreApplication::translate("MainWindow", "redo", nullptr));
+        button_save_map->setText(QCoreApplication::translate("MainWindow", "sauvegarder carte", nullptr));
+        button_open_map->setText(QCoreApplication::translate("MainWindow", "ouvrir carte", nullptr));
     } // retranslateUi
 
 };

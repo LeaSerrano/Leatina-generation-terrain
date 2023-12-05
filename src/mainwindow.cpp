@@ -53,10 +53,9 @@
 
 #include <QPainter>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),
-      ui(new Ui::MainWindow), isLeftButtonPressed(false) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), isLeftButtonPressed(false) {
     ui->setupUi(this);
+    setWindowTitle("Leatina Generation Terrain");
 
     viewer = new MyViewer();
 
@@ -78,11 +77,11 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
     //QPixmap pixmap("perlinNoise.png");
+
     //Image originale
     originalImage = QImage("perlinNoise.png");
 
     editedImage = originalImage.copy();
-    editedImage.save("carteTemp.png");
 
     //ui->label_perlinNoise->setPixmap(pixmap);
     ui->label_perlinNoise->setMouseTracking(true);
@@ -95,9 +94,19 @@ MainWindow::MainWindow(QWidget *parent)
     //concerne le tracé
     QObject::connect(ui->button_undo, &QPushButton::clicked, this, &MainWindow::undoDrawingPath);
     QObject::connect(ui->button_redo, &QPushButton::clicked, this, &MainWindow::redoDrawingPath);
+
+    //Pinceau
     pathPen.setColor(Qt::white);
     pathPen.setWidth(3);
     pathPen.setJoinStyle(Qt::RoundJoin);
+
+    QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
+        downloadMap(viewer->terrainMesh.getMap());
+    });
+
+    QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
+        uploadMap();
+    });
 
     viewer->setFocus();
 }
@@ -130,9 +139,18 @@ void MainWindow::onHeightRangeSliderReleased() {
 
 // Regénérer carte + maillage
 void MainWindow::onReloadButtonClicked() {
-    // viewer->terrainMesh.perlinNoiseCreated = false;
-    // viewer->terrainMesh.generateMesh();
-    viewer->terrainMesh = TerrainMesh();
+    viewer->terrainMesh.perlinNoiseCreated = false;
+    viewer->terrainMesh.generateMesh();
+
+    originalImage = QImage("perlinNoise.png");
+    //ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
+    editedImage = originalImage.copy();
+
+    currentPath.clear();
+    previousPaths.clear();
+    redoPaths.clear();
+
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
     viewer->setFocus();
 }
@@ -243,4 +261,37 @@ void MainWindow::drawingPath(QMouseEvent* mouseEvent)
     updateMesh(tempImage);
 }
 
+void MainWindow::downloadMap(QImage image){
+    // Boîte de dialogue pour save la carte
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Enregistrer une carte"), QDir::homePath(), tr("Images (*.png)"));
 
+    if (filePath.isEmpty()){
+        return;
+    }
+
+    if (!filePath.toLower().endsWith(".png")) {
+        filePath += ".png";
+    }
+
+    if(image.save(filePath, "png")){
+        qDebug() << "L'image de la carte a bien été sauvergardée ici : " << filePath;
+    }else{
+        qDebug() << "Erreur lors de la sauvegarde de l'image de la carte.";
+    }
+}
+
+void MainWindow::uploadMap(){
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Ouvrir une carte"), QDir::homePath(), tr("Images (*.png)"));
+
+    if (filePath.isEmpty()){
+        return;
+    }else{
+
+    }
+
+    originalImage = QImage(filePath);
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
+    updateMesh(originalImage);
+    viewer->setFocus();
+
+}

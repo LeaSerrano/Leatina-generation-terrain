@@ -1,8 +1,19 @@
-
 #include "terrainMesh.h"
 #include <qmath.h>
 #include <QDebug>
 #include <QtGlobal>
+
+//Générer terrainMesh : nouvelle carte + maillage
+TerrainMesh::TerrainMesh() {
+    perlinNoiseCreated = false;
+    generateMesh();
+}
+
+TerrainMesh::~TerrainMesh() {
+    if (perlinNoiseCreated) {
+        delete perlinNoise;
+    }
+}
 
 void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
     float step = (float)255/heightRange;
@@ -159,17 +170,7 @@ void TerrainMesh::generateMesh() {
     calculateNormals();
 }
 
-//Générer une nouvelle carte + maillage
-TerrainMesh::TerrainMesh() {
-    perlinNoiseCreated = false;
-    generateMesh();
-}
 
-TerrainMesh::~TerrainMesh() {
-    if (perlinNoiseCreated) {
-        delete perlinNoise;
-    }
-}
 
 //Mettre une carte
 void TerrainMesh::setMap(QImage image){

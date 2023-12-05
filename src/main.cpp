@@ -77,6 +77,7 @@ int main(int argc, char** argv) {
     viewer->updateTitle("myProject");
 
     mainWindow->setWindowIcon(QIcon("img/icons/icon.png"));*/
+
     mainWindow->show();
     //viewer->setFocus();
 

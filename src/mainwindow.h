@@ -99,6 +99,12 @@ private slots:
     void undoDrawingPath();
     void redoDrawingPath();
 
+    //Sauvegarde carte
+    void downloadMap(QImage image);
+
+    //Ouvrir carte
+    void uploadMap();
+
 private:
     Ui::MainWindow *ui;
     MyViewer* viewer;
@@ -128,6 +134,7 @@ protected:
     void redoDrawingPth();
     void updateDrawingPath();
     void updateMesh(QImage image);
+
 
 };
 
