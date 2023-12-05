@@ -127,4 +127,3 @@ float PerlinNoise::getPerlinAt(int i, int j, int resolution) {
 int PerlinNoise::getSeed() {
     return seed;
 }
-

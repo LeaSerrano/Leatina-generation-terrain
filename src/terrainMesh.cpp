@@ -4,8 +4,6 @@
 #include <QDebug>
 #include <QtGlobal>
 
-
-
 void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
     float step = (float)255/heightRange;
 
@@ -154,13 +152,14 @@ void TerrainMesh::calculateNormals() {
 
 }
 
-
+//Générer un nouveau maillage
 void TerrainMesh::generateMesh() {
     generatePlan();
     generateIndices();
     calculateNormals();
 }
 
+//Générer une nouvelle carte + maillage
 TerrainMesh::TerrainMesh() {
     perlinNoiseCreated = false;
     generateMesh();
@@ -171,3 +170,15 @@ TerrainMesh::~TerrainMesh() {
         delete perlinNoise;
     }
 }
+
+//Mettre une carte
+void TerrainMesh::setMap(QImage image){
+    perlinNoiseCreated = true;
+    perlinNoise->ImgPerlin = image;
+}
+
+//Récupérer une carte
+QImage TerrainMesh::getMap(){
+    return perlinNoise->ImgPerlin;
+}
+

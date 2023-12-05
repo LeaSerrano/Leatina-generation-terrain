@@ -78,8 +78,11 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
     //QPixmap pixmap("perlinNoise.png");
-    QImage originalImage("perlinNoise.png");
+    //Image originale
+    originalImage = QImage("perlinNoise.png");
+
     editedImage = originalImage.copy();
+    editedImage.save("carteTemp.png");
 
     //ui->label_perlinNoise->setPixmap(pixmap);
     ui->label_perlinNoise->setMouseTracking(true);
@@ -103,6 +106,7 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+// Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
     int value = ui->horizontalSlider_resolution->value();
 
@@ -114,6 +118,7 @@ void MainWindow::onResolutionSliderReleased() {
     viewer->setFocus();
 }
 
+// Modifier étendue (range)
 void MainWindow::onHeightRangeSliderReleased() {
     int value = ui->horizontalSlider_heightRange->value();
     viewer->terrainMesh.heightRange = value;
@@ -122,13 +127,17 @@ void MainWindow::onHeightRangeSliderReleased() {
     viewer->setFocus();
 }
 
+
+// Regénérer carte + maillage
 void MainWindow::onReloadButtonClicked() {
-    viewer->terrainMesh.perlinNoiseCreated = false;
-    viewer->terrainMesh.generateMesh();
+    // viewer->terrainMesh.perlinNoiseCreated = false;
+    // viewer->terrainMesh.generateMesh();
+    viewer->terrainMesh = TerrainMesh();
 
     viewer->setFocus();
 }
 
+// Permet de savoir si la souris est en train de faire un clic gauche + mouvement dans le label de la carte
 bool MainWindow::eventFilter(QObject *obj, QEvent *event){
     if (obj == ui->label_perlinNoise) {
             if (event->type() == QEvent::MouseButtonPress) {
@@ -160,6 +169,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
         return QMainWindow::eventFilter(obj, event);
 }
 
+// Enlever le tracé
 void MainWindow::undoDrawingPath() {
     if (!previousPaths.isEmpty()) {
         redoPaths.push(currentPath);
@@ -168,6 +178,7 @@ void MainWindow::undoDrawingPath() {
     }
 }
 
+// Refaire le tracé
 void MainWindow::redoDrawingPath() {
     if (!redoPaths.isEmpty()) {
         previousPaths.push(currentPath);
@@ -176,6 +187,7 @@ void MainWindow::redoDrawingPath() {
     }
 }
 
+// Actualiser le maillage
 void MainWindow::updateMesh(QImage image){
     viewer->terrainMesh.perlinNoise->ImgPerlin = image;
     viewer->terrainMesh.generateMesh();
@@ -184,7 +196,7 @@ void MainWindow::updateMesh(QImage image){
     ui->widget_affichage_terrain->setFocus();
 }
 
-
+// Actualiser le tracé
 void MainWindow::updateDrawingPath() {
     QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
     tempImage.fill(Qt::transparent);
@@ -227,12 +239,8 @@ void MainWindow::drawingPath(QMouseEvent* mouseEvent)
     // Afficher l'image temporaire sur le QLabel
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
 
-    // viewer->terrainMesh.perlinNoise->ImgPerlin = tempImage;
-    // viewer->terrainMesh.generateMesh();
-
-    // viewer->setFocus();
+    // Actualisation du maillage
     updateMesh(tempImage);
-
 }
 
 

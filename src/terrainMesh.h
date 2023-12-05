@@ -31,6 +31,8 @@ private:
     void generateIndices();
     void getHeightAtPerlinPx(GLfloat &y, float perlin);
     void calculateNormals();
+    void setMap(QImage image);
+    QImage getMap();
 
 };
 

@@ -73,6 +73,7 @@ private slots:
 
 #include <QMainWindow>
 #include <QSpinBox>
+#include <QImage>
 #include <QPainter>
 #include <QPainterPath>
 #include <QStack>
@@ -102,6 +103,11 @@ private:
     Ui::MainWindow *ui;
     MyViewer* viewer;
     bool isLeftButtonPressed;
+
+    //Image originale
+    QImage originalImage;
+
+    //Image modifiée
     QImage editedImage;
 
     //Concerne le tracé
