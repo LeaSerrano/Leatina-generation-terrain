@@ -89,6 +89,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
+    QObject::connect(ui->button_undo, &QPushButton::clicked, this, &MainWindow::undoDrawingPath);
+    QObject::connect(ui->button_redo, &QPushButton::clicked, this, &MainWindow::redoDrawingPath);
+
 
     viewer->setFocus();
 }
@@ -129,61 +132,86 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = true;
+                    startPoint = mouseEvent->localPos();
+
+                    //point de départ tracé
+                    currentPath.moveTo(startPoint);
+
+                    previousPaths.push(currentPath);
+                    redoPaths.clear();
                 }
             } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-                //int mouseY = mouseEvent->y();
-                //int mouseX = mouseEvent->x();
-
-                drawingPath(static_cast<QMouseEvent*>(event));
-
-                //qDebug() << "Position de la souris : X =" << mouseX << ", Y =" << mouseY;
+                //drawingPath(static_cast<QMouseEvent*>(event));
+                drawingPath(mouseEvent);
             } else if (event->type() == QEvent::MouseButtonRelease) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = false;
-
+                    //currentPath = QPainterPath();
+                    startPoint = QPointF();
                 }
             }
         }
         return QMainWindow::eventFilter(obj, event);
 }
 
+void MainWindow::undoDrawingPath() {
+    if (!previousPaths.isEmpty()) {
+        redoPaths.push(currentPath);
+        currentPath = previousPaths.pop();
+        updateDrawingPath();
+    }
+}
+
+void MainWindow::redoDrawingPath() {
+    if (!redoPaths.isEmpty()) {
+        previousPaths.push(currentPath);
+        currentPath = redoPaths.pop();
+        updateDrawingPath();
+    }
+}
+
+void MainWindow::updateDrawingPath() {
+    QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
+    tempImage.fill(Qt::transparent);
+
+    QPainter painter(&tempImage);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.drawImage(0, 0, editedImage);
+    painter.setPen(QPen(Qt::white, 1));
+    painter.drawPath(currentPath);
+    painter.end();
+
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
+
+}
+
 void MainWindow::drawingPath(QMouseEvent* mouseEvent)
 {
-    // Obtenir les coordonnées de la souris en virgule flottante
     QPointF mousePos = mouseEvent->localPos();
-    QPoint globalPos = ui->label_perlinNoise->mapToGlobal(QPoint(0, 0));
 
-    int x = qRound(mousePos.x());
-    int y = qRound(mousePos.y());
+    // Ajout point au tracé
+    currentPath.lineTo(mousePos);
 
-    // Vérifier que les coordonnées sont valides
-    if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
-        // Modifier le pixel en blanc (RGB: 255, 255, 255)
-        editedImage.setPixel(x, y, qRgb(255, 255, 255));
-        qDebug() << "Draw ! X =" << x << ", Y =" << y;
+    // Actualiser l'affichage de l'image
+    int coin_x = ui->label_perlinNoise->geometry().x();
+    int coin_y = ui->label_perlinNoise->geometry().y();
+    ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
 
-   // // Vérifier que les coordonnées sont valides
-   // if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
-   //     // Modifier le pixel en blanc (RGB: 255, 255, 255)
-   //     editedImage.setPixel(x, y, qRgb(255, 255, 255));
-   //     qDebug() << "Draw !";
-   // }
-    // // Vérifier que les coordonnées sont valides
-    // // Obtenir les coordonnées de la souris
-    //     int x = mouseEvent->pos().x();
-    //     int y = mouseEvent->pos().y();
-    //     if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
-    //         // Modifier le pixel en blanc (RGB: 255, 255, 255)
-    //         editedImage.setPixel(x, y, qRgb(255, 255, 255));
-    //         qDebug() << "Draw !";
+    // Création image temporaire pour dessiner le tracé
+    QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
+    tempImage.fill(Qt::transparent);
 
-            // Actualiser l'affichage de l'image
-            int coin_x = ui->label_perlinNoise->geometry().x();
-            int coin_y = ui->label_perlinNoise->geometry().y();
-            ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
+    // Dessiner tracé sur image temporaire
+    QPainter painter(&tempImage);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.drawImage(0, 0, editedImage);
+    painter.setPen(QPen(Qt::white, 1));
+    painter.drawPath(currentPath);
+    painter.end();
 
-            ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
-        }
+    // Afficher l'image temporaire sur le QLabel
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
 }
+

@@ -32,6 +32,8 @@ public:
     QLabel *label_heightRange;
     QPushButton *pushButton_reload;
     QLabel *label_perlinNoise;
+    QPushButton *button_undo;
+    QPushButton *button_redo;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -65,6 +67,12 @@ public:
         label_perlinNoise = new QLabel(centralwidget);
         label_perlinNoise->setObjectName(QString::fromUtf8("label_perlinNoise"));
         label_perlinNoise->setGeometry(QRect(0, 440, 300, 300));
+        button_undo = new QPushButton(centralwidget);
+        button_undo->setObjectName(QString::fromUtf8("button_undo"));
+        button_undo->setGeometry(QRect(340, 450, 89, 25));
+        button_redo = new QPushButton(centralwidget);
+        button_redo->setObjectName(QString::fromUtf8("button_redo"));
+        button_redo->setGeometry(QRect(340, 480, 89, 25));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -86,6 +94,8 @@ public:
         label_heightRange->setText(QCoreApplication::translate("MainWindow", "Plage de hauteurs : ", nullptr));
         pushButton_reload->setText(QString());
         label_perlinNoise->setText(QString());
+        button_undo->setText(QCoreApplication::translate("MainWindow", "undo", nullptr));
+        button_redo->setText(QCoreApplication::translate("MainWindow", "redo", nullptr));
     } // retranslateUi
 
 };
