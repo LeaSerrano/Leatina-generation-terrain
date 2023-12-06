@@ -36,6 +36,7 @@ public:
     QPushButton *button_redo;
     QPushButton *button_save_map;
     QPushButton *button_open_map;
+    QPushButton *pushButton_mode_FPS;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -81,6 +82,9 @@ public:
         button_open_map = new QPushButton(centralwidget);
         button_open_map->setObjectName(QString::fromUtf8("button_open_map"));
         button_open_map->setGeometry(QRect(340, 520, 89, 25));
+        pushButton_mode_FPS = new QPushButton(centralwidget);
+        pushButton_mode_FPS->setObjectName(QString::fromUtf8("pushButton_mode_FPS"));
+        pushButton_mode_FPS->setGeometry(QRect(740, 570, 83, 25));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -106,6 +110,7 @@ public:
         button_redo->setText(QCoreApplication::translate("MainWindow", "redo", nullptr));
         button_save_map->setText(QCoreApplication::translate("MainWindow", "sauvegarder carte", nullptr));
         button_open_map->setText(QCoreApplication::translate("MainWindow", "ouvrir carte", nullptr));
+        pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "Mode FPS", nullptr));
     } // retranslateUi
 
 };

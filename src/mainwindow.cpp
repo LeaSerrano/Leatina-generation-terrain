@@ -59,12 +59,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     viewer = new MyViewer();
 
+    ui->statusbar->hide();
+
     viewer->setParent(ui->widget_affichage_terrain);
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(10);
-    ui->horizontalSlider_resolution->setMaximum(180);
+    ui->horizontalSlider_resolution->setMaximum(300);
     QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
     ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);
@@ -107,6 +109,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
         uploadMap();
     });
+
+    QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
     viewer->setFocus();
 }
@@ -293,5 +297,23 @@ void MainWindow::uploadMap(){
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
     updateMesh(originalImage);
     viewer->setFocus();
+
+}
+
+void MainWindow::changerVuePremierePersonne() {
+    if (viewer->vueActuelle == viewer->VueTerrain) {
+        viewer->vueActuelle = viewer->VuePremierePersonne;
+
+        this->setCentralWidget(viewer);
+
+
+        //ui->widget_affichage_terrain->setFocus();
+        viewer->setFocus();
+        //viewer->update();
+
+
+    } else {
+        viewer->vueActuelle = viewer->VueTerrain;
+    }
 
 }

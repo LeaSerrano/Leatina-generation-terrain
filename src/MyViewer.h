@@ -15,6 +15,7 @@
 #include <QGLViewer/qglviewer.h>
 
 #include <gl/GLUtilityMethods.h>
+#include <QGLViewer/manipulatedCameraFrame.h>
 
 // Qt stuff:
 #include <QFormLayout>
@@ -45,12 +46,17 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     GLuint shaderProgram;
     GLuint vertexShader, fragmentShader;
     QMatrix4x4 modelMatrix;
+    QPoint lastMousePos;
 
 
 public :
     TerrainMesh terrainMesh;
 
+    enum Vue { VueTerrain, VuePremierePersonne };
+    Vue vueActuelle;
+
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_4_3_Core() {
+        vueActuelle = VueTerrain;
     }
 
 
@@ -107,6 +113,30 @@ public :
         shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
     }
 
+    void drawTerrainView() {
+            drawBuffers();
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_LIGHTING);
+            glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
+    }
+
+    void drawPremierePersonneView() {
+        float centerX = terrainMesh.sizeX / 2.0f;
+        float centerZ = terrainMesh.sizeZ / 2.0f;
+
+        float perlin = terrainMesh.perlinNoise->getPerlinAt(centerX, centerZ, terrainMesh.resolution);
+        GLfloat centerY;
+        terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+
+        qglviewer::Vec cameraPosition(centerX, centerY + 0.5f, centerZ);
+        camera()->setPosition(cameraPosition);
+
+        drawBuffers();
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_LIGHTING);
+        glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
+    }
+
 
     void draw() {
         glUseProgram(shaderProgram);
@@ -138,7 +168,13 @@ public :
         qglviewer::Vec cameraView = camera()->viewDirection();
         glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), /*0.0, 3.0, -7.0*/ cameraView[0], cameraView[1], cameraView[2]);
 
-        drawBuffers();
+        //drawBuffers();
+
+        if (vueActuelle == VueTerrain) {
+            drawTerrainView();
+        } else if (vueActuelle == VuePremierePersonne) {
+            drawPremierePersonneView();
+        }
 
 
         glEnable(GL_DEPTH_TEST);
@@ -289,31 +325,67 @@ public :
     }
 
     void keyPressEvent( QKeyEvent * event ) {
-        if( event->key() == Qt::Key_H ) {
-            help();
-        }
-        else if( event->key() == Qt::Key_T ) {
-            if( event->modifiers() & Qt::CTRL )
-            {
-                bool ok;
-                QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
-                if (ok && !text.isEmpty())
+        const float stepSize = 0.1f;
+
+            if( event->key() == Qt::Key_H ) {
+                help();
+            }
+            else if( event->key() == Qt::Key_T ) {
+                if( event->modifiers() & Qt::CTRL )
                 {
-                    updateTitle(text);
+                    bool ok;
+                    QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
+                    if (ok && !text.isEmpty())
+                    {
+                        updateTitle(text);
+                    }
                 }
             }
-        }
-        else if (event->key() == Qt::Key_Left) {
-            rotateObjectLeft();
-        } else if (event->key() == Qt::Key_Right) {
-            rotateObjectRight();
-        }
-        /*else if (event->key() == Qt::Key_Up) {
-            rotateObjectUp();
-        }
-        else if (event->key() == Qt::Key_Down) {
-            rotateObjectDown();
-        }*/
+
+            if (vueActuelle == VueTerrain) {
+                if (event->key() == Qt::Key_Left) {
+                    rotateObjectLeft();
+                }
+                else if (event->key() == Qt::Key_Right) {
+                    rotateObjectRight();
+                }
+                else if (event->key() == Qt::Key_Up) {
+                    rotateObjectUp();
+                }
+                else if (event->key() == Qt::Key_Down) {
+                    rotateObjectDown();
+                }
+            }
+            else if (vueActuelle == VuePremierePersonne) {
+                const float stepSize = 0.1f; // Ajustez la taille du pas selon vos besoins
+
+                /*if (event->key() == Qt::Key_Z) {
+                    camera()->setPosition(camera()->position() + qglviewer::Vec(2, 0, 0));
+
+                    update();
+                }*/
+            }
+            /*else {
+                const float stepSize = 0.1f; // Ajustez la taille du pas selon vos besoins
+                   static qglviewer::Vec accumulatedTranslation(0, 0, 0);
+
+                   if (event->key() == Qt::Key_Left) {
+                       accumulatedTranslation += qglviewer::Vec(-stepSize, 0, 0);
+                   } else if (event->key() == Qt::Key_Right) {
+                       accumulatedTranslation += qglviewer::Vec(stepSize, 0, 0);
+                   } else if (event->key() == Qt::Key_Up) {
+                       accumulatedTranslation += qglviewer::Vec(0, 0, -stepSize);
+                   } else if (event->key() == Qt::Key_Down) {
+                       accumulatedTranslation += qglviewer::Vec(0, 0, stepSize);
+                   }
+
+                   camera()->setPosition(camera()->position() + accumulatedTranslation);
+                   update();
+
+                   qglviewer::Vec cameraPosition;
+                   cameraPosition = camera()->position();
+                   qDebug() << cameraPosition[0] << " " << cameraPosition[1] << " " << cameraPosition[2];
+            }*/
     }
 
     void rotateObjectLeft() {
@@ -372,7 +444,37 @@ public :
     }*/
 
     void mousePressEvent(QMouseEvent* e ) {
-        //QGLViewer::mousePressEvent(e);
+        if (vueActuelle == VuePremierePersonne) {
+            lastMousePos = e->pos();
+            QGLViewer::mousePressEvent(e);
+        }
+
+    }
+
+    void mouseMoveEvent(QMouseEvent* e) {
+        if (vueActuelle == VuePremierePersonne) {
+            float mouseDeltaX = e->x() - lastMousePos.x();
+            float mouseDeltaY = e->y() - lastMousePos.y();
+
+            float sensitivity = 0.01f;
+            float deltaX = mouseDeltaX * sensitivity;
+            float deltaY = -mouseDeltaY * sensitivity;
+
+            qglviewer::Quaternion currentOrientation = camera()->frame()->orientation();
+
+            qglviewer::Quaternion deltaOrientation = qglviewer::Quaternion(qglviewer::Vec(1, 0, 0), deltaY) * qglviewer::Quaternion(qglviewer::Vec(0, 1, 0), -deltaX);
+
+            camera()->frame()->setOrientation(currentOrientation * deltaOrientation);
+            update();
+
+            lastMousePos = e->pos();
+        }
+
+        QGLViewer::mouseMoveEvent(e);
+    }
+
+    void mouseReleaseEvent(QMouseEvent* e) {
+        QGLViewer::mouseReleaseEvent(e);
     }
 
     /*void mouseMoveEvent(QMouseEvent* e  ){

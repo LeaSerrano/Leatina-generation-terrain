@@ -20,17 +20,17 @@ public:
     PerlinNoise* perlinNoise;
     QImage getMap();
 
-    float sizeX = 1.0, sizeY = 1.0, sizeZ = 1.0;
+    float sizeX = 3.0, sizeY = 1.0, sizeZ = 3.0;
     float averageHeight;
     int resolution = 100;
     int heightRange = 300;
     void generateMesh();
     bool perlinNoiseCreated;
+    void getHeightAtPerlinPx(GLfloat &y, float perlin);
 
 private:
     void generatePlan();
     void generateIndices();
-    void getHeightAtPerlinPx(GLfloat &y, float perlin);
     void calculateNormals();
     void setMap(QImage image);
 

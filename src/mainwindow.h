@@ -105,6 +105,8 @@ private slots:
     //Ouvrir carte
     void uploadMap();
 
+    void changerVuePremierePersonne();
+
 private:
     Ui::MainWindow *ui;
     MyViewer* viewer;
