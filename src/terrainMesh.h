@@ -18,6 +18,7 @@ public:
     QVector<short> index_buffer;
 
     PerlinNoise* perlinNoise;
+    QImage getMap();
 
     float sizeX = 1.0, sizeY = 1.0, sizeZ = 1.0;
     float averageHeight;
@@ -31,6 +32,8 @@ private:
     void generateIndices();
     void getHeightAtPerlinPx(GLfloat &y, float perlin);
     void calculateNormals();
+    void setMap(QImage image);
+
 
 };
 

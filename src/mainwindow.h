@@ -73,6 +73,10 @@ private slots:
 
 #include <QMainWindow>
 #include <QSpinBox>
+#include <QImage>
+#include <QPainter>
+#include <QPainterPath>
+#include <QStack>
 #include "MyViewer.h"
 
 namespace Ui {
@@ -91,15 +95,47 @@ private slots:
     void onHeightRangeSliderReleased();
     void onReloadButtonClicked();
 
+    //Concerne le tracé
+    void undoDrawingPath();
+    void redoDrawingPath();
+
+    //Sauvegarde carte
+    void downloadMap(QImage image);
+
+    //Ouvrir carte
+    void uploadMap();
+
 private:
     Ui::MainWindow *ui;
     MyViewer* viewer;
     bool isLeftButtonPressed;
+
+    //Image originale
+    QImage originalImage;
+
+    //Image modifiée
     QImage editedImage;
+
+    //Concerne le tracé
+    QPointF startPoint;
+    QPainterPath currentPath;
+
+    QStack<QPainterPath> previousPaths;
+    QStack<QPainterPath> redoPaths;
+
+    QPen pathPen;
+
+
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
     void drawingPath(QMouseEvent *mouseEvent);
+    void undoDrawingPth();
+    void redoDrawingPth();
+    void updateDrawingPath();
+    void updateMesh(QImage image);
+
+
 };
 
 #endif // MAINWINDOW_H

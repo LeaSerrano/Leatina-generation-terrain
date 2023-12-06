@@ -53,10 +53,9 @@
 
 #include <QPainter>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),
-      ui(new Ui::MainWindow), isLeftButtonPressed(false) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), isLeftButtonPressed(false) {
     ui->setupUi(this);
+    setWindowTitle("Leatina Generation Terrain");
 
     viewer = new MyViewer();
 
@@ -78,14 +77,36 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
     //QPixmap pixmap("perlinNoise.png");
-    QImage originalImage("perlinNoise.png");
+
+    //Image originale
+    originalImage = QImage("perlinNoise.png");
+
     editedImage = originalImage.copy();
 
     //ui->label_perlinNoise->setPixmap(pixmap);
     ui->label_perlinNoise->setMouseTracking(true);
     ui->label_perlinNoise->installEventFilter(this);
+    int coin_x = ui->label_perlinNoise->geometry().x();
+    int coin_y = ui->label_perlinNoise->geometry().y();
+    ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
+    //concerne le tracé
+    QObject::connect(ui->button_undo, &QPushButton::clicked, this, &MainWindow::undoDrawingPath);
+    QObject::connect(ui->button_redo, &QPushButton::clicked, this, &MainWindow::redoDrawingPath);
+
+    //Pinceau
+    pathPen.setColor(Qt::white);
+    pathPen.setWidth(3);
+    pathPen.setJoinStyle(Qt::RoundJoin);
+
+    QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
+        downloadMap(viewer->terrainMesh.getMap());
+    });
+
+    QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
+        uploadMap();
+    });
 
     viewer->setFocus();
 }
@@ -94,6 +115,7 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+// Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
     int value = ui->horizontalSlider_resolution->value();
 
@@ -105,6 +127,7 @@ void MainWindow::onResolutionSliderReleased() {
     viewer->setFocus();
 }
 
+// Modifier étendue (range)
 void MainWindow::onHeightRangeSliderReleased() {
     int value = ui->horizontalSlider_heightRange->value();
     viewer->terrainMesh.heightRange = value;
@@ -113,57 +136,162 @@ void MainWindow::onHeightRangeSliderReleased() {
     viewer->setFocus();
 }
 
+
+// Regénérer carte + maillage
 void MainWindow::onReloadButtonClicked() {
     viewer->terrainMesh.perlinNoiseCreated = false;
     viewer->terrainMesh.generateMesh();
 
+    originalImage = QImage("perlinNoise.png");
+    //ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
+    editedImage = originalImage.copy();
+
+    currentPath.clear();
+    previousPaths.clear();
+    redoPaths.clear();
+
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
+
     viewer->setFocus();
 }
 
+// Permet de savoir si la souris est en train de faire un clic gauche + mouvement dans le label de la carte
 bool MainWindow::eventFilter(QObject *obj, QEvent *event){
     if (obj == ui->label_perlinNoise) {
             if (event->type() == QEvent::MouseButtonPress) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = true;
+                    startPoint = mouseEvent->localPos();
+
+                    //point de départ tracé
+                    currentPath.moveTo(startPoint);
+
+                    previousPaths.push(currentPath);
+                    redoPaths.clear();
                 }
             } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-                //int mouseX = mouseEvent->pos().x();
-                //int mouseY = mouseEvent->pos().y();
-
-                drawingPath(static_cast<QMouseEvent*>(event));
-
-                //qDebug() << "Position de la souris : X =" << mouseX << ", Y =" << mouseY;
+                //drawingPath(static_cast<QMouseEvent*>(event));
+                drawingPath(mouseEvent);
             } else if (event->type() == QEvent::MouseButtonRelease) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = false;
-
+                    //currentPath = QPainterPath();
+                    startPoint = QPointF();
                 }
             }
         }
+
         return QMainWindow::eventFilter(obj, event);
 }
 
-void MainWindow::drawingPath(QMouseEvent *mouseEvent)
-{
-//    // Vérifier que les coordonnées sont valides
-//    if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
-//        // Modifier le pixel en blanc (RGB: 255, 255, 255)
-//        editedImage.setPixel(x, y, qRgb(255, 255, 255));
-//        qDebug() << "Draw !";
-//    }
-    // Vérifier que les coordonnées sont valides
-    // Obtenir les coordonnées de la souris
-        int x = mouseEvent->pos().x();
-        int y = mouseEvent->pos().y();
-        if (x >= 0 && x < editedImage.width() && y >= 0 && y < editedImage.height()) {
-            // Modifier le pixel en blanc (RGB: 255, 255, 255)
-            editedImage.setPixel(x, y, qRgb(255, 255, 255));
-            qDebug() << "Draw !";
+// Enlever le tracé
+void MainWindow::undoDrawingPath() {
+    if (!previousPaths.isEmpty()) {
+        redoPaths.push(currentPath);
+        currentPath = previousPaths.pop();
+        updateDrawingPath();
+    }
+}
 
-            // Actualiser l'affichage de l'image
-            ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
-        }
+// Refaire le tracé
+void MainWindow::redoDrawingPath() {
+    if (!redoPaths.isEmpty()) {
+        previousPaths.push(currentPath);
+        currentPath = redoPaths.pop();
+        updateDrawingPath();
+    }
+}
+
+// Actualiser le maillage
+void MainWindow::updateMesh(QImage image){
+    viewer->terrainMesh.perlinNoise->ImgPerlin = image;
+    viewer->terrainMesh.generateMesh();
+
+    viewer->setFocus();
+    ui->widget_affichage_terrain->setFocus();
+}
+
+// Actualiser le tracé
+void MainWindow::updateDrawingPath() {
+    QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
+    tempImage.fill(Qt::transparent);
+
+    QPainter painter(&tempImage);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.drawImage(0, 0, editedImage);
+    painter.setPen(pathPen);
+    painter.drawPath(currentPath);
+    painter.end();
+
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
+    updateMesh(tempImage);
+}
+
+void MainWindow::drawingPath(QMouseEvent* mouseEvent)
+{
+    QPointF mousePos = mouseEvent->localPos();
+
+    // Ajout point au tracé
+    currentPath.lineTo(mousePos);
+
+    // Actualiser l'affichage de l'image
+    int coin_x = ui->label_perlinNoise->geometry().x();
+    int coin_y = ui->label_perlinNoise->geometry().y();
+    ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
+
+    // Création image temporaire pour dessiner le tracé
+    QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
+    tempImage.fill(Qt::transparent);
+
+    // Dessiner tracé sur image temporaire
+    QPainter painter(&tempImage);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.drawImage(0, 0, editedImage);
+    painter.setPen(pathPen);
+    painter.drawPath(currentPath);
+    painter.end();
+
+    // Afficher l'image temporaire sur le QLabel
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
+
+    // Actualisation du maillage
+    updateMesh(tempImage);
+}
+
+void MainWindow::downloadMap(QImage image){
+    // Boîte de dialogue pour save la carte
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Enregistrer une carte"), QDir::homePath(), tr("Images (*.png)"));
+
+    if (filePath.isEmpty()){
+        return;
+    }
+
+    if (!filePath.toLower().endsWith(".png")) {
+        filePath += ".png";
+    }
+
+    if(image.save(filePath, "png")){
+        qDebug() << "L'image de la carte a bien été sauvergardée ici : " << filePath;
+    }else{
+        qDebug() << "Erreur lors de la sauvegarde de l'image de la carte.";
+    }
+}
+
+void MainWindow::uploadMap(){
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Ouvrir une carte"), QDir::homePath(), tr("Images (*.png)"));
+
+    if (filePath.isEmpty()){
+        return;
+    }else{
+
+    }
+
+    originalImage = QImage(filePath);
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
+    updateMesh(originalImage);
+    viewer->setFocus();
+
 }
