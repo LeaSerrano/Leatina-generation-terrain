@@ -360,13 +360,29 @@ public :
                 }
             }
             else if (vueActuelle == VuePremierePersonne) {
-                const float stepSize = 0.1f;
+                /*const float stepSize = 0.1f;
 
                 if (event->key() == Qt::Key_Z) {
                     qglviewer::Vec direction = camera()->viewDirection();
                     camera()->setPosition(camera()->position() + stepSize * direction);
                     update();
-                }
+                }*/
+
+                   static qglviewer::Vec accumulatedTranslation(0, 0, 0);
+
+                   if (event->key() == Qt::Key_Left) {
+                       accumulatedTranslation += qglviewer::Vec(-stepSize, 0, 0);
+                   } else if (event->key() == Qt::Key_Right) {
+                       accumulatedTranslation += qglviewer::Vec(stepSize, 0, 0);
+                   } else if (event->key() == Qt::Key_Up) {
+                       accumulatedTranslation += qglviewer::Vec(0, 0, -stepSize);
+                   } else if (event->key() == Qt::Key_Down) {
+                       accumulatedTranslation += qglviewer::Vec(0, 0, stepSize);
+                   }
+
+                   qglviewer::Vec direction = camera()->viewDirection();
+                   camera()->setPosition(camera()->position() + accumulatedTranslation);
+                   update();
 
 
 
