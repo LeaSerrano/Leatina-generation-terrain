@@ -36,6 +36,8 @@
 #include <fstream>
 #include <sstream>
 
+#define FPS 60
+
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
@@ -101,11 +103,12 @@ public :
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 
         QString vertexShaderSource = readShaderFile("src/vshader.glsl");
         QString fragmentShaderSource = readShaderFile("src/fshader.glsl");
@@ -128,7 +131,7 @@ public :
         GLfloat centerY;
         terrainMesh.getHeightAtPerlinPx(centerY, perlin);
 
-        qglviewer::Vec cameraPosition(centerX, centerY + 0.5f, centerZ);
+        qglviewer::Vec cameraPosition(centerX, centerY + 0.2f, centerZ);
         camera()->setPosition(cameraPosition);
 
         drawBuffers();
@@ -357,14 +360,18 @@ public :
                 }
             }
             else if (vueActuelle == VuePremierePersonne) {
-                const float stepSize = 0.1f; // Ajustez la taille du pas selon vos besoins
+                const float stepSize = 0.1f;
 
-                /*if (event->key() == Qt::Key_Z) {
-                    camera()->setPosition(camera()->position() + qglviewer::Vec(2, 0, 0));
-
+                if (event->key() == Qt::Key_Z) {
+                    qglviewer::Vec direction = camera()->viewDirection();
+                    camera()->setPosition(camera()->position() + stepSize * direction);
                     update();
-                }*/
+                }
+
+
+
             }
+
             /*else {
                 const float stepSize = 0.1f; // Ajustez la taille du pas selon vos besoins
                    static qglviewer::Vec accumulatedTranslation(0, 0, 0);
@@ -444,15 +451,16 @@ public :
     }*/
 
     void mousePressEvent(QMouseEvent* e ) {
-        if (vueActuelle == VuePremierePersonne) {
+        /*if (vueActuelle == VuePremierePersonne) {
             lastMousePos = e->pos();
             QGLViewer::mousePressEvent(e);
-        }
+        }*/
 
     }
 
     void mouseMoveEvent(QMouseEvent* e) {
-        if (vueActuelle == VuePremierePersonne) {
+        /*if (vueActuelle == VuePremierePersonne) {
+
             float mouseDeltaX = e->x() - lastMousePos.x();
             float mouseDeltaY = e->y() - lastMousePos.y();
 
@@ -470,7 +478,7 @@ public :
             lastMousePos = e->pos();
         }
 
-        QGLViewer::mouseMoveEvent(e);
+        QGLViewer::mouseMoveEvent(e);*/
     }
 
     void mouseReleaseEvent(QMouseEvent* e) {
