@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(10);
-    ui->horizontalSlider_resolution->setMaximum(180);
+    ui->horizontalSlider_resolution->setMaximum(300);
     QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
     ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);

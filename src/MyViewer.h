@@ -28,6 +28,7 @@
 #include <QDebug>
 #include <QOpenGLShaderProgram>
 #include <QtMath>
+#include <algorithm>
 
 
 #include "qt/QSmartAction.h"
@@ -35,8 +36,6 @@
 
 #include <fstream>
 #include <sstream>
-
-#define FPS 60
 
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
@@ -48,7 +47,11 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     GLuint shaderProgram;
     GLuint vertexShader, fragmentShader;
     QMatrix4x4 modelMatrix;
+
     QPoint lastMousePos;
+    qglviewer::Vec accumulatedMouseTranslation;
+    qglviewer::Vec accumulatedKeyTranslation;
+
 
 
 public :
@@ -118,9 +121,6 @@ public :
 
     void drawTerrainView() {
             drawBuffers();
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_LIGHTING);
-            glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
     }
 
     void drawPremierePersonneView() {
@@ -135,9 +135,8 @@ public :
         camera()->setPosition(cameraPosition);
 
         drawBuffers();
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_LIGHTING);
-        glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
+
+        animate();
     }
 
 
@@ -328,7 +327,6 @@ public :
     }
 
     void keyPressEvent( QKeyEvent * event ) {
-        const float stepSize = 0.1f;
 
             if( event->key() == Qt::Key_H ) {
                 help();
@@ -360,33 +358,40 @@ public :
                 }
             }
             else if (vueActuelle == VuePremierePersonne) {
-                /*const float stepSize = 0.1f;
 
-                if (event->key() == Qt::Key_Z) {
-                    qglviewer::Vec direction = camera()->viewDirection();
-                    camera()->setPosition(camera()->position() + stepSize * direction);
-                    update();
-                }*/
+                /*static qglviewer::Vec accumulatedTranslation(0, 0, 0);
 
-                   static qglviewer::Vec accumulatedTranslation(0, 0, 0);
+                if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Q) {
+                    accumulatedTranslation += qglviewer::Vec(-stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {
+                    accumulatedTranslation += qglviewer::Vec(stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Z) {
+                    accumulatedTranslation += qglviewer::Vec(0, 0, -stepSize);
+                } else if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+                    accumulatedTranslation += qglviewer::Vec(0, 0, stepSize);
+                }
 
-                   if (event->key() == Qt::Key_Left) {
-                       accumulatedTranslation += qglviewer::Vec(-stepSize, 0, 0);
-                   } else if (event->key() == Qt::Key_Right) {
-                       accumulatedTranslation += qglviewer::Vec(stepSize, 0, 0);
-                   } else if (event->key() == Qt::Key_Up) {
-                       accumulatedTranslation += qglviewer::Vec(0, 0, -stepSize);
-                   } else if (event->key() == Qt::Key_Down) {
-                       accumulatedTranslation += qglviewer::Vec(0, 0, stepSize);
-                   }
+                qglviewer::Quaternion orientation = camera()->orientation();
+                qglviewer::Vec rotatedTranslation = orientation * accumulatedTranslation;
 
-                   qglviewer::Vec direction = camera()->viewDirection();
-                   camera()->setPosition(camera()->position() + accumulatedTranslation);
-                   update();
+                camera()->setPosition(camera()->position() + rotatedTranslation);
+                update();*/
 
+                const float stepSize = 0.009f;
 
+                if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Q) {
+                    accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {
+                    accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Z) {
+                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, -stepSize);
+                } else if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
+                }
 
+                update();
             }
+
 
             /*else {
                 const float stepSize = 0.1f; // Ajustez la taille du pas selon vos besoins
@@ -466,27 +471,32 @@ public :
         QGLViewer::mouseDoubleClickEvent( e );
     }*/
 
-    void mousePressEvent(QMouseEvent* e ) {
-        /*if (vueActuelle == VuePremierePersonne) {
+    /*void mousePressEvent(QMouseEvent* e ) {
+        if (vueActuelle == VuePremierePersonne) {
             lastMousePos = e->pos();
             QGLViewer::mousePressEvent(e);
-        }*/
+        }
 
     }
 
     void mouseMoveEvent(QMouseEvent* e) {
-        /*if (vueActuelle == VuePremierePersonne) {
-
+        if (vueActuelle == VuePremierePersonne) {
             float mouseDeltaX = e->x() - lastMousePos.x();
-            float mouseDeltaY = e->y() - lastMousePos.y();
-
             float sensitivity = 0.01f;
-            float deltaX = mouseDeltaX * sensitivity;
-            float deltaY = -mouseDeltaY * sensitivity;
+            float deltaYaw = -mouseDeltaX * sensitivity;
 
             qglviewer::Quaternion currentOrientation = camera()->frame()->orientation();
 
-            qglviewer::Quaternion deltaOrientation = qglviewer::Quaternion(qglviewer::Vec(1, 0, 0), deltaY) * qglviewer::Quaternion(qglviewer::Vec(0, 1, 0), -deltaX);
+            // Limit the change in orientation to yaw (rotation around the vertical axis)
+            float yawLimit = 180.0f; // Limit in degrees
+            qglviewer::Vec rotationAxis;
+            qreal rotationAngle; // Change qreal to the appropriate type used in your application
+            currentOrientation.getAxisAngle(rotationAxis, rotationAngle);
+
+            float newYaw = std::clamp(static_cast<float>(rotationAngle) + deltaYaw, -yawLimit, yawLimit);
+            deltaYaw = newYaw - static_cast<float>(rotationAngle);
+
+            qglviewer::Quaternion deltaOrientation = qglviewer::Quaternion(rotationAxis, deltaYaw);
 
             camera()->frame()->setOrientation(currentOrientation * deltaOrientation);
             update();
@@ -494,63 +504,39 @@ public :
             lastMousePos = e->pos();
         }
 
-        QGLViewer::mouseMoveEvent(e);*/
+        QGLViewer::mouseMoveEvent(e);
+    }*/
+
+    void mousePressEvent(QMouseEvent *e) {
+        lastMousePos = e->pos();
+    }
+
+    void mouseMoveEvent(QMouseEvent *e) {
+        double sensibility = 0.05;
+        QPoint delta = e->pos() - lastMousePos;
+        double angleY = delta.x() * sensibility;
+
+        qglviewer::Quaternion rotation;
+        rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
+
+        camera()->frame()->rotate(rotation);
+        lastMousePos = e->pos();
+
+        update();
     }
 
     void mouseReleaseEvent(QMouseEvent* e) {
         QGLViewer::mouseReleaseEvent(e);
     }
 
-    /*void mouseMoveEvent(QMouseEvent* e  ){
-        QGLViewer::mouseMoveEvent(e);
+    void animate() {
+        camera()->setPosition(camera()->position() + accumulatedMouseTranslation + accumulatedKeyTranslation);
     }
-
-    void mouseReleaseEvent(QMouseEvent* e  ) {
-        QGLViewer::mouseReleaseEvent(e);
-    }*/
 
 signals:
     void windowTitleUpdated( const QString & );
 
 public slots:
-    /*void open_mesh() {
-        bool success = false;
-        QString fileName = QFileDialog::getOpenFileName(NULL,"","");
-        if ( !fileName.isNull() ) { // got a file name
-            if(fileName.endsWith(QString(".off")))
-                success = OFFIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            else if(fileName.endsWith(QString(".obj")))
-                success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            if(success) {
-                std::cout << fileName.toStdString() << " was opened successfully" << std::endl;
-                point3d bb(FLT_MAX,FLT_MAX,FLT_MAX) , BB(-FLT_MAX,-FLT_MAX,-FLT_MAX);
-                for( unsigned int v = 0 ; v < mesh.vertices.size() ; ++v ) {
-                    bb = point3d::min(bb , mesh.vertices[v]);
-                    BB = point3d::max(BB , mesh.vertices[v]);
-                }
-                adjustCamera(bb,BB);
-                update();
-            }
-            else
-                std::cout << fileName.toStdString() << " could not be opened" << std::endl;
-        }
-    }
-
-    void save_mesh() {
-        bool success = false;
-        QString fileName = QFileDialog::getOpenFileName(NULL,"","");
-        if ( !fileName.isNull() ) { // got a file name
-            if(fileName.endsWith(QString(".off")))
-                success = OFFIO::save(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            else if(fileName.endsWith(QString(".obj")))
-                success = OBJIO::save(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            if(success)
-                std::cout << fileName.toStdString() << " was saved" << std::endl;
-            else
-                std::cout << fileName.toStdString() << " could not be saved" << std::endl;
-        }
-    }*/
-
     void showControls()
     {
         // Show controls :
