@@ -126,7 +126,7 @@ public :
             drawBuffers();
     }
 
-    void drawPremierePersonneView() {
+    /*void drawPremierePersonneView() {
         float centerX = terrainMesh.sizeX / 2.0f;
         float centerZ = terrainMesh.sizeZ / 2.0f;
 
@@ -134,13 +134,42 @@ public :
         GLfloat centerY;
         terrainMesh.getHeightAtPerlinPx(centerY, perlin);
 
-        qglviewer::Vec cameraPosition(centerX, centerY + 0.2f, centerZ);
+        qglviewer::Vec cameraPosition(centerX, centerY + 0.5f, centerZ);
         camera()->setPosition(cameraPosition);
 
         drawBuffers();
 
         animate();
+    }*/
+
+    void drawPremierePersonneView() {
+            float centerX = terrainMesh.sizeX / 2.0f;
+            float centerZ = terrainMesh.sizeZ / 2.0f;
+
+            float perlin = terrainMesh.perlinNoise->getPerlinAt(centerX, centerZ, terrainMesh.resolution);
+            GLfloat centerY;
+            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+
+            qglviewer::Vec cameraPosition(centerX, centerY + 0.2f, centerZ);
+            camera()->setPosition(cameraPosition);
+
+        /*float centerX = terrainMesh.sizeX / 2.0f;
+        float centerZ = terrainMesh.sizeZ / 2.0f;
+
+        float perlin = terrainMesh.perlinNoise->getPerlinAt(centerX, centerZ, terrainMesh.resolution);
+        GLfloat centerY;
+        terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+
+        point3d bb(centerX, centerY - 0.2f, centerZ);
+        point3d BB(centerX, centerY + 0.2f, centerZ);
+
+        adjustCamera(bb, BB);*/
+
+        drawBuffers();
+
+        animate();
     }
+
 
 
     void draw() {
@@ -362,25 +391,7 @@ public :
             }
             else if (vueActuelle == VuePremierePersonne) {
 
-                /*static qglviewer::Vec accumulatedTranslation(0, 0, 0);
-
-                if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Q) {
-                    accumulatedTranslation += qglviewer::Vec(-stepSize, 0, 0);
-                } else if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {
-                    accumulatedTranslation += qglviewer::Vec(stepSize, 0, 0);
-                } else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Z) {
-                    accumulatedTranslation += qglviewer::Vec(0, 0, -stepSize);
-                } else if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
-                    accumulatedTranslation += qglviewer::Vec(0, 0, stepSize);
-                }
-
-                qglviewer::Quaternion orientation = camera()->orientation();
-                qglviewer::Vec rotatedTranslation = orientation * accumulatedTranslation;
-
-                camera()->setPosition(camera()->position() + rotatedTranslation);
-                update();*/
-
-                const float stepSize = 0.009f;
+                /*const float stepSize = 0.009f;
 
                 if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Q) {
                     accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
@@ -392,7 +403,77 @@ public :
                     accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
                 }
 
+                update();*/
+
+                /*const float stepSize = 0.01f;
+
+                if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Q) {
+                    accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {
+                    accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Z) {
+                    qglviewer::Vec translation = camera()->viewDirection() * stepSize;
+                    translation[1] = 0; // Fixe la composante verticale à zéro
+                    accumulatedKeyTranslation += translation;
+                } else if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+                    qglviewer::Vec translation = camera()->viewDirection() * -stepSize;
+                    translation[1] = 0; // Fixe la composante verticale à zéro
+                    accumulatedKeyTranslation += translation;
+                }
+
+                update();*/
+
+                const float stepSize = 0.01f;
+
+                if (event->key() == Qt::Key_Q) {
+                    accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_D) {
+                    accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
+                } else if (event->key() == Qt::Key_Z) {
+                    qglviewer::Vec translation = camera()->viewDirection() * stepSize;
+                    translation[1] = 0;
+                    accumulatedKeyTranslation += translation;
+                } else if (event->key() == Qt::Key_S) {
+                    qglviewer::Vec translation = camera()->viewDirection() * -stepSize;
+                    translation[1] = 0;
+                    accumulatedKeyTranslation += translation;
+                }
+                else if (event->key() == Qt::Key_Up) {
+                    double sensibility = 0.05;
+
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), sensibility);
+
+                    camera()->frame()->rotate(rotation);
+                }
+                else if (event->key() == Qt::Key_Down) {
+                    double sensibility = 0.05;
+
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), sensibility);
+
+                    camera()->frame()->rotate(rotation);
+                }
+                else if (event->key() == Qt::Key_Right) {
+                    double sensibility = 0.05;
+
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), sensibility);
+
+                    camera()->frame()->rotate(rotation);
+                }
+                else if (event->key() == Qt::Key_Left) {
+                    double sensibility = 0.05;
+
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), sensibility);
+
+                    camera()->frame()->rotate(rotation);
+                }
+
                 update();
+
+
             }
 
 
@@ -511,9 +592,10 @@ public :
     }*/
 
     void mousePressEvent(QMouseEvent *e) {
-        if (vueActuelle == VuePremierePersonne) {
+        /*if (vueActuelle == VuePremierePersonne) {
             lastMousePos = e->pos();
-        }
+                QGLViewer::mousePressEvent(e);
+        }*/
     }
 
     /*void mouseMoveEvent(QMouseEvent *e) {
@@ -559,123 +641,7 @@ public :
     }*/
 
     void mouseMoveEvent(QMouseEvent *e) {
-        if (vueActuelle == VuePremierePersonne) {
-
-            /*double sensibility = 0.05;
-            QPoint delta = e->pos() - lastMousePos;
-
-            // Rotation autour de l'axe y
-            double angleY = delta.x() * sensibility;
-            qglviewer::Quaternion rotationY;
-            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
-            camera()->frame()->rotate(rotationY);
-
-            // Rotation autour de l'axe x
-            double angleX = delta.y() * sensibility;
-            qglviewer::Quaternion rotationX;
-            rotationX.setAxisAngle(camera()->rightVector(), angleX);
-
-            // Créer une nouvelle orientation en combinant les rotations actuelles avec la rotation autour de l'axe x
-            qglviewer::Quaternion newOrientation = rotationX * camera()->frame()->rotation();
-
-            // Vérifier que l'angle X est entre 0 et 90 degrés
-            qglviewer::Vec currentUp = newOrientation * camera()->upVector();
-
-            qDebug() << currentUp.x;
-
-            if (currentUp.x > -1.0 && currentUp.x < 0.5) {
-                camera()->frame()->setOrientation(newOrientation);
-            }
-
-            lastMousePos = e->pos();
-            update();
-*/
-
-            /*double sensibility = 0.009;
-            QPoint delta = e->pos() - lastMousePos;
-
-            double angleY = delta.x() * sensibility;
-            qglviewer::Quaternion rotationY;
-            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
-            camera()->frame()->rotate(rotationY);
-
-            double angleX = delta.y() * sensibility;
-
-            const double maxRotationX = M_PI / 2.0;  // Limite à 90 degrés
-
-            qglviewer::Frame *cameraFrame = camera()->frame();
-            qglviewer::Quaternion currentRotation = cameraFrame->orientation();
-
-            qglviewer::Quaternion rotationX;
-            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
-
-            qglviewer::Quaternion newRotation = rotationX * currentRotation;
-
-            if (newRotation.angle() > maxRotationX) {
-                newRotation = currentRotation;
-            }
-
-            qglviewer::Quaternion newOrientation = rotationY * newRotation;
-            cameraFrame->setOrientation(newOrientation);*/
-
-            /*double sensibility = 0.009;
-            QPoint delta = e->pos() - lastMousePos;
-
-            double angleY = delta.x() * sensibility;
-            qglviewer::Quaternion rotationY;
-            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
-            //camera()->frame()->rotate(rotationY);
-
-            double angleX = delta.y() * sensibility;
-
-            const double maxRotationX = M_PI / 2.0;  // Limite à 90 degrés
-
-            qglviewer::Frame *cameraFrame = camera()->frame();
-            qglviewer::Quaternion currentRotation = cameraFrame->orientation();
-
-            qglviewer::Quaternion rotationX;
-            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
-
-            qglviewer::Quaternion newRotation = rotationY * rotationX * currentRotation;
-
-            if (newRotation.angle() > maxRotationX) {
-                    newRotation.setAxisAngle(newRotation.axis(), maxRotationX);
-            }
-
-            //qglviewer::Quaternion newOrientation = rotationY * newRotation;
-            cameraFrame->setOrientation(newRotation);*/
-
-            /*double sensibility = 0.009;
-            QPoint delta = e->pos() - lastMousePos;
-
-            // Rotation autour de l'axe Y
-            double angleY = delta.x() * sensibility;
-            qglviewer::Quaternion rotationY;
-            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
-
-            // Rotation autour de l'axe X
-            double angleX = delta.y() * sensibility;
-            qglviewer::Quaternion rotationX;
-            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
-
-            // Appliquer la rotation dans l'ordre X, puis Y
-            qglviewer::Quaternion newRotation = rotationX * rotationY;
-
-            const double maxRotationX = M_PI / 2.0;  // Limite à 90 degrés
-
-            // Appliquer la rotation à l'orientation actuelle de la caméra
-            qglviewer::Frame *cameraFrame = camera()->frame();
-            qglviewer::Quaternion currentRotation = cameraFrame->orientation();
-            qglviewer::Quaternion finalRotation = newRotation * currentRotation;
-
-            // Limiter la rotation autour de l'axe X
-            if (finalRotation.angle() > maxRotationX) {
-                    finalRotation.setAxisAngle(finalRotation.axis(), maxRotationX);
-            }
-
-            // Appliquer la nouvelle orientation à la caméra
-            cameraFrame->setOrientation(finalRotation);*/
-
+        /*if (vueActuelle == VuePremierePersonne) {
             double sensibility = 0.009;
             QPoint delta = e->pos() - lastMousePos;
 
@@ -696,38 +662,33 @@ public :
             rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
 
             double angleX = delta.y() * sensibility;
-            qglviewer::Quaternion rotationX;
-            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
-
-
-            qglviewer::Quaternion finalRotation = rotationY * rotationX * currentRotation;
 
             const double maxRotationX = M_PI / 3.0;  // Limite à 60 degrés
 
-            if (finalRotation.angle() > maxRotationX) {
-                finalRotation.setAxisAngle(finalRotation.axis(), maxRotationX);
+            if (angleX > maxRotationX) {
+                angleX = maxRotationX;
             }
+
+            qglviewer::Quaternion rotationX;
+            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
+
+            qglviewer::Quaternion finalRotation = rotationX * rotationY * currentRotation;
 
             qglviewer::Quaternion rollReset;
             rollReset.setAxisAngle(qglviewer::Vec(0.0, 0.0, 1.0), -roll);
             finalRotation = rollReset * finalRotation;
 
+            finalRotation.normalize();
             camera()->frame()->setOrientation(finalRotation);
 
             lastMousePos = e->pos();
             update();
 
-        }
+        }*/
     }
 
-
-
-
-
-
-
     void mouseReleaseEvent(QMouseEvent* e) {
-        QGLViewer::mouseReleaseEvent(e);
+        //QGLViewer::mouseReleaseEvent(e);
     }
 
     void animate() {

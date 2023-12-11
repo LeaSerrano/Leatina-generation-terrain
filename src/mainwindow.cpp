@@ -304,6 +304,13 @@ void MainWindow::changerVuePremierePersonne() {
     if (viewer->vueActuelle == viewer->VueTerrain) {
         viewer->vueActuelle = viewer->VuePremierePersonne;
 
+        //viewer->terrainMesh.sizeX = 4.0;
+        //viewer->terrainMesh.sizeY = 4.0;
+        //viewer->terrainMesh.sizeZ = 4.0;
+        //viewer->terrainMesh.generateMesh();
+
+        //viewer->draw();
+
         this->setCentralWidget(viewer);
 
 
