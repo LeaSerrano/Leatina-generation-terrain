@@ -52,6 +52,9 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     qglviewer::Vec accumulatedMouseTranslation;
     qglviewer::Vec accumulatedKeyTranslation;
 
+    qglviewer::Quaternion accumulatedRotationX;
+    qglviewer::Quaternion accumulatedRotationY;
+
 
 
 public :
@@ -508,10 +511,12 @@ public :
     }*/
 
     void mousePressEvent(QMouseEvent *e) {
-        lastMousePos = e->pos();
+        if (vueActuelle == VuePremierePersonne) {
+            lastMousePos = e->pos();
+        }
     }
 
-    void mouseMoveEvent(QMouseEvent *e) {
+    /*void mouseMoveEvent(QMouseEvent *e) {
         double sensibility = 0.05;
         QPoint delta = e->pos() - lastMousePos;
         double angleY = delta.x() * sensibility;
@@ -523,7 +528,203 @@ public :
         lastMousePos = e->pos();
 
         update();
+    }*/
+
+    /*void mouseMoveEvent(QMouseEvent *e) {
+        double sensibility = 0.05;
+        QPoint delta = e->pos() - lastMousePos;
+
+        // Rotation autour de l'axe y
+        double angleY = delta.x() * sensibility;
+        qglviewer::Quaternion rotationY;
+        rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
+        camera()->frame()->rotate(rotationY);
+
+        // Rotation autour de l'axe x
+        double angleX = delta.y() * sensibility;
+        qglviewer::Quaternion rotationX;
+        rotationX.setAxisAngle(camera()->rightVector(), angleX);
+
+        // Créer une nouvelle orientation en combinant les rotations actuelles avec la rotation autour de l'axe x
+        qglviewer::Quaternion newOrientation = rotationX * camera()->frame()->rotation();
+
+        // Vérifier que l'angle X est entre 0 et 90 degrés
+        qglviewer::Vec currentUp = newOrientation * camera()->upVector();
+        if (currentUp.x > 0.0 && currentUp.x < 1.0) {
+            camera()->frame()->setOrientation(newOrientation);
+        }
+
+        lastMousePos = e->pos();
+        update();
+    }*/
+
+    void mouseMoveEvent(QMouseEvent *e) {
+        if (vueActuelle == VuePremierePersonne) {
+
+            /*double sensibility = 0.05;
+            QPoint delta = e->pos() - lastMousePos;
+
+            // Rotation autour de l'axe y
+            double angleY = delta.x() * sensibility;
+            qglviewer::Quaternion rotationY;
+            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
+            camera()->frame()->rotate(rotationY);
+
+            // Rotation autour de l'axe x
+            double angleX = delta.y() * sensibility;
+            qglviewer::Quaternion rotationX;
+            rotationX.setAxisAngle(camera()->rightVector(), angleX);
+
+            // Créer une nouvelle orientation en combinant les rotations actuelles avec la rotation autour de l'axe x
+            qglviewer::Quaternion newOrientation = rotationX * camera()->frame()->rotation();
+
+            // Vérifier que l'angle X est entre 0 et 90 degrés
+            qglviewer::Vec currentUp = newOrientation * camera()->upVector();
+
+            qDebug() << currentUp.x;
+
+            if (currentUp.x > -1.0 && currentUp.x < 0.5) {
+                camera()->frame()->setOrientation(newOrientation);
+            }
+
+            lastMousePos = e->pos();
+            update();
+*/
+
+            /*double sensibility = 0.009;
+            QPoint delta = e->pos() - lastMousePos;
+
+            double angleY = delta.x() * sensibility;
+            qglviewer::Quaternion rotationY;
+            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
+            camera()->frame()->rotate(rotationY);
+
+            double angleX = delta.y() * sensibility;
+
+            const double maxRotationX = M_PI / 2.0;  // Limite à 90 degrés
+
+            qglviewer::Frame *cameraFrame = camera()->frame();
+            qglviewer::Quaternion currentRotation = cameraFrame->orientation();
+
+            qglviewer::Quaternion rotationX;
+            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
+
+            qglviewer::Quaternion newRotation = rotationX * currentRotation;
+
+            if (newRotation.angle() > maxRotationX) {
+                newRotation = currentRotation;
+            }
+
+            qglviewer::Quaternion newOrientation = rotationY * newRotation;
+            cameraFrame->setOrientation(newOrientation);*/
+
+            /*double sensibility = 0.009;
+            QPoint delta = e->pos() - lastMousePos;
+
+            double angleY = delta.x() * sensibility;
+            qglviewer::Quaternion rotationY;
+            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
+            //camera()->frame()->rotate(rotationY);
+
+            double angleX = delta.y() * sensibility;
+
+            const double maxRotationX = M_PI / 2.0;  // Limite à 90 degrés
+
+            qglviewer::Frame *cameraFrame = camera()->frame();
+            qglviewer::Quaternion currentRotation = cameraFrame->orientation();
+
+            qglviewer::Quaternion rotationX;
+            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
+
+            qglviewer::Quaternion newRotation = rotationY * rotationX * currentRotation;
+
+            if (newRotation.angle() > maxRotationX) {
+                    newRotation.setAxisAngle(newRotation.axis(), maxRotationX);
+            }
+
+            //qglviewer::Quaternion newOrientation = rotationY * newRotation;
+            cameraFrame->setOrientation(newRotation);*/
+
+            /*double sensibility = 0.009;
+            QPoint delta = e->pos() - lastMousePos;
+
+            // Rotation autour de l'axe Y
+            double angleY = delta.x() * sensibility;
+            qglviewer::Quaternion rotationY;
+            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
+
+            // Rotation autour de l'axe X
+            double angleX = delta.y() * sensibility;
+            qglviewer::Quaternion rotationX;
+            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
+
+            // Appliquer la rotation dans l'ordre X, puis Y
+            qglviewer::Quaternion newRotation = rotationX * rotationY;
+
+            const double maxRotationX = M_PI / 2.0;  // Limite à 90 degrés
+
+            // Appliquer la rotation à l'orientation actuelle de la caméra
+            qglviewer::Frame *cameraFrame = camera()->frame();
+            qglviewer::Quaternion currentRotation = cameraFrame->orientation();
+            qglviewer::Quaternion finalRotation = newRotation * currentRotation;
+
+            // Limiter la rotation autour de l'axe X
+            if (finalRotation.angle() > maxRotationX) {
+                    finalRotation.setAxisAngle(finalRotation.axis(), maxRotationX);
+            }
+
+            // Appliquer la nouvelle orientation à la caméra
+            cameraFrame->setOrientation(finalRotation);*/
+
+            double sensibility = 0.009;
+            QPoint delta = e->pos() - lastMousePos;
+
+
+            qglviewer::Quaternion currentRotation = camera()->frame()->orientation();
+            qglviewer::Vec axis;
+            double angle;
+            currentRotation.getAxisAngle(axis, angle);
+
+
+            double pitch = axis[0] * angle;
+            double yaw = axis[1] * angle;
+            double roll = axis[2] * angle;
+
+
+            double angleY = delta.x() * sensibility;
+            qglviewer::Quaternion rotationY;
+            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
+
+            double angleX = delta.y() * sensibility;
+            qglviewer::Quaternion rotationX;
+            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
+
+
+            qglviewer::Quaternion finalRotation = rotationY * rotationX * currentRotation;
+
+            const double maxRotationX = M_PI / 3.0;  // Limite à 60 degrés
+
+            if (finalRotation.angle() > maxRotationX) {
+                finalRotation.setAxisAngle(finalRotation.axis(), maxRotationX);
+            }
+
+            qglviewer::Quaternion rollReset;
+            rollReset.setAxisAngle(qglviewer::Vec(0.0, 0.0, 1.0), -roll);
+            finalRotation = rollReset * finalRotation;
+
+            camera()->frame()->setOrientation(finalRotation);
+
+            lastMousePos = e->pos();
+            update();
+
+        }
     }
+
+
+
+
+
+
 
     void mouseReleaseEvent(QMouseEvent* e) {
         QGLViewer::mouseReleaseEvent(e);
