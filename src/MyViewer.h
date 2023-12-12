@@ -36,6 +36,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
@@ -143,27 +144,16 @@ public :
     }*/
 
     void drawPremierePersonneView() {
-            float centerX = terrainMesh.sizeX / 2.0f;
-            float centerZ = terrainMesh.sizeZ / 2.0f;
-
-            float perlin = terrainMesh.perlinNoise->getPerlinAt(centerX, centerZ, terrainMesh.resolution);
-            GLfloat centerY;
-            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
-
-            qglviewer::Vec cameraPosition(centerX, centerY + 0.2f, centerZ);
-            camera()->setPosition(cameraPosition);
-
-        /*float centerX = terrainMesh.sizeX / 2.0f;
+        float centerX = terrainMesh.sizeX / 2.0f;
         float centerZ = terrainMesh.sizeZ / 2.0f;
 
         float perlin = terrainMesh.perlinNoise->getPerlinAt(centerX, centerZ, terrainMesh.resolution);
         GLfloat centerY;
         terrainMesh.getHeightAtPerlinPx(centerY, perlin);
 
-        point3d bb(centerX, centerY - 0.2f, centerZ);
-        point3d BB(centerX, centerY + 0.2f, centerZ);
-
-        adjustCamera(bb, BB);*/
+        qglviewer::Vec cameraPosition(centerX, centerY + 1.0f, centerZ);
+        camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
+        camera()->setPosition(cameraPosition);
 
         drawBuffers();
 
@@ -424,56 +414,64 @@ public :
                 update();*/
 
                 const float stepSize = 0.01f;
+                const float stepRotate = 0.05f;
 
                 if (event->key() == Qt::Key_Q) {
                     accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
                 } else if (event->key() == Qt::Key_D) {
                     accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
                 } else if (event->key() == Qt::Key_Z) {
-                    qglviewer::Vec translation = camera()->viewDirection() * stepSize;
-                    translation[1] = 0;
-                    accumulatedKeyTranslation += translation;
+                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, -stepSize);
                 } else if (event->key() == Qt::Key_S) {
-                    qglviewer::Vec translation = camera()->viewDirection() * -stepSize;
-                    translation[1] = 0;
-                    accumulatedKeyTranslation += translation;
+                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
                 }
                 else if (event->key() == Qt::Key_Up) {
-                    double sensibility = 0.05;
+                    qreal pitch = camera()->viewDirection().y;
 
-                    qglviewer::Quaternion rotation;
-                    rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), sensibility);
-
-                    camera()->frame()->rotate(rotation);
+                    if (pitch <= 0.4) {
+                        qglviewer::Quaternion rotation;
+                        rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
+                        camera()->frame()->rotate(rotation);
+                    }
                 }
                 else if (event->key() == Qt::Key_Down) {
-                    double sensibility = 0.05;
+                    qreal pitch = camera()->viewDirection().y;
 
-                    qglviewer::Quaternion rotation;
-                    rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), sensibility);
-
-                    camera()->frame()->rotate(rotation);
+                    if (pitch >= -0.7) {
+                        qglviewer::Quaternion rotation;
+                        rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
+                        camera()->frame()->rotate(rotation);
+                    }
                 }
                 else if (event->key() == Qt::Key_Right) {
-                    double sensibility = 0.05;
-
                     qglviewer::Quaternion rotation;
-                    rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), sensibility);
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), stepRotate);
 
                     camera()->frame()->rotate(rotation);
                 }
                 else if (event->key() == Qt::Key_Left) {
-                    double sensibility = 0.05;
-
                     qglviewer::Quaternion rotation;
-                    rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), sensibility);
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), stepRotate);
 
                     camera()->frame()->rotate(rotation);
                 }
 
                 update();
 
+                /*float posX = camera()->position()[0];
+                float posZ = camera()->position()[2];
 
+                float perlin = terrainMesh.perlinNoise->getPerlinAt(posX, posZ, terrainMesh.resolution);
+                GLfloat posY;
+                terrainMesh.getHeightAtPerlinPx(posY, perlin);
+
+                qglviewer::Vec cameraPosition(posX, posY + 1.0f, posZ);
+                camera()->position()[1] = posY + 0.5f;
+
+
+                qDebug() << "après déplacement :" << camera()->position()[0] << ", " << camera()->position()[1] << ", " << camera()->position()[2];
+
+            */
             }
 
 
