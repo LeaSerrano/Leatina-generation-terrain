@@ -119,38 +119,19 @@ private:
     //Image modifiée
     QImage editedImage;
 
-    //QImage layerImage;
-
-    //Concerne le tracé
-    //QPointF startPoint;
-    //QPainterPath currentPath;
-
-    //QStack<QPainterPath> previousPaths;
-    //QStack<QPainterPath> redoPaths;
     Path* currentPath;
 
-    QList<Path*> previousPaths;
+    QList<Path*> undoPaths;
     QList<Path*> redoPaths;
-
-
-    //QPen pathPen;
 
     int newHeightValue;
 
-    //QList<QPoint> redPixels;
-
-
-
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
-    //void drawingPath(QMouseEvent *mouseEvent);
-    void undoDrawingPth();
-    void redoDrawingPth();
-    void updateMesh(QImage image);
-    //void updateDrawingPath();
-    //void applyModification(int newHeightValue);
 
-    //void getPixelsFromPath(QList<QPoint> redPixels);
+    void updateMesh(QImage image);
+
+    void update_label_perlinNoise(QImage editedImage, QImage layerImage);
 
 };
 

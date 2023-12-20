@@ -16,6 +16,17 @@ public:
     void startDrawingPath(QMouseEvent *mouseEvent);
     void drawingPath(QMouseEvent *mouseEvent, QImage editedImage);
     void endDrawingPath();
+    void addModification(QImage editedImage);
+    void removeModification(QImage editedImage);
+
+    QImage getLayerImage();
+    QImage getPathImage();
+
+    QImage setPathImage(QImage editedImage);
+
+    void setHeightValue(int size);
+    int getHeightValue();
+    void setPixelsPath();
 
 private:
     QPainterPath path;
@@ -24,7 +35,7 @@ private:
     //Param stylo
     QPen pathPen;
     int widthPen = 3;
-    int HeightValue = 0;
+    int heightValue = 0;
 
     //calque
     QList<QPoint> pixelsPath; //pixels du tracé rouge
@@ -35,12 +46,10 @@ private:
 
 protected:
 
-    void setPixelsPath();
-    void addModification(QImage editedImage);
-    void removeModification(QImage editedImage);
 
     void setPathPen_width(int size);
-    QImage getPathImage();
+
+
 
 };
 
