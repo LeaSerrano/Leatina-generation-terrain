@@ -36,6 +36,8 @@ public:
     QPushButton *button_redo;
     QPushButton *button_save_map;
     QPushButton *button_open_map;
+    QSlider *verticalSlider_newHeightValue;
+    QLabel *label_newHeightValue;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -81,6 +83,17 @@ public:
         button_open_map = new QPushButton(centralwidget);
         button_open_map->setObjectName(QString::fromUtf8("button_open_map"));
         button_open_map->setGeometry(QRect(340, 520, 89, 25));
+        verticalSlider_newHeightValue = new QSlider(centralwidget);
+        verticalSlider_newHeightValue->setObjectName(QString::fromUtf8("verticalSlider_newHeightValue"));
+        verticalSlider_newHeightValue->setGeometry(QRect(520, 450, 16, 160));
+        verticalSlider_newHeightValue->setMinimum(-255);
+        verticalSlider_newHeightValue->setMaximum(255);
+        verticalSlider_newHeightValue->setOrientation(Qt::Vertical);
+        verticalSlider_newHeightValue->setTickPosition(QSlider::TicksAbove);
+        verticalSlider_newHeightValue->setTickInterval(50);
+        label_newHeightValue = new QLabel(centralwidget);
+        label_newHeightValue->setObjectName(QString::fromUtf8("label_newHeightValue"));
+        label_newHeightValue->setGeometry(QRect(570, 470, 67, 17));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -106,6 +119,7 @@ public:
         button_redo->setText(QCoreApplication::translate("MainWindow", "redo", nullptr));
         button_save_map->setText(QCoreApplication::translate("MainWindow", "sauvegarder carte", nullptr));
         button_open_map->setText(QCoreApplication::translate("MainWindow", "ouvrir carte", nullptr));
+        label_newHeightValue->setText(QCoreApplication::translate("MainWindow", "TextLabel", nullptr));
     } // retranslateUi
 
 };

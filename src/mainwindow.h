@@ -78,6 +78,7 @@ private slots:
 #include <QPainterPath>
 #include <QStack>
 #include "MyViewer.h"
+#include "path.h"
 
 namespace Ui {
 class MainWindow;
@@ -89,6 +90,8 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    QList<QPen> pathPens;
 
 private slots:
     void onResolutionSliderReleased();
@@ -116,25 +119,38 @@ private:
     //Image modifiée
     QImage editedImage;
 
+    //QImage layerImage;
+
     //Concerne le tracé
-    QPointF startPoint;
-    QPainterPath currentPath;
+    //QPointF startPoint;
+    //QPainterPath currentPath;
 
-    QStack<QPainterPath> previousPaths;
-    QStack<QPainterPath> redoPaths;
+    //QStack<QPainterPath> previousPaths;
+    //QStack<QPainterPath> redoPaths;
+    Path* currentPath;
 
-    QPen pathPen;
+    QList<Path*> previousPaths;
+    QList<Path*> redoPaths;
+
+
+    //QPen pathPen;
+
+    int newHeightValue;
+
+    //QList<QPoint> redPixels;
 
 
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
-    void drawingPath(QMouseEvent *mouseEvent);
+    //void drawingPath(QMouseEvent *mouseEvent);
     void undoDrawingPth();
     void redoDrawingPth();
-    void updateDrawingPath();
     void updateMesh(QImage image);
+    //void updateDrawingPath();
+    //void applyModification(int newHeightValue);
 
+    //void getPixelsFromPath(QList<QPoint> redPixels);
 
 };
 
