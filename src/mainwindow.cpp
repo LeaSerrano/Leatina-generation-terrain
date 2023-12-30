@@ -132,7 +132,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         uploadMap();
     });
 
-    QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
+    //QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
     combinePathsImages(pathsImages);
     viewer->setFocus();
@@ -275,6 +275,8 @@ void MainWindow::combinePathsImages(QList<QImage> pathsImages){
 
 // Enlever le tracé
 void MainWindow::undoDrawingPath() {
+    qDebug() << "test";
+
     if (!undoPaths.isEmpty()) {
         //Enlever le tracé du currentPath
         //currentPath->removeModification(editedImage);

@@ -27,7 +27,6 @@ void TerrainMesh::getHeightAtPerlinPx(GLfloat &y, float perlin) {
     for (int p = 0; p < heightRange; p++) {
         if (perlin >= stepMin && perlin < stepMax) {
             y = value;
-            qDebug() << "y : " << y;
             return;
         }
 

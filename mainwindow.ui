@@ -154,17 +154,6 @@
      <string>ouvrir carte</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_mode_FPS">
-    <property name="geometry">
-     <rect>
-      <x>740</x>
-      <y>570</y>
-      <width>83</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Mode FPS</string>
    <widget class="QSlider" name="verticalSlider_newHeightValue">
     <property name="geometry">
      <rect>
@@ -245,6 +234,19 @@
     </property>
     <property name="text">
      <string>0</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_mode_FPS">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>650</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>FPS</string>
     </property>
    </widget>
   </widget>
