@@ -275,14 +275,14 @@ void MainWindow::combinePathsImages(QList<QImage> pathsImages){
 
 // Enlever le tracé
 void MainWindow::undoDrawingPath() {
-    qDebug() << "test";
+    //qDebug() << "test";
 
     if (!undoPaths.isEmpty()) {
-        //Enlever le tracé du currentPath
-        //currentPath->removeModification(editedImage);
-        //editedImage = currentPath->getPathImage().copy();
-
+        //qDebug() << "        undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
+        //Enlever le tracé dans la liste des tracés
         pathsImages.removeLast();
+
+        //Update de l'image
         combinePathsImages(pathsImages);
         editedImage = combinedImage.copy();
         updateMesh(editedImage);
@@ -292,15 +292,15 @@ void MainWindow::undoDrawingPath() {
 
         //Mettre à jour le currentPath par le "précédent"
         currentPath = undoPaths.takeLast();
+
+        //qDebug() << "UNDO => undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
     }
 }
 
 // Refaire le tracé
 void MainWindow::redoDrawingPath() {
     if (!redoPaths.isEmpty()) {
-
-        //Mettre à jour le currentPath par le "suivant"
-        currentPath = redoPaths.takeLast();
+        //qDebug() << "        undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
 
         //Ajouter à undo
         undoPaths.append(currentPath);
@@ -309,9 +309,15 @@ void MainWindow::redoDrawingPath() {
         pathsImages.append(currentPath->renderPathImage);
         currentPath->addModification(editedImage);
 
+        //Update de l'image
         combinePathsImages(pathsImages);
         editedImage = combinedImage.copy();
         updateMesh(editedImage);
+
+        //Mettre à jour le currentPath par le "suivant"
+        currentPath = redoPaths.takeLast();
+
+        //qDebug() << "REDO => undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
     }
 }
 
