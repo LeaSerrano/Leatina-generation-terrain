@@ -14,19 +14,23 @@ class Path
 public:
     Path();
     void startDrawingPath(QMouseEvent *mouseEvent);
-    void drawingPath(QMouseEvent *mouseEvent, QImage editedImage);
+    void drawingPath(QMouseEvent *mouseEvent, QImage image);
     void endDrawingPath();
-    void addModification(QImage editedImage);
-    void removeModification(QImage editedImage);
+    void addModification(QImage image);
 
     QImage getLayerImage();
     QImage getPathImage();
 
-    QImage setPathImage(QImage editedImage);
+    QImage setPathImage(QImage image);
 
     void setHeightValue(int size);
     int getHeightValue();
     void setPixelsPath();
+    void setPathPen_width(int size);
+
+    QImage renderPathImage; //image tracée (tracé prend les bonnes couleurs modifiées)
+
+    QImage getRenderPathImage();
 
 private:
     QPainterPath path;
@@ -39,15 +43,7 @@ private:
 
     //calque
     QList<QPoint> pixelsPath; //pixels du tracé rouge
-    QImage layerImage; //image du calque
-
-    QImage pathImage; //image originale + tracé
-
-
-protected:
-
-
-    void setPathPen_width(int size);
+    QImage layerImage; //image du calque (tracé rouge)
 
 
 

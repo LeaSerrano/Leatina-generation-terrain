@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     originalImage = QImage("perlinNoise.png");
 
     editedImage = originalImage.copy();
-    editedImage.convertToFormat(QImage::Format_ARGB32);
+    editedImage = editedImage.convertToFormat(QImage::Format_ARGB32);
 
     //ui->label_perlinNoise->setPixmap(pixmap);
     ui->label_perlinNoise->setMouseTracking(true);
@@ -97,26 +97,35 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->button_redo, &QPushButton::clicked, this, &MainWindow::redoDrawingPath);
 
     //Pinceau
-    //pathPen.setColor(Qt::white);
-    //pathPen.setWidth(3);
-    //pathPen.setJoinStyle(Qt::RoundJoin);
+    penSize = 3;
+    ui->dial_penSize->setValue(penSize);
+    ui->label_penSize->setText(QString::number(penSize));
+    QObject::connect(ui->dial_penSize, &QDial::valueChanged, this, [=](){
+        penSize = ui->dial_penSize->value();
+        ui->label_penSize->setText(QString::number(penSize));
+        currentPath->setPathPen_width(penSize);
+    });
 
     //Hauteur de la nouvelle valeur de hauteur
     newHeightValue = -10;
     ui->verticalSlider_newHeightValue->setValue(newHeightValue);
+    ui->label_newHeightValue->setText(QString::number(newHeightValue));
     QObject::connect(ui->verticalSlider_newHeightValue, &QSlider::valueChanged, this, [=]() {
         newHeightValue = ui->verticalSlider_newHeightValue->value();
         ui->label_newHeightValue->setText(QString::number(newHeightValue));
     });
 
+    //Sauvegarde terrain
     QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
         downloadMap(viewer->terrainMesh.getMap());
     });
 
+    //Ouverture terrain
     QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
         uploadMap();
     });
 
+    combinePathsImages(pathsImages);
     viewer->setFocus();
 
 }
@@ -155,10 +164,15 @@ void MainWindow::onReloadButtonClicked() {
     originalImage = QImage("perlinNoise.png");
     //ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
     editedImage = originalImage.copy();
+    editedImage = editedImage.convertToFormat(QImage::Format_ARGB32);
 
     //currentPath.clear();
     undoPaths.clear();
     redoPaths.clear();
+
+    pathsImages.clear();
+    combinePathsImages(pathsImages);
+    updateMesh(combinedImage);
 
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
@@ -172,16 +186,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = true;
-                    //_startPoint = mouseEvent->localPos();
 
-                    //point de départ tracé
-                    //_currentPath.moveTo(startPoint);
-
-                    //
                     currentPath = new Path();
-                    //currentPath->setPathImage(editedImage);
                     currentPath->setHeightValue(newHeightValue);
-                    qDebug() << currentPath->getHeightValue();
+                    currentPath->setPathPen_width(penSize);
                     currentPath->startDrawingPath(mouseEvent);
 
                     undoPaths.append(currentPath);
@@ -189,47 +197,70 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 }
             } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-                //drawingPath(mouseEvent);
-                currentPath->drawingPath(mouseEvent, editedImage);
+
+                currentPath->drawingPath(mouseEvent, editedImage); //Appel editedImage  : juste pour la taille img
                 //editedImage = currentPath->getPathImage().copy();
 
-                update_label_perlinNoise(editedImage, currentPath->getLayerImage());
+                //Affichage Image résultat + Image tracé rouge
+                update_label_perlinNoise(combinedImage, currentPath->getLayerImage());
 
-                //qDebug() << "tracé ?";
             } else if (event->type() == QEvent::MouseButtonRelease) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = false;
-                    //currentPath = QPainterPath();
-                    //_startPoint = QPointF();
-                    //getPixelsFromPath(layerImage);
-                    // getPixelsFromPath(redPixels);
-                    currentPath->setPixelsPath();
-                    currentPath->addModification(editedImage);
-                    //ui->label_perlinNoise->
 
-                    editedImage = currentPath->getPathImage().copy();
+                    currentPath->setPixelsPath();
+                    currentPath->addModification(editedImage); //Appel editedImage : récup couleur de base
+
+                    //Ajout du tracé dans la liste
+                    pathsImages.append(currentPath->renderPathImage);
+
+                    //Génération image combinée des tracés
+                    combinePathsImages(pathsImages);
+
+                    editedImage = combinedImage.copy();
                     updateMesh(editedImage);
-                    editedImage.save("edited.png");
-                    update_label_perlinNoise(editedImage, currentPath->getLayerImage());
+
+                    // editedImage.save("edited.png");
+                    // combinedImage.save("combined.png");
+
+                    //Affichage du tracé rouge
+                    //update_label_perlinNoise(editedImage, currentPath->getLayerImage());
 
                     currentPath->endDrawingPath();
                 }
             }
         }
     viewer->setFocus();
-        return QMainWindow::eventFilter(obj, event);
+    return QMainWindow::eventFilter(obj, event);
 }
 
-void MainWindow:: update_label_perlinNoise(QImage editedImage, QImage layerImage){
+void MainWindow::update_label_perlinNoise(QImage editedImage, QImage layerImage){
     QImage combinedImage(editedImage.size(), QImage::Format_ARGB32);
     combinedImage.fill(Qt::transparent); // Initialise l'image avec un fond transparent
     QPainter cpainter(&combinedImage);
+
     cpainter.drawImage(0, 0, editedImage);
     cpainter.drawImage(0, 0, layerImage);
     cpainter.end();
 
-    // Affichez l'image combinée dans le QLabel
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(combinedImage));
+}
+
+void MainWindow::combinePathsImages(QList<QImage> pathsImages){
+    combinedImage = QImage(originalImage.size(), QImage::Format_ARGB32);
+    combinedImage.fill(Qt::transparent);
+
+    QPainter cpainter(&combinedImage);
+    QImage copy_originalImage = originalImage.copy();
+    copy_originalImage = copy_originalImage.convertToFormat(QImage::Format_ARGB32);
+    cpainter.drawImage(0, 0, copy_originalImage);
+    for (const QImage& pathImage : pathsImages){
+        cpainter.drawImage(0, 0, pathImage);
+    }
+    cpainter.end();
+
+
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(combinedImage));
 }
 
@@ -238,35 +269,39 @@ void MainWindow:: update_label_perlinNoise(QImage editedImage, QImage layerImage
 void MainWindow::undoDrawingPath() {
     if (!undoPaths.isEmpty()) {
         //Enlever le tracé du currentPath
-        currentPath->removeModification(editedImage);
-        editedImage = currentPath->getPathImage().copy();
+        //currentPath->removeModification(editedImage);
+        //editedImage = currentPath->getPathImage().copy();
 
+        pathsImages.removeLast();
+        combinePathsImages(pathsImages);
+        editedImage = combinedImage.copy();
         updateMesh(editedImage);
-        ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
         //Ajouter à redo
         redoPaths.append(currentPath);
 
         //Mettre à jour le currentPath par le "précédent"
         currentPath = undoPaths.takeLast();
-
     }
 }
 
 // Refaire le tracé
 void MainWindow::redoDrawingPath() {
     if (!redoPaths.isEmpty()) {
-        //Ajouter à undo
-        undoPaths.append(currentPath);
 
         //Mettre à jour le currentPath par le "suivant"
         currentPath = redoPaths.takeLast();
 
-        currentPath->addModification(editedImage);
-        editedImage = currentPath->getPathImage().copy();
-        updateMesh(editedImage);
-        ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
+        //Ajouter à undo
+        undoPaths.append(currentPath);
 
+        //Remettre le tracé dans la liste des tracés
+        pathsImages.append(currentPath->renderPathImage);
+        currentPath->addModification(editedImage);
+
+        combinePathsImages(pathsImages);
+        editedImage = combinedImage.copy();
+        updateMesh(editedImage);
     }
 }
 

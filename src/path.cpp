@@ -3,6 +3,8 @@
 Path::Path() {
     pathPen.setColor(Qt::red);
     pathPen.setWidth(widthPen);
+    pathPen.setJoinStyle(Qt::RoundJoin);
+    pathPen.setCapStyle(Qt::RoundCap);
 }
 
 void Path::startDrawingPath(QMouseEvent *mouseEvent){
@@ -10,20 +12,21 @@ void Path::startDrawingPath(QMouseEvent *mouseEvent){
     path.moveTo(startPoint);
 }
 
-void Path::drawingPath(QMouseEvent *mouseEvent, QImage editedImage){
+void Path::drawingPath(QMouseEvent *mouseEvent, QImage image){
     QPointF mousePos = mouseEvent->localPos();
 
     //Ajout point au tracé
     path.lineTo(mousePos);
 
     //Calque trait
-    layerImage = QImage(editedImage.size(), QImage::Format_ARGB32);
+    layerImage = QImage(image.size(), QImage::Format_ARGB32);
     layerImage.fill(Qt::transparent);
 
     //Trait visuel rouge
     QPainter painter(&layerImage);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, layerImage);
+    pathPen.setWidth(widthPen);
     painter.setPen(pathPen);
     painter.drawPath(path);
     painter.end();
@@ -46,41 +49,25 @@ void Path::setPixelsPath(){
     }
 }
 
-void Path::addModification(QImage editedImage){
-    pathImage = editedImage.copy();
-    qDebug() << "là";
+void Path::addModification(QImage image){
+    renderPathImage = QImage(image.size(), image.format());
+    renderPathImage.fill(Qt::transparent);
+    //qDebug() << "là";
+
     for(const QPoint& pixel : pixelsPath){
         int x = pixel.x();
         int y = pixel.y();
 
         //Récupération de la couleur d'origine
-        QRgb editedPixelColor = pathImage.pixel(x, y);
+        QRgb editedPixelColor = image.pixel(x, y);
 
         int grayValue = qGray(editedPixelColor);
         int newGrayValue = qBound(0, grayValue + heightValue, 255);
 
-        pathImage.setPixel(x, y, qRgb(newGrayValue, newGrayValue, newGrayValue));
+        renderPathImage.setPixel(x, y, qRgb(newGrayValue, newGrayValue, newGrayValue));
 
-        //pathImage = pathImage.convertToFormat(QImage::Format_RGB32);
-        qDebug() << "ici";
-    }
-}
-
-void Path::removeModification(QImage editedImage){
-    pathImage = editedImage.copy();
-    for(const QPoint& pixel : pixelsPath){
-        int x = pixel.x();
-        int y = pixel.y();
-
-        //Récupération de la couleur d'origine
-        QRgb editedPixelColor = pathImage.pixel(x, y);
-
-        int grayValue = qGray(editedPixelColor);
-        int newGrayValue = qBound(0, grayValue - heightValue, 255);
-
-        pathImage.setPixel(x, y, qRgb(newGrayValue, newGrayValue, newGrayValue));
-
-        //pathImage = pathImage.convertToFormat(QImage::Format_RGB32);
+        //renderPathImage = renderPathImage.convertToFormat(QImage::Format_RGB32);
+        //qDebug() << "ici";
     }
 }
 
@@ -105,11 +92,11 @@ QImage Path::getLayerImage(){
     return layerImage;
 }
 
-QImage Path::getPathImage(){
-    return pathImage;
+QImage Path::getRenderPathImage(){
+    return renderPathImage;
 }
 
-//QImage Path::setPathImage(QImage editedImage){
-//    pathImage = editedImage.copy();
+//QImage Path::setrenderPathImage(QImage editedImage){
+//    renderPathImage = editedImage.copy();
 //}
 

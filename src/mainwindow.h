@@ -93,6 +93,8 @@ public:
 
     QList<QPen> pathPens;
 
+
+
 private slots:
     void onResolutionSliderReleased();
     void onHeightRangeSliderReleased();
@@ -119,6 +121,10 @@ private:
     //Image modifiée
     QImage editedImage;
 
+    //Image combinée (image qui regroupe tous les tracés)
+    QList<QImage> pathsImages; //regroupe toutes les calques
+    QImage combinedImage;
+
     Path* currentPath;
 
     QList<Path*> undoPaths;
@@ -126,12 +132,15 @@ private:
 
     int newHeightValue;
 
+    int penSize;
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
     void updateMesh(QImage image);
 
     void update_label_perlinNoise(QImage editedImage, QImage layerImage);
+    void combinePathsImages(QList<QImage> pathsImages);
 
 };
 
