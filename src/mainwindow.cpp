@@ -312,15 +312,8 @@ void MainWindow::changerVuePremierePersonne() {
         viewer->draw();
 
         this->setCentralWidget(viewer);
-
-
-        //ui->widget_affichage_terrain->setFocus();
         viewer->setFocus();
-        //viewer->update();
 
-
-    } else {
-        viewer->vueActuelle = viewer->VueTerrain;
     }
 
 }

@@ -128,20 +128,43 @@ public :
     }
 
     void drawPremierePersonneView() {
-        float centerX = terrainMesh.sizeX / 2.0f;
-        float centerZ = terrainMesh.sizeZ / 2.0f;
+            float centerX = terrainMesh.sizeX / 2.0f;
+            float centerZ = terrainMesh.sizeZ / 2.0f;
 
-        float perlin = terrainMesh.perlinNoise->getPerlinAt(centerX, centerZ, terrainMesh.resolution);
-        GLfloat centerY;
-        terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+            float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
+            float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
 
-        qglviewer::Vec cameraPosition(centerX, centerY + 1.0f, centerZ);
-        camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
-        camera()->setPosition(cameraPosition);
+            int i = static_cast<int>(centerX / stepX);
+            int j = static_cast<int>(centerZ / stepZ);
 
-        drawBuffers();
+            float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
+            GLfloat centerY;
+            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
 
-        animate();
+            qglviewer::Vec cameraPosition(centerX, centerY+0.2f, centerZ);
+            camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
+            camera()->setPosition(cameraPosition);
+
+            drawBuffers();
+
+            animate();
+    }
+
+    void setCameraPositionWithPerlinHeight() {
+            qglviewer::Vec cameraPosition = camera()->position();
+
+            float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
+            float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
+
+            int i = static_cast<int>(cameraPosition.x / stepX);
+            int j = static_cast<int>(cameraPosition.z / stepZ);
+
+            float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
+            GLfloat centerY;
+            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+
+            cameraPosition.y = centerY+ 0.2f;
+            camera()->setPosition(cameraPosition);
     }
 
     void draw() {
@@ -172,9 +195,7 @@ public :
         glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), cameraPosition[0], cameraPosition[1], cameraPosition[2]);
 
         qglviewer::Vec cameraView = camera()->viewDirection();
-        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), /*0.0, 3.0, -7.0*/ cameraView[0], cameraView[1], cameraView[2]);
-
-        //drawBuffers();
+        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), cameraView[0], cameraView[1], cameraView[2]);
 
         if (vueActuelle == VueTerrain) {
             drawTerrainView();
@@ -186,10 +207,7 @@ public :
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        //update();
 
         glUseProgram(0);
     }
@@ -217,7 +235,6 @@ public :
         glShaderSource(shader, 1, &shaderSource, NULL);
         glCompileShader(shader);
 
-        // Check for compilation errors (you might want to add more detailed error checking)
         GLint success;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
@@ -239,7 +256,6 @@ public :
         glAttachShader(shaderProgram, fragmentShader);
         glLinkProgram(shaderProgram);
 
-        // Check for linking errors (you might want to add more detailed error checking)
         GLint success;
         glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
         if (!success) {
@@ -260,13 +276,12 @@ public :
         std::ifstream file(filePath);
         if (!file.is_open()) {
             qDebug() << "Unable to open file: " << filePath;
-            return QString();  // Return an empty QString
+            return QString();
         }
 
         std::stringstream buffer;
         buffer << file.rdbuf();
 
-        // Convert the std::string to QString before returning
         return QString::fromStdString(buffer.str());
     }
 
@@ -274,8 +289,6 @@ public :
     void init() {
         makeCurrent();
         initializeOpenGLFunctions();
-
-        //setMouseTracking(true);// Needed for MouseGrabber.
 
         setBackgroundColor(QColor(20, 20, 20));
 
@@ -305,7 +318,6 @@ public :
 
         modelMatrix = QMatrix4x4();
     }
-
 
     QString helpString() const {
         QString text("<h2>Our cool project</h2>");
@@ -363,15 +375,18 @@ public :
             }
             else if (vueActuelle == VuePremierePersonne) {
 
-                const float stepSize = 0.01f;
+                const float stepSize = 1.f/terrainMesh.resolution;
                 const float stepRotate = 0.05f;
 
                 if (event->key() == Qt::Key_Q) {
                     accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
+
                 } else if (event->key() == Qt::Key_D) {
                     accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
+
                 } else if (event->key() == Qt::Key_Z) {
                     accumulatedKeyTranslation += qglviewer::Vec(0, 0, -stepSize);
+
                 } else if (event->key() == Qt::Key_S) {
                     accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
                 }
@@ -394,25 +409,18 @@ public :
                     }
                 }
                 else if (event->key() == Qt::Key_Right) {
-                    qreal pitch = camera()->viewDirection().y;
-
-                    if (pitch >= -0.05 && pitch <= 0.05) {
-                        qglviewer::Quaternion rotation;
-                        rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), stepRotate);
-                        camera()->frame()->rotate(rotation);
-                    }
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), stepRotate);
+                    camera()->frame()->rotate(rotation);
                 }
                 else if (event->key() == Qt::Key_Left) {
-                    qreal pitch = camera()->viewDirection().y;
-
-                    if (pitch >= -0.05 && pitch <= 0.05) {
-                        qglviewer::Quaternion rotation;
-                        rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), stepRotate);
-                        camera()->frame()->rotate(rotation);
-                    }
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), stepRotate);
+                    camera()->frame()->rotate(rotation);
                 }
 
                 update();
+
             }
 
     }
@@ -455,161 +463,24 @@ public :
         update();
     }
 
-    /*void mouseDoubleClickEvent( QMouseEvent * e )
-    {
-        if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::RightButton) )
-        {
-            pickBackgroundColor();
-            return;
-        }
-
-        if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton) )
-        {
-            showControls();
-            return;
-        }
-
-        QGLViewer::mouseDoubleClickEvent( e );
-    }*/
-
-    /*void mousePressEvent(QMouseEvent* e ) {
-        if (vueActuelle == VuePremierePersonne) {
-            lastMousePos = e->pos();
-            QGLViewer::mousePressEvent(e);
-        }
-
-    }
-
-    void mouseMoveEvent(QMouseEvent* e) {
-        if (vueActuelle == VuePremierePersonne) {
-            float mouseDeltaX = e->x() - lastMousePos.x();
-            float sensitivity = 0.01f;
-            float deltaYaw = -mouseDeltaX * sensitivity;
-
-            qglviewer::Quaternion currentOrientation = camera()->frame()->orientation();
-
-            // Limit the change in orientation to yaw (rotation around the vertical axis)
-            float yawLimit = 180.0f; // Limit in degrees
-            qglviewer::Vec rotationAxis;
-            qreal rotationAngle; // Change qreal to the appropriate type used in your application
-            currentOrientation.getAxisAngle(rotationAxis, rotationAngle);
-
-            float newYaw = std::clamp(static_cast<float>(rotationAngle) + deltaYaw, -yawLimit, yawLimit);
-            deltaYaw = newYaw - static_cast<float>(rotationAngle);
-
-            qglviewer::Quaternion deltaOrientation = qglviewer::Quaternion(rotationAxis, deltaYaw);
-
-            camera()->frame()->setOrientation(currentOrientation * deltaOrientation);
-            update();
-
-            lastMousePos = e->pos();
-        }
-
-        QGLViewer::mouseMoveEvent(e);
-    }*/
-
     void mousePressEvent(QMouseEvent *e) {
-        /*if (vueActuelle == VuePremierePersonne) {
-            lastMousePos = e->pos();
-                QGLViewer::mousePressEvent(e);
-        }*/
+
     }
-
-    /*void mouseMoveEvent(QMouseEvent *e) {
-        double sensibility = 0.05;
-        QPoint delta = e->pos() - lastMousePos;
-        double angleY = delta.x() * sensibility;
-
-        qglviewer::Quaternion rotation;
-        rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
-
-        camera()->frame()->rotate(rotation);
-        lastMousePos = e->pos();
-
-        update();
-    }*/
-
-    /*void mouseMoveEvent(QMouseEvent *e) {
-        double sensibility = 0.05;
-        QPoint delta = e->pos() - lastMousePos;
-
-        // Rotation autour de l'axe y
-        double angleY = delta.x() * sensibility;
-        qglviewer::Quaternion rotationY;
-        rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
-        camera()->frame()->rotate(rotationY);
-
-        // Rotation autour de l'axe x
-        double angleX = delta.y() * sensibility;
-        qglviewer::Quaternion rotationX;
-        rotationX.setAxisAngle(camera()->rightVector(), angleX);
-
-        // Créer une nouvelle orientation en combinant les rotations actuelles avec la rotation autour de l'axe x
-        qglviewer::Quaternion newOrientation = rotationX * camera()->frame()->rotation();
-
-        // Vérifier que l'angle X est entre 0 et 90 degrés
-        qglviewer::Vec currentUp = newOrientation * camera()->upVector();
-        if (currentUp.x > 0.0 && currentUp.x < 1.0) {
-            camera()->frame()->setOrientation(newOrientation);
-        }
-
-        lastMousePos = e->pos();
-        update();
-    }*/
 
     void mouseMoveEvent(QMouseEvent *e) {
-        /*if (vueActuelle == VuePremierePersonne) {
-            double sensibility = 0.009;
-            QPoint delta = e->pos() - lastMousePos;
 
-
-            qglviewer::Quaternion currentRotation = camera()->frame()->orientation();
-            qglviewer::Vec axis;
-            double angle;
-            currentRotation.getAxisAngle(axis, angle);
-
-
-            double pitch = axis[0] * angle;
-            double yaw = axis[1] * angle;
-            double roll = axis[2] * angle;
-
-
-            double angleY = delta.x() * sensibility;
-            qglviewer::Quaternion rotationY;
-            rotationY.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), angleY);
-
-            double angleX = delta.y() * sensibility;
-
-            const double maxRotationX = M_PI / 3.0;  // Limite à 60 degrés
-
-            if (angleX > maxRotationX) {
-                angleX = maxRotationX;
-            }
-
-            qglviewer::Quaternion rotationX;
-            rotationX.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), angleX);
-
-            qglviewer::Quaternion finalRotation = rotationX * rotationY * currentRotation;
-
-            qglviewer::Quaternion rollReset;
-            rollReset.setAxisAngle(qglviewer::Vec(0.0, 0.0, 1.0), -roll);
-            finalRotation = rollReset * finalRotation;
-
-            finalRotation.normalize();
-            camera()->frame()->setOrientation(finalRotation);
-
-            lastMousePos = e->pos();
-            update();
-
-        }*/
     }
 
     void mouseReleaseEvent(QMouseEvent* e) {
-        //QGLViewer::mouseReleaseEvent(e);
     }
 
     void animate() {
-        camera()->setPosition(camera()->position() + accumulatedMouseTranslation + accumulatedKeyTranslation);
+        qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;
+
+        if (cameraPosition.x <= terrainMesh.sizeX && cameraPosition.x >= 0.0 && cameraPosition.z <= terrainMesh.sizeZ && cameraPosition.z >= 0.0) {
+            camera()->setPosition(cameraPosition);
+            setCameraPositionWithPerlinHeight();
+        }
     }
 
 signals:
