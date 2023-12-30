@@ -57,6 +57,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     setWindowTitle("Leatina Generation Terrain");
 
+    backgroundWidget = new QLabel(this);
+    backgroundWidget->setGeometry(0, 0, width(), height());
+    backgroundWidget->setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));");
+    backgroundWidget->lower();
+
     viewer = new MyViewer();
 
     viewer->setParent(ui->widget_affichage_terrain);
@@ -127,7 +132,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     combinePathsImages(pathsImages);
     viewer->setFocus();
-
 }
 
 MainWindow::~MainWindow() {

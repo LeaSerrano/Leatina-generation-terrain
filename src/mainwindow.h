@@ -77,6 +77,7 @@ private slots:
 #include <QPainter>
 #include <QPainterPath>
 #include <QStack>
+#include <QLabel>
 #include "MyViewer.h"
 #include "path.h"
 
@@ -112,6 +113,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QLabel *backgroundWidget;
     MyViewer* viewer;
     bool isLeftButtonPressed;
 
