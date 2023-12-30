@@ -37,7 +37,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = myProject1.0.0
-DISTDIR = /home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/tmp/obj/myProject1.0.0
+DISTDIR = /home/christina/Documents/Leatina-generation-terrain/tmp/obj/myProject1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1
 LIBS          = $(SUBLIBS) -Lextern/libQGLViewer-2.6.1/QGLViewer -lQGLViewer-qt5 -lglut -lGLU -lgsl -lblas -lgomp /usr/lib/x86_64-linux-gnu/libQt5OpenGL.so /usr/lib/x86_64-linux-gnu/libQt5Widgets.so /usr/lib/x86_64-linux-gnu/libQt5Gui.so /usr/lib/x86_64-linux-gnu/libQt5Xml.so /usr/lib/x86_64-linux-gnu/libQt5Core.so -lGL -lpthread   
@@ -56,6 +56,7 @@ SOURCES       = src/main.cpp \
 		src/gl/GLUtilityMethods.cpp \
 		src/gl/BasicColors.cpp \
 		src/mainwindow.cpp \
+		src/path.cpp \
 		src/perlinNoise.cpp \
 		src/terrainMesh.cpp \
 		src/window.cpp qrc_shaders.cpp \
@@ -66,6 +67,7 @@ OBJECTS       = tmp/obj/main.o \
 		tmp/obj/GLUtilityMethods.o \
 		tmp/obj/BasicColors.o \
 		tmp/obj/mainwindow.o \
+		tmp/obj/path.o \
 		tmp/obj/perlinNoise.o \
 		tmp/obj/terrainMesh.o \
 		tmp/obj/window.o \
@@ -159,12 +161,14 @@ DIST          = src/fshader.glsl \
 		src/gl/GLUtilityMethods.h \
 		src/gl/BasicColors.h \
 		src/mainwindow.h \
+		src/path.h \
 		src/perlinNoise.h \
 		src/terrainMesh.h \
 		src/window.h src/main.cpp \
 		src/gl/GLUtilityMethods.cpp \
 		src/gl/BasicColors.cpp \
 		src/mainwindow.cpp \
+		src/path.cpp \
 		src/perlinNoise.cpp \
 		src/terrainMesh.cpp \
 		src/window.cpp
@@ -358,8 +362,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents src/shaders.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/point3.h ./src/Mesh.h src/MyViewer.h src/gl/GLUtilityMethods.h src/gl/BasicColors.h src/mainwindow.h src/perlinNoise.h src/terrainMesh.h src/window.h $(DISTDIR)/
-	$(COPY_FILE) --parents src/main.cpp src/gl/GLUtilityMethods.cpp src/gl/BasicColors.cpp src/mainwindow.cpp src/perlinNoise.cpp src/terrainMesh.cpp src/window.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/point3.h ./src/Mesh.h src/MyViewer.h src/gl/GLUtilityMethods.h src/gl/BasicColors.h src/mainwindow.h src/path.h src/perlinNoise.h src/terrainMesh.h src/window.h $(DISTDIR)/
+	$(COPY_FILE) --parents src/main.cpp src/gl/GLUtilityMethods.cpp src/gl/BasicColors.cpp src/mainwindow.cpp src/path.cpp src/perlinNoise.cpp src/terrainMesh.cpp src/window.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mainwindow.ui $(DISTDIR)/
 
 
@@ -421,7 +425,7 @@ tmp/moc/moc_MyViewer.cpp: src/MyViewer.h \
 		src/perlinNoise.h \
 		tmp/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/src -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/extern/libQGLViewer-2.6.1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/MyViewer.h -o tmp/moc/moc_MyViewer.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/christina/Documents/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/christina/Documents/Leatina-generation-terrain -I/home/christina/Documents/Leatina-generation-terrain -I/home/christina/Documents/Leatina-generation-terrain/src -I/home/christina/Documents/Leatina-generation-terrain/extern/libQGLViewer-2.6.1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/MyViewer.h -o tmp/moc/moc_MyViewer.cpp
 
 tmp/moc/moc_mainwindow.cpp: src/mainwindow.h \
 		src/MyViewer.h \
@@ -441,14 +445,15 @@ tmp/moc/moc_mainwindow.cpp: src/mainwindow.h \
 		qt/QSmartAction.h \
 		src/terrainMesh.h \
 		src/perlinNoise.h \
+		src/path.h \
 		tmp/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/src -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/extern/libQGLViewer-2.6.1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/mainwindow.h -o tmp/moc/moc_mainwindow.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/christina/Documents/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/christina/Documents/Leatina-generation-terrain -I/home/christina/Documents/Leatina-generation-terrain -I/home/christina/Documents/Leatina-generation-terrain/src -I/home/christina/Documents/Leatina-generation-terrain/extern/libQGLViewer-2.6.1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/mainwindow.h -o tmp/moc/moc_mainwindow.cpp
 
 tmp/moc/moc_window.cpp: src/window.h \
 		tmp/moc/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/src -I/home/e20190003227/M2-IMAGINE/Leatina-generation-terrain/extern/libQGLViewer-2.6.1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/window.h -o tmp/moc/moc_window.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/christina/Documents/Leatina-generation-terrain/tmp/moc/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/christina/Documents/Leatina-generation-terrain -I/home/christina/Documents/Leatina-generation-terrain -I/home/christina/Documents/Leatina-generation-terrain/src -I/home/christina/Documents/Leatina-generation-terrain/extern/libQGLViewer-2.6.1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include src/window.h -o tmp/moc/moc_window.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -488,7 +493,8 @@ tmp/obj/main.o: src/main.cpp src/MyViewer.h \
 		qt/QSmartAction.h \
 		src/terrainMesh.h \
 		src/perlinNoise.h \
-		src/mainwindow.h
+		src/mainwindow.h \
+		src/path.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/main.o src/main.cpp
 
 tmp/obj/GLUtilityMethods.o: src/gl/GLUtilityMethods.cpp src/gl/GLUtilityMethods.h \
@@ -524,8 +530,12 @@ tmp/obj/mainwindow.o: src/mainwindow.cpp src/mainwindow.h \
 		qt/QSmartAction.h \
 		src/terrainMesh.h \
 		src/perlinNoise.h \
+		src/path.h \
 		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/mainwindow.o src/mainwindow.cpp
+
+tmp/obj/path.o: src/path.cpp src/path.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/path.o src/path.cpp
 
 tmp/obj/perlinNoise.o: src/perlinNoise.cpp src/perlinNoise.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/perlinNoise.o src/perlinNoise.cpp
@@ -552,7 +562,8 @@ tmp/obj/window.o: src/window.cpp src/window.h \
 		src/gl/BasicColors.h \
 		qt/QSmartAction.h \
 		src/terrainMesh.h \
-		src/perlinNoise.h
+		src/perlinNoise.h \
+		src/path.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tmp/obj/window.o src/window.cpp
 
 tmp/obj/qrc_shaders.o: qrc_shaders.cpp 
