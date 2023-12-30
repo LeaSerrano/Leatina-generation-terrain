@@ -77,7 +77,9 @@ private slots:
 #include <QPainter>
 #include <QPainterPath>
 #include <QStack>
+#include <QLabel>
 #include "MyViewer.h"
+#include "path.h"
 
 namespace Ui {
 class MainWindow;
@@ -89,6 +91,10 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    QList<QPen> pathPens;
+
+
 
 private slots:
     void onResolutionSliderReleased();
@@ -109,6 +115,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QLabel *backgroundWidget;
     MyViewer* viewer;
     bool isLeftButtonPressed;
 
@@ -118,25 +125,26 @@ private:
     //Image modifiée
     QImage editedImage;
 
-    //Concerne le tracé
-    QPointF startPoint;
-    QPainterPath currentPath;
+    //Image combinée (image qui regroupe tous les tracés)
+    QList<QImage> pathsImages; //regroupe toutes les calques
+    QImage combinedImage;
 
-    QStack<QPainterPath> previousPaths;
-    QStack<QPainterPath> redoPaths;
+    Path* currentPath;
 
-    QPen pathPen;
+    QList<Path*> undoPaths;
+    QList<Path*> redoPaths;
 
+    int newHeightValue;
 
+    int penSize;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
-    void drawingPath(QMouseEvent *mouseEvent);
-    void undoDrawingPth();
-    void redoDrawingPth();
-    void updateDrawingPath();
+
     void updateMesh(QImage image);
 
+    void update_label_perlinNoise(QImage editedImage, QImage layerImage);
+    void combinePathsImages(QList<QImage> pathsImages);
 
 };
 

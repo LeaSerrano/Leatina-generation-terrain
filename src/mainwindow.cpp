@@ -57,6 +57,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     setWindowTitle("Leatina Generation Terrain");
 
+    backgroundWidget = new QLabel(this);
+    backgroundWidget->setGeometry(0, 0, width(), height());
+    backgroundWidget->setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));");
+    backgroundWidget->lower();
+
     viewer = new MyViewer();
 
     ui->statusbar->hide();
@@ -84,6 +89,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     originalImage = QImage("perlinNoise.png");
 
     editedImage = originalImage.copy();
+    editedImage = editedImage.convertToFormat(QImage::Format_ARGB32);
 
     //ui->label_perlinNoise->setPixmap(pixmap);
     ui->label_perlinNoise->setMouseTracking(true);
@@ -98,20 +104,37 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->button_redo, &QPushButton::clicked, this, &MainWindow::redoDrawingPath);
 
     //Pinceau
-    pathPen.setColor(Qt::white);
-    pathPen.setWidth(3);
-    pathPen.setJoinStyle(Qt::RoundJoin);
+    penSize = 3;
+    ui->dial_penSize->setValue(penSize);
+    ui->label_penSize->setText(QString::number(penSize));
+    QObject::connect(ui->dial_penSize, &QDial::valueChanged, this, [=](){
+        penSize = ui->dial_penSize->value();
+        ui->label_penSize->setText(QString::number(penSize));
+        currentPath->setPathPen_width(penSize);
+    });
 
+    //Hauteur de la nouvelle valeur de hauteur
+    newHeightValue = -10;
+    ui->verticalSlider_newHeightValue->setValue(newHeightValue);
+    ui->label_newHeightValue->setText(QString::number(newHeightValue));
+    QObject::connect(ui->verticalSlider_newHeightValue, &QSlider::valueChanged, this, [=]() {
+        newHeightValue = ui->verticalSlider_newHeightValue->value();
+        ui->label_newHeightValue->setText(QString::number(newHeightValue));
+    });
+
+    //Sauvegarde terrain
     QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
         downloadMap(viewer->terrainMesh.getMap());
     });
 
+    //Ouverture terrain
     QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
         uploadMap();
     });
 
     QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
+    combinePathsImages(pathsImages);
     viewer->setFocus();
 }
 
@@ -149,10 +172,15 @@ void MainWindow::onReloadButtonClicked() {
     originalImage = QImage("perlinNoise.png");
     //ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
     editedImage = originalImage.copy();
+    editedImage = editedImage.convertToFormat(QImage::Format_ARGB32);
 
-    currentPath.clear();
-    previousPaths.clear();
+    //currentPath.clear();
+    undoPaths.clear();
     redoPaths.clear();
+
+    pathsImages.clear();
+    combinePathsImages(pathsImages);
+    updateMesh(combinedImage);
 
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
 
@@ -166,46 +194,122 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = true;
-                    startPoint = mouseEvent->localPos();
 
-                    //point de départ tracé
-                    currentPath.moveTo(startPoint);
+                    currentPath = new Path();
+                    currentPath->setHeightValue(newHeightValue);
+                    currentPath->setPathPen_width(penSize);
+                    currentPath->startDrawingPath(mouseEvent);
 
-                    previousPaths.push(currentPath);
+                    undoPaths.append(currentPath);
                     redoPaths.clear();
                 }
             } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-                //drawingPath(static_cast<QMouseEvent*>(event));
-                drawingPath(mouseEvent);
+
+                currentPath->drawingPath(mouseEvent, editedImage); //Appel editedImage  : juste pour la taille img
+                //editedImage = currentPath->getPathImage().copy();
+
+                //Affichage Image résultat + Image tracé rouge
+                update_label_perlinNoise(combinedImage, currentPath->getLayerImage());
+
             } else if (event->type() == QEvent::MouseButtonRelease) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
                     isLeftButtonPressed = false;
-                    //currentPath = QPainterPath();
-                    startPoint = QPointF();
+
+                    currentPath->setPixelsPath();
+                    currentPath->addModification(editedImage); //Appel editedImage : récup couleur de base
+
+                    //Ajout du tracé dans la liste
+                    pathsImages.append(currentPath->renderPathImage);
+
+                    //Génération image combinée des tracés
+                    combinePathsImages(pathsImages);
+
+                    editedImage = combinedImage.copy();
+                    updateMesh(editedImage);
+
+                    // editedImage.save("edited.png");
+                    // combinedImage.save("combined.png");
+
+                    //Affichage du tracé rouge
+                    //update_label_perlinNoise(editedImage, currentPath->getLayerImage());
+
+                    currentPath->endDrawingPath();
                 }
             }
         }
-
-        return QMainWindow::eventFilter(obj, event);
+    viewer->setFocus();
+    return QMainWindow::eventFilter(obj, event);
 }
+
+void MainWindow::update_label_perlinNoise(QImage editedImage, QImage layerImage){
+    QImage combinedImage(editedImage.size(), QImage::Format_ARGB32);
+    combinedImage.fill(Qt::transparent); // Initialise l'image avec un fond transparent
+    QPainter cpainter(&combinedImage);
+
+    cpainter.drawImage(0, 0, editedImage);
+    cpainter.drawImage(0, 0, layerImage);
+    cpainter.end();
+
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(combinedImage));
+}
+
+void MainWindow::combinePathsImages(QList<QImage> pathsImages){
+    combinedImage = QImage(originalImage.size(), QImage::Format_ARGB32);
+    combinedImage.fill(Qt::transparent);
+
+    QPainter cpainter(&combinedImage);
+    QImage copy_originalImage = originalImage.copy();
+    copy_originalImage = copy_originalImage.convertToFormat(QImage::Format_ARGB32);
+    cpainter.drawImage(0, 0, copy_originalImage);
+    for (const QImage& pathImage : pathsImages){
+        cpainter.drawImage(0, 0, pathImage);
+    }
+    cpainter.end();
+
+
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(combinedImage));
+}
+
 
 // Enlever le tracé
 void MainWindow::undoDrawingPath() {
-    if (!previousPaths.isEmpty()) {
-        redoPaths.push(currentPath);
-        currentPath = previousPaths.pop();
-        updateDrawingPath();
+    if (!undoPaths.isEmpty()) {
+        //Enlever le tracé du currentPath
+        //currentPath->removeModification(editedImage);
+        //editedImage = currentPath->getPathImage().copy();
+
+        pathsImages.removeLast();
+        combinePathsImages(pathsImages);
+        editedImage = combinedImage.copy();
+        updateMesh(editedImage);
+
+        //Ajouter à redo
+        redoPaths.append(currentPath);
+
+        //Mettre à jour le currentPath par le "précédent"
+        currentPath = undoPaths.takeLast();
     }
 }
 
 // Refaire le tracé
 void MainWindow::redoDrawingPath() {
     if (!redoPaths.isEmpty()) {
-        previousPaths.push(currentPath);
-        currentPath = redoPaths.pop();
-        updateDrawingPath();
+
+        //Mettre à jour le currentPath par le "suivant"
+        currentPath = redoPaths.takeLast();
+
+        //Ajouter à undo
+        undoPaths.append(currentPath);
+
+        //Remettre le tracé dans la liste des tracés
+        pathsImages.append(currentPath->renderPathImage);
+        currentPath->addModification(editedImage);
+
+        combinePathsImages(pathsImages);
+        editedImage = combinedImage.copy();
+        updateMesh(editedImage);
     }
 }
 
@@ -216,53 +320,6 @@ void MainWindow::updateMesh(QImage image){
 
     viewer->setFocus();
     ui->widget_affichage_terrain->setFocus();
-}
-
-// Actualiser le tracé
-void MainWindow::updateDrawingPath() {
-    QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
-    tempImage.fill(Qt::transparent);
-
-    QPainter painter(&tempImage);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.drawImage(0, 0, editedImage);
-    painter.setPen(pathPen);
-    painter.drawPath(currentPath);
-    painter.end();
-
-    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
-    updateMesh(tempImage);
-}
-
-void MainWindow::drawingPath(QMouseEvent* mouseEvent)
-{
-    QPointF mousePos = mouseEvent->localPos();
-
-    // Ajout point au tracé
-    currentPath.lineTo(mousePos);
-
-    // Actualiser l'affichage de l'image
-    int coin_x = ui->label_perlinNoise->geometry().x();
-    int coin_y = ui->label_perlinNoise->geometry().y();
-    ui->label_perlinNoise->setGeometry(coin_x, coin_y, editedImage.width(), editedImage.height());
-
-    // Création image temporaire pour dessiner le tracé
-    QImage tempImage(editedImage.size(), QImage::Format_ARGB32);
-    tempImage.fill(Qt::transparent);
-
-    // Dessiner tracé sur image temporaire
-    QPainter painter(&tempImage);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.drawImage(0, 0, editedImage);
-    painter.setPen(pathPen);
-    painter.drawPath(currentPath);
-    painter.end();
-
-    // Afficher l'image temporaire sur le QLabel
-    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(tempImage));
-
-    // Actualisation du maillage
-    updateMesh(tempImage);
 }
 
 void MainWindow::downloadMap(QImage image){
