@@ -37,6 +37,7 @@ public:
     QPushButton *button_redo;
     QPushButton *button_save_map;
     QPushButton *button_open_map;
+    QPushButton *pushButton_mode_FPS;
     QSlider *verticalSlider_newHeightValue;
     QLabel *label_newHeightValue;
     QDial *dial_penSize;
@@ -86,6 +87,11 @@ public:
         button_open_map = new QPushButton(centralwidget);
         button_open_map->setObjectName(QString::fromUtf8("button_open_map"));
         button_open_map->setGeometry(QRect(340, 520, 89, 25));
+<<<<<<< HEAD
+        pushButton_mode_FPS = new QPushButton(centralwidget);
+        pushButton_mode_FPS->setObjectName(QString::fromUtf8("pushButton_mode_FPS"));
+        pushButton_mode_FPS->setGeometry(QRect(740, 570, 83, 25));
+=======
         verticalSlider_newHeightValue = new QSlider(centralwidget);
         verticalSlider_newHeightValue->setObjectName(QString::fromUtf8("verticalSlider_newHeightValue"));
         verticalSlider_newHeightValue->setGeometry(QRect(520, 450, 16, 160));
@@ -110,6 +116,7 @@ public:
         label_penSize = new QLabel(centralwidget);
         label_penSize->setObjectName(QString::fromUtf8("label_penSize"));
         label_penSize->setGeometry(QRect(640, 470, 67, 17));
+>>>>>>> main
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -135,8 +142,12 @@ public:
         button_redo->setText(QCoreApplication::translate("MainWindow", "redo", nullptr));
         button_save_map->setText(QCoreApplication::translate("MainWindow", "sauvegarder carte", nullptr));
         button_open_map->setText(QCoreApplication::translate("MainWindow", "ouvrir carte", nullptr));
+<<<<<<< HEAD
+        pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "Mode FPS", nullptr));
+=======
         label_newHeightValue->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
         label_penSize->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
+>>>>>>> main
     } // retranslateUi
 
 };

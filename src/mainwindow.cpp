@@ -64,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     viewer = new MyViewer();
 
+    ui->statusbar->hide();
+
     viewer->setParent(ui->widget_affichage_terrain);
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
@@ -129,6 +131,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
         uploadMap();
     });
+
+    QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
     combinePathsImages(pathsImages);
     viewer->setFocus();
@@ -350,5 +354,23 @@ void MainWindow::uploadMap(){
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
     updateMesh(originalImage);
     viewer->setFocus();
+
+}
+
+void MainWindow::changerVuePremierePersonne() {
+    if (viewer->vueActuelle == viewer->VueTerrain) {
+        viewer->vueActuelle = viewer->VuePremierePersonne;
+
+        viewer->terrainMesh.sizeX = 4.0;
+        viewer->terrainMesh.sizeY = 4.0;
+        viewer->terrainMesh.sizeZ = 4.0;
+        viewer->terrainMesh.generateMesh();
+
+        viewer->draw();
+
+        this->setCentralWidget(viewer);
+        viewer->setFocus();
+
+    }
 
 }
