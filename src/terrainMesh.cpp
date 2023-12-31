@@ -68,7 +68,6 @@ void TerrainMesh::generatePlan() {
 
             GLfloat y;
             getHeightAtPerlinPx(y, perlin);
-            //GLfloat y = 0.0f;
 
             vertex_buffer.push_back(QVector3D(x, y, z));
             texture_coord_buffer.push_back(QVector2D(static_cast<float>(i) / resolution, static_cast<float>(j) / resolution));

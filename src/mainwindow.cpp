@@ -64,12 +64,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     viewer = new MyViewer();
 
+    ui->statusbar->hide();
+
     viewer->setParent(ui->widget_affichage_terrain);
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(10);
-    ui->horizontalSlider_resolution->setMaximum(300);
+    ui->horizontalSlider_resolution->setMaximum(180);
     QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
     ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);
@@ -129,6 +131,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
         uploadMap();
     });
+
+    QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
     combinePathsImages(pathsImages);
     viewer->setFocus();
@@ -271,12 +275,14 @@ void MainWindow::combinePathsImages(QList<QImage> pathsImages){
 
 // Enlever le tracé
 void MainWindow::undoDrawingPath() {
-    if (!undoPaths.isEmpty()) {
-        //Enlever le tracé du currentPath
-        //currentPath->removeModification(editedImage);
-        //editedImage = currentPath->getPathImage().copy();
+    //qDebug() << "test";
 
+    if (!undoPaths.isEmpty()) {
+        //qDebug() << "        undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
+        //Enlever le tracé dans la liste des tracés
         pathsImages.removeLast();
+
+        //Update de l'image
         combinePathsImages(pathsImages);
         editedImage = combinedImage.copy();
         updateMesh(editedImage);
@@ -286,15 +292,15 @@ void MainWindow::undoDrawingPath() {
 
         //Mettre à jour le currentPath par le "précédent"
         currentPath = undoPaths.takeLast();
+
+        //qDebug() << "UNDO => undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
     }
 }
 
 // Refaire le tracé
 void MainWindow::redoDrawingPath() {
     if (!redoPaths.isEmpty()) {
-
-        //Mettre à jour le currentPath par le "suivant"
-        currentPath = redoPaths.takeLast();
+        //qDebug() << "        undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
 
         //Ajouter à undo
         undoPaths.append(currentPath);
@@ -303,9 +309,15 @@ void MainWindow::redoDrawingPath() {
         pathsImages.append(currentPath->renderPathImage);
         currentPath->addModification(editedImage);
 
+        //Update de l'image
         combinePathsImages(pathsImages);
         editedImage = combinedImage.copy();
         updateMesh(editedImage);
+
+        //Mettre à jour le currentPath par le "suivant"
+        currentPath = redoPaths.takeLast();
+
+        //qDebug() << "REDO => undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
     }
 }
 
@@ -350,5 +362,23 @@ void MainWindow::uploadMap(){
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
     updateMesh(originalImage);
     viewer->setFocus();
+
+}
+
+void MainWindow::changerVuePremierePersonne() {
+    if (viewer->vueActuelle == viewer->VueTerrain) {
+        viewer->vueActuelle = viewer->VuePremierePersonne;
+
+        viewer->terrainMesh.sizeX = 4.0;
+        viewer->terrainMesh.sizeY = 4.0;
+        viewer->terrainMesh.sizeZ = 4.0;
+        viewer->terrainMesh.generateMesh();
+
+        viewer->draw();
+
+        this->setCentralWidget(viewer);
+        viewer->setFocus();
+
+    }
 
 }

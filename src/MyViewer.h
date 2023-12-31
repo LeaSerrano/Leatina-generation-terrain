@@ -15,6 +15,7 @@
 #include <QGLViewer/qglviewer.h>
 
 #include <gl/GLUtilityMethods.h>
+#include <QGLViewer/manipulatedCameraFrame.h>
 
 // Qt stuff:
 #include <QFormLayout>
@@ -27,6 +28,7 @@
 #include <QDebug>
 #include <QOpenGLShaderProgram>
 #include <QtMath>
+#include <algorithm>
 
 
 #include "qt/QSmartAction.h"
@@ -34,6 +36,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
@@ -46,10 +49,26 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     GLuint vertexShader, fragmentShader;
     QMatrix4x4 modelMatrix;
 
+<<<<<<< HEAD
+=======
+    QPoint lastMousePos;
+    qglviewer::Vec accumulatedMouseTranslation;
+    qglviewer::Vec accumulatedKeyTranslation;
+
+    qglviewer::Quaternion accumulatedRotationX;
+    qglviewer::Quaternion accumulatedRotationY;
+
+
+
+>>>>>>> 73e4220c39e58f6db3e6ca0bee8c920f69108e5a
 public :
     TerrainMesh terrainMesh;
 
+    enum Vue { VueTerrain, VuePremierePersonne };
+    Vue vueActuelle;
+
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_4_3_Core() {
+        vueActuelle = VueTerrain;
     }
 
 
@@ -145,16 +164,21 @@ public :
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
 
+<<<<<<< HEAD
         //Texture
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+=======
+>>>>>>> 73e4220c39e58f6db3e6ca0bee8c920f69108e5a
 
         // Charger les textures
         GLuint textureEauID = loadTexture("./images/textureEau.jpg");
@@ -194,6 +218,49 @@ public :
         glBindTexture(GL_TEXTURE_2D, textureHeightmapID);
     }
 
+    void drawTerrainView() {
+            drawBuffers();
+    }
+
+    void drawPremierePersonneView() {
+            float centerX = terrainMesh.sizeX / 2.0f;
+            float centerZ = terrainMesh.sizeZ / 2.0f;
+
+            float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
+            float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
+
+            int i = static_cast<int>(centerX / stepX);
+            int j = static_cast<int>(centerZ / stepZ);
+
+            float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
+            GLfloat centerY;
+            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+
+            qglviewer::Vec cameraPosition(centerX, centerY+0.2f, centerZ);
+            camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
+            camera()->setPosition(cameraPosition);
+
+            drawBuffers();
+
+            animate();
+    }
+
+    void setCameraPositionWithPerlinHeight() {
+            qglviewer::Vec cameraPosition = camera()->position();
+
+            float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
+            float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
+
+            int i = static_cast<int>(cameraPosition.x / stepX);
+            int j = static_cast<int>(cameraPosition.z / stepZ);
+
+            float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
+            GLfloat centerY;
+            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+
+            cameraPosition.y = centerY+ 0.2f;
+            camera()->setPosition(cameraPosition);
+    }
 
     void draw() {
         glUseProgram(shaderProgram);
@@ -223,18 +290,19 @@ public :
         glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), cameraPosition[0], cameraPosition[1], cameraPosition[2]);
 
         qglviewer::Vec cameraView = camera()->viewDirection();
-        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), /*0.0, 3.0, -7.0*/ cameraView[0], cameraView[1], cameraView[2]);
+        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), cameraView[0], cameraView[1], cameraView[2]);
 
-        drawBuffers();
+        if (vueActuelle == VueTerrain) {
+            drawTerrainView();
+        } else if (vueActuelle == VuePremierePersonne) {
+            drawPremierePersonneView();
+        }
 
 
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, terrainMesh.index_buffer.size(), GL_UNSIGNED_SHORT, (void*)0);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        //update();
 
         glUseProgram(0);
     }
@@ -262,7 +330,6 @@ public :
         glShaderSource(shader, 1, &shaderSource, NULL);
         glCompileShader(shader);
 
-        // Check for compilation errors (you might want to add more detailed error checking)
         GLint success;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
@@ -284,7 +351,6 @@ public :
         glAttachShader(shaderProgram, fragmentShader);
         glLinkProgram(shaderProgram);
 
-        // Check for linking errors (you might want to add more detailed error checking)
         GLint success;
         glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
         if (!success) {
@@ -305,13 +371,12 @@ public :
         std::ifstream file(filePath);
         if (!file.is_open()) {
             qDebug() << "Unable to open file: " << filePath;
-            return QString();  // Return an empty QString
+            return QString();
         }
 
         std::stringstream buffer;
         buffer << file.rdbuf();
 
-        // Convert the std::string to QString before returning
         return QString::fromStdString(buffer.str());
     }
 
@@ -319,8 +384,6 @@ public :
     void init() {
         makeCurrent();
         initializeOpenGLFunctions();
-
-        //setMouseTracking(true);// Needed for MouseGrabber.
 
         setBackgroundColor(QColor(20, 20, 20));
 
@@ -351,7 +414,6 @@ public :
         modelMatrix = QMatrix4x4();
     }
 
-
     QString helpString() const {
         QString text("<h2>Our cool project</h2>");
         text += "<p>";
@@ -376,31 +438,86 @@ public :
     }
 
     void keyPressEvent( QKeyEvent * event ) {
-        if( event->key() == Qt::Key_H ) {
-            help();
-        }
-        else if( event->key() == Qt::Key_T ) {
-            if( event->modifiers() & Qt::CTRL )
-            {
-                bool ok;
-                QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
-                if (ok && !text.isEmpty())
+
+            if( event->key() == Qt::Key_H ) {
+                help();
+            }
+            else if( event->key() == Qt::Key_T ) {
+                if( event->modifiers() & Qt::CTRL )
                 {
-                    updateTitle(text);
+                    bool ok;
+                    QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
+                    if (ok && !text.isEmpty())
+                    {
+                        updateTitle(text);
+                    }
                 }
             }
-        }
-        else if (event->key() == Qt::Key_Left) {
-            rotateObjectLeft();
-        } else if (event->key() == Qt::Key_Right) {
-            rotateObjectRight();
-        }
-        /*else if (event->key() == Qt::Key_Up) {
-            rotateObjectUp();
-        }
-        else if (event->key() == Qt::Key_Down) {
-            rotateObjectDown();
-        }*/
+
+            if (vueActuelle == VueTerrain) {
+                if (event->key() == Qt::Key_Left) {
+                    rotateObjectLeft();
+                }
+                else if (event->key() == Qt::Key_Right) {
+                    rotateObjectRight();
+                }
+                else if (event->key() == Qt::Key_Up) {
+                    rotateObjectUp();
+                }
+                else if (event->key() == Qt::Key_Down) {
+                    rotateObjectDown();
+                }
+            }
+            else if (vueActuelle == VuePremierePersonne) {
+
+                const float stepSize = 1.f/terrainMesh.resolution;
+                const float stepRotate = 0.05f;
+
+                if (event->key() == Qt::Key_Q) {
+                    accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
+
+                } else if (event->key() == Qt::Key_D) {
+                    accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
+
+                } else if (event->key() == Qt::Key_Z) {
+                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, -stepSize);
+
+                } else if (event->key() == Qt::Key_S) {
+                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
+                }
+                else if (event->key() == Qt::Key_Up) {
+                    qreal pitch = camera()->viewDirection().y;
+
+                    if (pitch <= 0.4) {
+                        qglviewer::Quaternion rotation;
+                        rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
+                        camera()->frame()->rotate(rotation);
+                    }
+                }
+                else if (event->key() == Qt::Key_Down) {
+                    qreal pitch = camera()->viewDirection().y;
+
+                    if (pitch >= -0.7) {
+                        qglviewer::Quaternion rotation;
+                        rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
+                        camera()->frame()->rotate(rotation);
+                    }
+                }
+                else if (event->key() == Qt::Key_Right) {
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), stepRotate);
+                    camera()->frame()->rotate(rotation);
+                }
+                else if (event->key() == Qt::Key_Left) {
+                    qglviewer::Quaternion rotation;
+                    rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), stepRotate);
+                    camera()->frame()->rotate(rotation);
+                }
+
+                update();
+
+            }
+
     }
 
     void rotateObjectLeft() {
@@ -441,77 +558,30 @@ public :
         update();
     }
 
-    /*void mouseDoubleClickEvent( QMouseEvent * e )
-    {
-        if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::RightButton) )
-        {
-            pickBackgroundColor();
-            return;
-        }
+    void mousePressEvent(QMouseEvent *e) {
 
-        if( (e->modifiers() & Qt::ControlModifier)  &&  (e->button() == Qt::LeftButton) )
-        {
-            showControls();
-            return;
-        }
-
-        QGLViewer::mouseDoubleClickEvent( e );
-    }*/
-
-    void mousePressEvent(QMouseEvent* e ) {
-        //QGLViewer::mousePressEvent(e);
     }
 
-    /*void mouseMoveEvent(QMouseEvent* e  ){
-        QGLViewer::mouseMoveEvent(e);
+    void mouseMoveEvent(QMouseEvent *e) {
+
     }
 
-    void mouseReleaseEvent(QMouseEvent* e  ) {
-        QGLViewer::mouseReleaseEvent(e);
-    }*/
+    void mouseReleaseEvent(QMouseEvent* e) {
+    }
+
+    void animate() {
+        qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;
+
+        if (cameraPosition.x <= terrainMesh.sizeX && cameraPosition.x >= 0.0 && cameraPosition.z <= terrainMesh.sizeZ && cameraPosition.z >= 0.0) {
+            camera()->setPosition(cameraPosition);
+            setCameraPositionWithPerlinHeight();
+        }
+    }
 
 signals:
     void windowTitleUpdated( const QString & );
 
 public slots:
-    /*void open_mesh() {
-        bool success = false;
-        QString fileName = QFileDialog::getOpenFileName(NULL,"","");
-        if ( !fileName.isNull() ) { // got a file name
-            if(fileName.endsWith(QString(".off")))
-                success = OFFIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            else if(fileName.endsWith(QString(".obj")))
-                success = OBJIO::openTriMesh(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            if(success) {
-                std::cout << fileName.toStdString() << " was opened successfully" << std::endl;
-                point3d bb(FLT_MAX,FLT_MAX,FLT_MAX) , BB(-FLT_MAX,-FLT_MAX,-FLT_MAX);
-                for( unsigned int v = 0 ; v < mesh.vertices.size() ; ++v ) {
-                    bb = point3d::min(bb , mesh.vertices[v]);
-                    BB = point3d::max(BB , mesh.vertices[v]);
-                }
-                adjustCamera(bb,BB);
-                update();
-            }
-            else
-                std::cout << fileName.toStdString() << " could not be opened" << std::endl;
-        }
-    }
-
-    void save_mesh() {
-        bool success = false;
-        QString fileName = QFileDialog::getOpenFileName(NULL,"","");
-        if ( !fileName.isNull() ) { // got a file name
-            if(fileName.endsWith(QString(".off")))
-                success = OFFIO::save(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            else if(fileName.endsWith(QString(".obj")))
-                success = OBJIO::save(fileName.toStdString() , mesh.vertices , mesh.triangles );
-            if(success)
-                std::cout << fileName.toStdString() << " was saved" << std::endl;
-            else
-                std::cout << fileName.toStdString() << " could not be saved" << std::endl;
-        }
-    }*/
-
     void showControls()
     {
         // Show controls :

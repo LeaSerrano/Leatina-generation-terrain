@@ -41,6 +41,7 @@ public:
     QLabel *label_newHeightValue;
     QDial *dial_penSize;
     QLabel *label_penSize;
+    QPushButton *pushButton_mode_FPS;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -110,6 +111,9 @@ public:
         label_penSize = new QLabel(centralwidget);
         label_penSize->setObjectName(QString::fromUtf8("label_penSize"));
         label_penSize->setGeometry(QRect(640, 470, 67, 17));
+        pushButton_mode_FPS = new QPushButton(centralwidget);
+        pushButton_mode_FPS->setObjectName(QString::fromUtf8("pushButton_mode_FPS"));
+        pushButton_mode_FPS->setGeometry(QRect(740, 650, 89, 25));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -137,6 +141,7 @@ public:
         button_open_map->setText(QCoreApplication::translate("MainWindow", "ouvrir carte", nullptr));
         label_newHeightValue->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
         label_penSize->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
+        pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "FPS", nullptr));
     } // retranslateUi
 
 };

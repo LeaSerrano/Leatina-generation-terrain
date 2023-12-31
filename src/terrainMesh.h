@@ -24,15 +24,15 @@ public:
 
     float sizeX = 1.0, sizeY = 1.0, sizeZ = 1.0;
     float averageHeight;
-    int resolution = 100;
-    int heightRange = 300;
+    float resolution = 100;
+    float heightRange = 100;
     void generateMesh();
     bool perlinNoiseCreated;
+    void getHeightAtPerlinPx(GLfloat &y, float perlin);
 
 private:
     void generatePlan();
     void generateIndices();
-    void getHeightAtPerlinPx(GLfloat &y, float perlin);
     void calculateNormals();
     void setMap(QImage image);
 
