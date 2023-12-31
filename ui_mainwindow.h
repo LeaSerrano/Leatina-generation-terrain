@@ -103,7 +103,7 @@ public:
         dial_penSize->setGeometry(QRect(650, 500, 50, 64));
         dial_penSize->setMinimum(1);
         dial_penSize->setMaximum(10);
-        dial_penSize->setSliderPosition(3);
+        dial_penSize->setSliderPosition(10);
         dial_penSize->setOrientation(Qt::Horizontal);
         dial_penSize->setInvertedAppearance(false);
         dial_penSize->setWrapping(false);
