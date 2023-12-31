@@ -4,6 +4,7 @@
 #include <qopengl.h>
 #include <QVector>
 #include <QVector3D>
+#include <QVector2D>
 #include <QOpenGLBuffer>
 #include "perlinNoise.h"
 
@@ -16,6 +17,7 @@ public:
     QVector<QVector3D> vertex_buffer;
     QVector<float> normal_buffer;
     QVector<short> index_buffer;
+    QVector<QVector2D> texture_coord_buffer; //Texture
 
     PerlinNoise* perlinNoise;
     QImage getMap();

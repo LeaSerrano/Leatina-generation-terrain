@@ -110,10 +110,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->dial_penSize, &QDial::valueChanged, this, [=](){
         penSize = ui->dial_penSize->value();
         ui->label_penSize->setText(QString::number(penSize));
-        currentPath->setPathPen_width(penSize);
     });
 
-    //Hauteur de la nouvelle valeur de hauteur
+    //Hauteur de la nouvelle valeur de hauteur (pinceau)
     newHeightValue = -10;
     ui->verticalSlider_newHeightValue->setValue(newHeightValue);
     ui->label_newHeightValue->setText(QString::number(newHeightValue));
