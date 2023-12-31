@@ -46,7 +46,6 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     GLuint vertexShader, fragmentShader;
     QMatrix4x4 modelMatrix;
 
-
 public :
     TerrainMesh terrainMesh;
 
@@ -74,6 +73,52 @@ public :
         toolBar->addAction( saveSnapShotPlusPlus );
     }
 
+    GLuint loadTexture(const QString& filePath)
+    {
+        // Charger l'image avec QImage
+        QImage image(filePath);
+
+        if (image.isNull()) {
+            qDebug() << "Failed to load texture: " << filePath;
+            return 0;  // Retourner 0 en cas d'échec du chargement de l'image
+        }
+
+        // Convertir l'image en format adapté à OpenGL
+        image = image.convertToFormat(QImage::Format_RGBA8888);
+
+        // Générer une texture OpenGL
+        GLuint textureID;
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        // Paramètres de la texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // Charger les données de l'image dans la texture
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            image.width(),
+            image.height(),
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            image.bits()
+            );
+
+        // Générer les mipmaps
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        // Désactiver la texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return textureID;
+    }
+
     void drawBuffers() {
         GLuint vertexbuffer;
         glGenBuffers(1, &vertexbuffer);
@@ -90,6 +135,11 @@ public :
         glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
         glBufferData(GL_ARRAY_BUFFER, terrainMesh.normal_buffer.size() * sizeof(float), &terrainMesh.normal_buffer[0], GL_STATIC_DRAW);
 
+        //Texture
+        GLuint textureCoordBuffer;
+        glGenBuffers(1, &textureCoordBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
+        glBufferData(GL_ARRAY_BUFFER, terrainMesh.texture_coord_buffer.size() * sizeof(QVector2D), &terrainMesh.texture_coord_buffer[0], GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -99,12 +149,49 @@ public :
         glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
 
+        //Texture
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+
+        // Charger les textures
+        GLuint textureEauID = loadTexture("./images/textureEau.jpg");
+        GLuint textureHerbeID = loadTexture("./images/textureHerbe.jpg");
+        GLuint textureRocheID = loadTexture("./images/textureRoche.jpg");
+        GLuint textureNeigeID = loadTexture("./images/textureNeige.jpg");
+        GLuint textureHeightmapID = loadTexture("perlinNoise.png");
 
         QString vertexShaderSource = readShaderFile("src/vshader.glsl");
         QString fragmentShaderSource = readShaderFile("src/fshader.glsl");
 
         shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
+
+        //Texture
+        glUseProgram(shaderProgram);
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureEau"), 0);     // Associer la texture à l'unité de texture 0
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureHerbe"), 1);   // Associer la texture à l'unité de texture 1
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureRoche"), 2);   // Associer la texture à l'unité de texture 2
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureNeige"), 3);   // Associer la texture à l'unité de texture 3
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureHeightmap"), 4);
+        glUseProgram(0);
+
+        // Associer les textures aux unités de texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureEauID);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textureHerbeID);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textureRocheID);
+
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, textureNeigeID);
+
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, textureHeightmapID);
     }
 
 
