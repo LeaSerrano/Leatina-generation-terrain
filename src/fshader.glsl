@@ -23,6 +23,7 @@ uniform sampler2D textureHerbe;    // Texture pour la hauteur entre 10 et 100
 uniform sampler2D textureRoche;    // Texture pour la hauteur entre 100 et 200
 uniform sampler2D textureNeige;    // Texture pour la hauteur > 200
 
+uniform samplerCube cubemapTexture;
 
 out vec4 FragColor;
 
@@ -68,8 +69,12 @@ void main()
         h_color = cN;
     }
 
+    vec3 reflection = reflect(normalize(viewDir), normal);
+    vec3 environmentColor = texture(cubemapTexture, reflection).rgb;
+    vec3 result = (ambient + diffuse + specular) * h_color.rgb * environmentColor;
+
     //vec3 result = (ambient + diffuse + specular) * h_color;
-    vec3 result = (ambient + diffuse + specular) * h_color.rgb;
+    //vec3 result = (ambient + diffuse + specular) * h_color.rgb;
     FragColor = vec4(result, 1.0);
     //FragColor = h_color;
 

@@ -59,7 +59,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     qglviewer::Quaternion accumulatedRotationX;
     qglviewer::Quaternion accumulatedRotationY;
 
-
+    GLuint cubemapTexture; //Cube
 
 public :
     TerrainMesh terrainMesh;
@@ -91,6 +91,40 @@ public :
         toolBar->addAction( openCamera );
         toolBar->addAction( saveSnapShotPlusPlus );
     }
+
+    void loadCubemap() {
+        glGenTextures(1, &cubemapTexture);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+        const char* faces[6] = {
+            "./images/right.jpg",
+            "./images/left.jpg",
+            "./images/top.jpg",
+            "./images/bottom.jpg",
+            "./images/front.jpg",
+            "./images/back.jpg"
+        };
+
+        for (unsigned int i = 0; i < 6; i++) {
+            QImage image(faces[i]);
+
+            if (!image.isNull()) {
+                image = image.convertToFormat(QImage::Format_RGB888);
+
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                             0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
+            } else {
+                qDebug() << "Cubemap texture failed to load at path: " << faces[i];
+            }
+        }
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    }
+
 
     GLuint loadTexture(const QString& filePath)
     {
@@ -208,6 +242,11 @@ public :
         glUniform1i(glGetUniformLocation(shaderProgram, "textureRoche"), 2);
         glUniform1i(glGetUniformLocation(shaderProgram, "textureNeige"), 3);
         glUniform1i(glGetUniformLocation(shaderProgram, "textureHeightmap"), 4);
+
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "cubemapTexture"), 5);
+
     }
 
     void drawTerrainView() {
@@ -397,6 +436,8 @@ public :
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glEnable(GL_COLOR_MATERIAL);
+
+        loadCubemap();
 
         //
 
