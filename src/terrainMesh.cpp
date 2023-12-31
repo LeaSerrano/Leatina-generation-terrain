@@ -48,6 +48,7 @@ void TerrainMesh::generatePlan() {
 
 
     vertex_buffer.clear();
+    texture_coord_buffer.clear(); //Texture
 
     if (!perlinNoiseCreated) {
         perlinNoise = new PerlinNoise();
@@ -57,6 +58,8 @@ void TerrainMesh::generatePlan() {
     float stepX = static_cast<float>(sizeX) / static_cast<float>(resolution);
     float stepZ = static_cast<float>(sizeZ) / static_cast<float>(resolution);
 
+    float minHeight = std::numeric_limits<float>::max();
+    float maxHeight = std::numeric_limits<float>::lowest();
 
     for (int i = 0; i <= resolution; ++i) {
         for (int j = 0; j <= resolution; ++j) {
@@ -69,8 +72,17 @@ void TerrainMesh::generatePlan() {
             getHeightAtPerlinPx(y, perlin);
 
             vertex_buffer.push_back(QVector3D(x, y, z));
+            texture_coord_buffer.push_back(QVector2D(x,z));
+            //qDebug() << vertex_buffer.last();
+            //qDebug() << texture_coord_buffer.last();
+
+            //minHeight = std::min(minHeight, y);
+            //maxHeight = std::max(maxHeight, y);
         }
     }
+
+    //qDebug() << "Min Height: " << minHeight;
+    //qDebug() << "Max Height: " << maxHeight;
 }
 
 
@@ -167,6 +179,7 @@ void TerrainMesh::generateMesh() {
     generatePlan();
     generateIndices();
     calculateNormals();
+
 }
 
 
