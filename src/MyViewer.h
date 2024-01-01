@@ -61,6 +61,13 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
     GLuint cubemapTexture; //Cube
 
+    GLuint skyboxShader;
+    GLuint skyboxVAO, skyboxVBO;
+
+    GLuint vertexbuffer, indexbuffer, normalBuffer, textureCoordBuffer;
+    GLuint textureEauID,textureHerbeID, textureRocheID, textureNeigeID, textureHeightmapID;
+
+
 public :
     TerrainMesh terrainMesh;
 
@@ -92,6 +99,108 @@ public :
         toolBar->addAction( saveSnapShotPlusPlus );
     }
 
+    void loadSkybox() {
+        // Load the skybox shaders
+        QString skyboxVertexShaderSource = readShaderFile("src/skybox_vshader.glsl");
+        QString skyboxFragmentShaderSource = readShaderFile("src/skybox_fshader.glsl");
+
+        skyboxShader = createShaderProgram(skyboxVertexShaderSource.toUtf8().constData(), skyboxFragmentShaderSource.toUtf8().constData());
+
+        // Set up skybox vertices
+        GLfloat skyboxVertices[] = {
+            // Positions
+            -1.0f,  1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            -1.0f,  1.0f, -1.0f,
+            1.0f,  1.0f, -1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+            1.0f, -1.0f,  1.0f
+        };
+
+
+        glGenVertexArrays(1, &skyboxVAO);
+        glGenBuffers(1, &skyboxVBO);
+
+        glBindVertexArray(skyboxVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+        glEnableVertexAttribArray(0);
+
+        glBindVertexArray(0);
+    }
+
+    void drawSkybox() {
+        glUseProgram(skyboxShader);
+        glUniform1i(glGetUniformLocation(skyboxShader, "cubemapTexture"), 5);
+
+        glDisable(GL_DEPTH_TEST);
+
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader, "modelS"), 1, GL_FALSE, modelMatrix.data());
+
+
+        GLfloat viewMatrix[16];
+        camera()->getModelViewMatrix(viewMatrix);
+
+        // Supprimer les composantes de translation de la viewMatrix
+        viewMatrix[12] = 0.0f;
+        viewMatrix[13] = 0.0f;
+        viewMatrix[14] = 0.0f;
+
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader, "viewS"), 1, GL_FALSE, viewMatrix);
+
+
+        GLfloat projectionMatrix[16];
+        camera()->getProjectionMatrix(projectionMatrix);
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader, "projectionS"), 1, GL_FALSE, projectionMatrix);
+
+        glBindVertexArray(skyboxVAO);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+
+        glEnable(GL_DEPTH_TEST);
+
+        glUseProgram(0);
+    }
+
+
     void loadCubemap() {
         glGenTextures(1, &cubemapTexture);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
@@ -111,8 +220,7 @@ public :
             if (!image.isNull()) {
                 image = image.convertToFormat(QImage::Format_RGB888);
 
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                             0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
             } else {
                 qDebug() << "Cubemap texture failed to load at path: " << faces[i];
             }
@@ -172,24 +280,57 @@ public :
         return textureID;
     }
 
+    GLuint loadTextureHeightmap(QImage image)
+    {
+        image = image.convertToFormat(QImage::Format_RGBA8888);
+
+        GLuint textureID;
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            image.width(),
+            image.height(),
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            image.bits()
+            );
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return textureID;
+    }
+
     void drawBuffers() {
-        GLuint vertexbuffer;
+        //GLuint vertexbuffer;
         glGenBuffers(1, &vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glBufferData(GL_ARRAY_BUFFER, terrainMesh.vertex_buffer.size() * sizeof(QVector3D), &terrainMesh.vertex_buffer[0], GL_STATIC_DRAW);
 
-        GLuint indexbuffer;
+        //GLuint indexbuffer;
         glGenBuffers(1, &indexbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, indexbuffer);
-        glBufferData(GL_ARRAY_BUFFER, terrainMesh.index_buffer.size() * sizeof(short), &terrainMesh.index_buffer[0], GL_STATIC_DRAW);
+        //glBindBuffer(GL_ARRAY_BUFFER, indexbuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, terrainMesh.index_buffer.size() * sizeof(short), &terrainMesh.index_buffer[0], GL_STATIC_DRAW);
 
-        GLuint normalBuffer;
+        //GLuint normalBuffer;
         glGenBuffers(1, &normalBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
         glBufferData(GL_ARRAY_BUFFER, terrainMesh.normal_buffer.size() * sizeof(float), &terrainMesh.normal_buffer[0], GL_STATIC_DRAW);
 
         //Texture
-        GLuint textureCoordBuffer;
+        //GLuint textureCoordBuffer;
         glGenBuffers(1, &textureCoordBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
         glBufferData(GL_ARRAY_BUFFER, terrainMesh.texture_coord_buffer.size() * sizeof(QVector2D), &terrainMesh.texture_coord_buffer[0], GL_STATIC_DRAW);
@@ -207,7 +348,7 @@ public :
         //Texture
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0/*2 * sizeof(float)*/, (void*)0);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, /*0*/2 * sizeof(float), (void*)0);
 
         QString vertexShaderSource = readShaderFile("src/vshader.glsl");
         QString fragmentShaderSource = readShaderFile("src/fshader.glsl");
@@ -215,11 +356,12 @@ public :
         shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
 
         // Charger les textures
-        GLuint textureEauID = loadTexture("./images/textureEau.jpg");
-        GLuint textureHerbeID = loadTexture("./images/textureHerbe.jpg");
-        GLuint textureRocheID = loadTexture("./images/textureRoche.jpg");
-        GLuint textureNeigeID = loadTexture("./images/textureNeige.jpg");
-        GLuint textureHeightmapID = loadTexture("perlinNoise.png");
+        textureEauID = loadTexture("./images/textureEau.jpg");
+        textureHerbeID = loadTexture("./images/textureHerbe.jpg");
+        textureRocheID = loadTexture("./images/textureRoche.jpg");
+        textureNeigeID = loadTexture("./images/textureNeige.jpg");
+        //textureHeightmapID = loadTexture("perlinNoise.png");
+        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
 
         // Associer les textures aux unités de texture
         glActiveTexture(GL_TEXTURE0);
@@ -249,51 +391,58 @@ public :
 
     }
 
+
+
+
     void drawTerrainView() {
-            drawBuffers();
+        drawBuffers();
     }
 
     void drawPremierePersonneView() {
-            float centerX = terrainMesh.sizeX / 2.0f;
-            float centerZ = terrainMesh.sizeZ / 2.0f;
+        float centerX = terrainMesh.sizeX / 2.0f;
+        float centerZ = terrainMesh.sizeZ / 2.0f;
 
-            float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
-            float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
+        float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
+        float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
 
-            int i = static_cast<int>(centerX / stepX);
-            int j = static_cast<int>(centerZ / stepZ);
+        int i = static_cast<int>(centerX / stepX);
+        int j = static_cast<int>(centerZ / stepZ);
 
-            float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
-            GLfloat centerY;
-            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+        float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
+        GLfloat centerY;
+        terrainMesh.getHeightAtPerlinPx(centerY, perlin);
 
-            qglviewer::Vec cameraPosition(centerX, centerY+0.2f, centerZ);
-            camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
-            camera()->setPosition(cameraPosition);
+        qglviewer::Vec cameraPosition(centerX, centerY+0.2f, centerZ);
+        camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
+        camera()->setPosition(cameraPosition);
 
-            drawBuffers();
+        drawBuffers();
 
-            animate();
+        animate();
     }
 
     void setCameraPositionWithPerlinHeight() {
-            qglviewer::Vec cameraPosition = camera()->position();
+        qglviewer::Vec cameraPosition = camera()->position();
 
-            float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
-            float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
+        float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
+        float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
 
-            int i = static_cast<int>(cameraPosition.x / stepX);
-            int j = static_cast<int>(cameraPosition.z / stepZ);
+        int i = static_cast<int>(cameraPosition.x / stepX);
+        int j = static_cast<int>(cameraPosition.z / stepZ);
 
-            float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
-            GLfloat centerY;
-            terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+        float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
+        GLfloat centerY;
+        terrainMesh.getHeightAtPerlinPx(centerY, perlin);
 
-            cameraPosition.y = centerY+ 0.2f;
-            camera()->setPosition(cameraPosition);
+        cameraPosition.y = centerY+ 0.2f;
+        camera()->setPosition(cameraPosition);
     }
 
     void draw() {
+        //skybox
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        drawSkybox();
+
         glUseProgram(shaderProgram);
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, modelMatrix.data());
@@ -308,7 +457,6 @@ public :
 
         GLuint viewMatrixLocation = glGetUniformLocation(shaderProgram, "view");
         glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix);
-
 
         glUniform3f(glGetUniformLocation(shaderProgram, "color"), 0.5, 0.5, 0.5);
         glUniform3f(glGetUniformLocation(shaderProgram, "lightColor"), 1.0, 1.0, 1.0);
@@ -328,7 +476,6 @@ public :
         } else if (vueActuelle == VuePremierePersonne) {
             drawPremierePersonneView();
         }
-
 
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
@@ -438,6 +585,7 @@ public :
         glEnable(GL_COLOR_MATERIAL);
 
         loadCubemap();
+        loadSkybox();
 
         //
 
@@ -472,84 +620,84 @@ public :
 
     void keyPressEvent( QKeyEvent * event ) {
 
-            if( event->key() == Qt::Key_H ) {
-                help();
-            }
-            else if( event->key() == Qt::Key_T ) {
-                if( event->modifiers() & Qt::CTRL )
+        if( event->key() == Qt::Key_H ) {
+            help();
+        }
+        else if( event->key() == Qt::Key_T ) {
+            if( event->modifiers() & Qt::CTRL )
+            {
+                bool ok;
+                QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
+                if (ok && !text.isEmpty())
                 {
-                    bool ok;
-                    QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
-                    if (ok && !text.isEmpty())
-                    {
-                        updateTitle(text);
-                    }
+                    updateTitle(text);
                 }
             }
+        }
 
-            if (vueActuelle == VueTerrain) {
-                if (event->key() == Qt::Key_Left) {
-                    rotateObjectLeft();
-                }
-                else if (event->key() == Qt::Key_Right) {
-                    rotateObjectRight();
-                }
-                else if (event->key() == Qt::Key_Up) {
-                    rotateObjectUp();
-                }
-                else if (event->key() == Qt::Key_Down) {
-                    rotateObjectDown();
-                }
+        if (vueActuelle == VueTerrain) {
+            if (event->key() == Qt::Key_Left) {
+                rotateObjectLeft();
             }
-            else if (vueActuelle == VuePremierePersonne) {
+            else if (event->key() == Qt::Key_Right) {
+                rotateObjectRight();
+            }
+            else if (event->key() == Qt::Key_Up) {
+                rotateObjectUp();
+            }
+            else if (event->key() == Qt::Key_Down) {
+                rotateObjectDown();
+            }
+        }
+        else if (vueActuelle == VuePremierePersonne) {
 
-                const float stepSize = 1.f/terrainMesh.resolution;
-                const float stepRotate = 0.05f;
+            const float stepSize = 1.f/terrainMesh.resolution;
+            const float stepRotate = 0.05f;
 
-                if (event->key() == Qt::Key_Q) {
-                    accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
+            if (event->key() == Qt::Key_Q) {
+                accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
 
-                } else if (event->key() == Qt::Key_D) {
-                    accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
+            } else if (event->key() == Qt::Key_D) {
+                accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
 
-                } else if (event->key() == Qt::Key_Z) {
-                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, -stepSize);
+            } else if (event->key() == Qt::Key_Z) {
+                accumulatedKeyTranslation += qglviewer::Vec(0, 0, -stepSize);
 
-                } else if (event->key() == Qt::Key_S) {
-                    accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
-                }
-                else if (event->key() == Qt::Key_Up) {
-                    qreal pitch = camera()->viewDirection().y;
+            } else if (event->key() == Qt::Key_S) {
+                accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
+            }
+            else if (event->key() == Qt::Key_Up) {
+                qreal pitch = camera()->viewDirection().y;
 
-                    if (pitch <= 0.4) {
-                        qglviewer::Quaternion rotation;
-                        rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
-                        camera()->frame()->rotate(rotation);
-                    }
-                }
-                else if (event->key() == Qt::Key_Down) {
-                    qreal pitch = camera()->viewDirection().y;
-
-                    if (pitch >= -0.7) {
-                        qglviewer::Quaternion rotation;
-                        rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
-                        camera()->frame()->rotate(rotation);
-                    }
-                }
-                else if (event->key() == Qt::Key_Right) {
+                if (pitch <= 0.4) {
                     qglviewer::Quaternion rotation;
-                    rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), stepRotate);
+                    rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                 }
-                else if (event->key() == Qt::Key_Left) {
+            }
+            else if (event->key() == Qt::Key_Down) {
+                qreal pitch = camera()->viewDirection().y;
+
+                if (pitch >= -0.7) {
                     qglviewer::Quaternion rotation;
-                    rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), stepRotate);
+                    rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                 }
-
-                update();
-
             }
+            else if (event->key() == Qt::Key_Right) {
+                qglviewer::Quaternion rotation;
+                rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), stepRotate);
+                camera()->frame()->rotate(rotation);
+            }
+            else if (event->key() == Qt::Key_Left) {
+                qglviewer::Quaternion rotation;
+                rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), stepRotate);
+                camera()->frame()->rotate(rotation);
+            }
+
+            update();
+
+        }
 
     }
 
@@ -588,6 +736,7 @@ public :
         translationMatrix.translate(objectCenter);
         modelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * modelMatrix;
 
+        //modelMatrixS =
         update();
     }
 
@@ -628,9 +777,9 @@ public slots:
             exit (EXIT_FAILURE);
         // << operator for point3 causes linking problem on windows
         out << camera()->position()[0] << " \t" << camera()->position()[1] << " \t" << camera()->position()[2] << " \t" " " <<
-                                          camera()->viewDirection()[0] << " \t" << camera()->viewDirection()[1] << " \t" << camera()->viewDirection()[2] << " \t" << " " <<
-                                          camera()->upVector()[0] << " \t" << camera()->upVector()[1] << " \t" <<camera()->upVector()[2] << " \t" <<" " <<
-                                          camera()->fieldOfView();
+            camera()->viewDirection()[0] << " \t" << camera()->viewDirection()[1] << " \t" << camera()->viewDirection()[2] << " \t" << " " <<
+            camera()->upVector()[0] << " \t" << camera()->upVector()[1] << " \t" <<camera()->upVector()[2] << " \t" <<" " <<
+            camera()->fieldOfView();
         out << std::endl;
 
         out.close ();
@@ -647,9 +796,9 @@ public slots:
         float fov;
 
         file >> (pos[0]) >> (pos[1]) >> (pos[2]) >>
-                                                    (view[0]) >> (view[1]) >> (view[2]) >>
-                                                                                           (up[0]) >> (up[1]) >> (up[2]) >>
-                                                                                                                            fov;
+            (view[0]) >> (view[1]) >> (view[2]) >>
+            (up[0]) >> (up[1]) >> (up[2]) >>
+            fov;
 
         camera()->setPosition(pos);
         camera()->setViewDirection(view);
