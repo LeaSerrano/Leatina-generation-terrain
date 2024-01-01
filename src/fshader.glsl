@@ -23,6 +23,7 @@ uniform sampler2D textureHerbe;    // Texture pour la hauteur entre 10 et 100
 uniform sampler2D textureRoche;    // Texture pour la hauteur entre 100 et 200
 uniform sampler2D textureNeige;    // Texture pour la hauteur > 200
 
+uniform samplerCube cubemapTexture;
 
 out vec4 FragColor;
 
@@ -52,21 +53,25 @@ void main()
     vec4 cR = texture(textureRoche, texCoord);
     vec4 cN = texture(textureNeige, texCoord);
 
-    if (height < 0.05) {
+    if (height == 0.00) {
         h_color = cE;
-    } else if (height >= 0.05 && height <= 0.1) {
-        h_color = mix(cE, cH, smoothstep(0.05, 0.1, height));
-    } else if (height > 0.1 && height <= 0.5) {
+    } else if (height > 0.00 && height <= 0.01) {
+        h_color = mix(cE, cH, smoothstep(0.00, 0.01, height));
+    } else if (height > 0.01 && height <= 0.4) {
         h_color = cH;
-    } else if (height > 0.5 && height <= 0.6) {
-        h_color = mix(cH, cR, smoothstep(0.5, 0.6, height));
-    } else if (height > 0.6 && height <= 0.75) {
+    } else if (height > 0.4 && height <= 0.6) {
+        h_color = mix(cH, cR, smoothstep(0.4, 0.6, height));
+    } else if (height > 0.6 && height <= 0.7) {
         h_color = cR;
-    } else if (height > 0.75 && height <= 0.8) {
-        h_color = mix(cR, cN, smoothstep(0.75, 0.8, height));
+    } else if (height > 0.7 && height <= 0.8) {
+        h_color = mix(cR, cN, smoothstep(0.7, 0.8, height));
     } else {
         h_color = cN;
     }
+
+    vec3 reflection = reflect(normalize(viewDir), normal);
+    vec3 environmentColor = texture(cubemapTexture, reflection).rgb;
+    //vec3 result = (ambient + diffuse + specular) * h_color.rgb * environmentColor;
 
     //vec3 result = (ambient + diffuse + specular) * h_color;
     vec3 result = (ambient + diffuse + specular) * h_color.rgb;

@@ -238,6 +238,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 }
             }
         }
+
     viewer->setFocus();
     return QMainWindow::eventFilter(obj, event);
 }
@@ -324,6 +325,9 @@ void MainWindow::redoDrawingPath() {
 void MainWindow::updateMesh(QImage image){
     viewer->terrainMesh.perlinNoise->ImgPerlin = image;
     viewer->terrainMesh.generateMesh();
+    viewer->draw();
+    viewer->drawBuffers();
+    viewer->update();
 
     viewer->setFocus();
     ui->widget_affichage_terrain->setFocus();
