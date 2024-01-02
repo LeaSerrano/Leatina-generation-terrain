@@ -104,7 +104,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->button_redo, &QPushButton::clicked, this, &MainWindow::redoDrawingPath);
 
     //Pinceau
-    penSize = 3;
+    penSize = 10;
     ui->dial_penSize->setValue(penSize);
     ui->label_penSize->setText(QString::number(penSize));
     QObject::connect(ui->dial_penSize, &QDial::valueChanged, this, [=](){
@@ -325,8 +325,6 @@ void MainWindow::redoDrawingPath() {
 void MainWindow::updateMesh(QImage image){
     viewer->terrainMesh.perlinNoise->ImgPerlin = image;
     viewer->terrainMesh.generateMesh();
-    viewer->draw();
-    viewer->drawBuffers();
     viewer->update();
 
     viewer->setFocus();

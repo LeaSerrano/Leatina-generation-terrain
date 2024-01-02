@@ -7,7 +7,8 @@
 #include <QPainterPath>
 #include <QMouseEvent>
 #include <QDebug>
-
+#include <QtGui>
+#include <opencv2/opencv.hpp>
 
 class Path
 {
@@ -31,6 +32,8 @@ public:
     QImage renderPathImage; //image tracée (tracé prend les bonnes couleurs modifiées)
 
     QImage getRenderPathImage();
+
+    int blurSize();
 
 private:
     QPainterPath path;

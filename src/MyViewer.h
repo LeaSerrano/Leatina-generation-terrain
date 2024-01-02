@@ -636,17 +636,21 @@ public :
         }
 
         if (vueActuelle == VueTerrain) {
-            if (event->key() == Qt::Key_Left) {
+            static int nbMvt = 0;
+            if (nbMvt == 0 && event->key() == Qt::Key_Left) {
                 rotateObjectLeft();
             }
-            else if (event->key() == Qt::Key_Right) {
+            else if (nbMvt == 0 && event->key() == Qt::Key_Right) {
                 rotateObjectRight();
             }
-            else if (event->key() == Qt::Key_Up) {
+            else if (nbMvt < 20 && event->key() == Qt::Key_Up) {
                 rotateObjectUp();
+                nbMvt++;
+                qDebug() << nbMvt;
             }
-            else if (event->key() == Qt::Key_Down) {
+            else if (nbMvt > 0 && event->key() == Qt::Key_Down) {
                 rotateObjectDown();
+                nbMvt--;
             }
         }
         else if (vueActuelle == VuePremierePersonne) {

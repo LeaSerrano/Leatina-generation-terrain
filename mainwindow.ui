@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>868</width>
-    <height>735</height>
+    <width>1920</width>
+    <height>1200</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,16 +19,19 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>661</width>
-      <height>441</height>
+      <width>1024</width>
+      <height>768</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:rgb(36, 31, 49);</string>
     </property>
    </widget>
    <widget class="QSlider" name="horizontalSlider_resolution">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>140</y>
+      <x>1350</x>
+      <y>10</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -40,8 +43,8 @@
    <widget class="QLabel" name="label_resolution">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>100</y>
+      <x>1260</x>
+      <y>10</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -53,8 +56,8 @@
    <widget class="QSlider" name="horizontalSlider_heightRange">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>290</y>
+      <x>1650</x>
+      <y>10</y>
       <width>160</width>
       <height>16</height>
      </rect>
@@ -66,8 +69,8 @@
    <widget class="QLabel" name="label_heightRange">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>250</y>
+      <x>1520</x>
+      <y>10</y>
       <width>141</width>
       <height>25</height>
      </rect>
@@ -79,8 +82,8 @@
    <widget class="QPushButton" name="pushButton_reload">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>0</y>
+      <x>1030</x>
+      <y>10</y>
       <width>28</width>
       <height>28</height>
      </rect>
@@ -92,11 +95,14 @@
    <widget class="QLabel" name="label_perlinNoise">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>440</y>
-      <width>300</width>
-      <height>300</height>
+      <x>1216</x>
+      <y>128</y>
+      <width>512</width>
+      <height>512</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color :rgb(92, 115, 84);</string>
     </property>
     <property name="text">
      <string/>
@@ -105,8 +111,8 @@
    <widget class="QPushButton" name="button_undo">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>450</y>
+      <x>1210</x>
+      <y>100</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -118,8 +124,8 @@
    <widget class="QPushButton" name="button_redo">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>480</y>
+      <x>1300</x>
+      <y>100</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -131,8 +137,8 @@
    <widget class="QPushButton" name="button_save_map">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>550</y>
+      <x>1160</x>
+      <y>10</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -144,8 +150,8 @@
    <widget class="QPushButton" name="button_open_map">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>520</y>
+      <x>1070</x>
+      <y>10</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -157,8 +163,8 @@
    <widget class="QSlider" name="verticalSlider_newHeightValue">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>450</y>
+      <x>1150</x>
+      <y>280</y>
       <width>16</width>
       <height>160</height>
      </rect>
@@ -182,8 +188,8 @@
    <widget class="QLabel" name="label_newHeightValue">
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>470</y>
+      <x>1130</x>
+      <y>250</y>
       <width>71</width>
       <height>17</height>
      </rect>
@@ -195,23 +201,26 @@
    <widget class="QDial" name="dial_penSize">
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>500</y>
+      <x>1140</x>
+      <y>550</y>
       <width>50</width>
       <height>64</height>
      </rect>
     </property>
     <property name="minimum">
-     <number>1</number>
+     <number>10</number>
     </property>
     <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="singleStep">
      <number>10</number>
     </property>
     <property name="value">
-     <number>3</number>
+     <number>10</number>
     </property>
     <property name="sliderPosition">
-     <number>3</number>
+     <number>10</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -229,8 +238,8 @@
    <widget class="QLabel" name="label_penSize">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>470</y>
+      <x>1150</x>
+      <y>520</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -242,8 +251,8 @@
    <widget class="QPushButton" name="pushButton_mode_FPS">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>650</y>
+      <x>1810</x>
+      <y>20</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -258,7 +267,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>868</width>
+     <width>1920</width>
      <height>22</height>
     </rect>
    </property>
