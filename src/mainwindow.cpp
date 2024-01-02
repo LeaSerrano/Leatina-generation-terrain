@@ -63,6 +63,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     backgroundWidget->lower();
 
     viewer = new MyViewer();
+    viewer->saveCameraInFile("initCam.txt");
+
+    defaultCentralWidget = ui->centralwidget;
 
     ui->statusbar->hide();
 
@@ -134,12 +137,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
     combinePathsImages(pathsImages);
+    setFocusPolicy(Qt::StrongFocus);
     viewer->setFocus();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
+
+void MainWindow::restaurerWidgetCentralParDefaut() {
+    this->setCentralWidget(defaultCentralWidget);
+}
+
 
 // Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
@@ -377,9 +386,30 @@ void MainWindow::changerVuePremierePersonne() {
 
         viewer->draw();
 
-        this->setCentralWidget(viewer);
+        //ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
+        //viewer->setGeometry(0, 0, width(), height());
+
         viewer->setFocus();
 
     }
 
 }
+
+// void MainWindow::keyPressEvent(QKeyEvent *event) {
+//     qDebug() << "Fonction keyPressEvent appelée.";
+//     qDebug() << "Touche appuyée : " << event->key();
+//     if (viewer->vueActuelle == viewer->VuePremierePersonne) {
+//         if (event->key() == Qt::Key_Escape) {
+//             qDebug() << "escape";
+//             //restaurerWidgetCentralParDefaut();
+
+//             ui->widget_affichage_terrain->setGeometry(0, 0, 1024, 768);
+//             viewer->setGeometry(0, 0, 1024, 768);
+
+//         }
+//     }
+
+
+//     QMainWindow::keyPressEvent(event);
+// }
+
