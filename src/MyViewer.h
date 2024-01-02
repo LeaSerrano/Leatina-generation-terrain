@@ -593,6 +593,7 @@ public :
         adjustCamera(bbmin, BBmax);
 
         modelMatrix = QMatrix4x4();
+
     }
 
     QString helpString() const {
@@ -636,60 +637,80 @@ public :
         }
 
         if (vueActuelle == VueTerrain) {
-            if (event->key() == Qt::Key_Left) {
+            static int nbMvt = 0;
+            if (nbMvt == 0 && event->key() == Qt::Key_Left) {
                 rotateObjectLeft();
             }
-            else if (event->key() == Qt::Key_Right) {
+            else if (nbMvt == 0 && event->key() == Qt::Key_Right) {
                 rotateObjectRight();
             }
-            else if (event->key() == Qt::Key_Up) {
+            else if (nbMvt < 20 && event->key() == Qt::Key_Up) {
                 rotateObjectUp();
+                nbMvt++;
+                //qDebug() << nbMvt;
             }
-            else if (event->key() == Qt::Key_Down) {
+            else if (nbMvt > 0 && event->key() == Qt::Key_Down) {
                 rotateObjectDown();
+                nbMvt--;
             }
         }
         else if (vueActuelle == VuePremierePersonne) {
+            static int nbMvtFPS = 0;
 
             const float stepSize = 1.f/terrainMesh.resolution;
             const float stepRotate = 0.05f;
 
             if (event->key() == Qt::Key_Q) {
-                accumulatedKeyTranslation += qglviewer::Vec(-stepSize, 0, 0);
-
+                accumulatedKeyTranslation += camera()->frame()->inverseTransformOf(qglviewer::Vec(-stepSize, 0, 0));
             } else if (event->key() == Qt::Key_D) {
-                accumulatedKeyTranslation += qglviewer::Vec(stepSize, 0, 0);
-
+                accumulatedKeyTranslation += camera()->frame()->inverseTransformOf(qglviewer::Vec(+stepSize, 0, 0));
             } else if (event->key() == Qt::Key_Z) {
-                accumulatedKeyTranslation += qglviewer::Vec(0, 0, -stepSize);
-
+                accumulatedKeyTranslation += camera()->frame()->inverseTransformOf(qglviewer::Vec(0, 0, -stepSize));
             } else if (event->key() == Qt::Key_S) {
-                accumulatedKeyTranslation += qglviewer::Vec(0, 0, stepSize);
+                accumulatedKeyTranslation += camera()->frame()->inverseTransformOf(qglviewer::Vec(0, 0, stepSize));
             }
-            else if (event->key() == Qt::Key_Up) {
+            if (event->key() == Qt::Key_Escape) {
+                vueActuelle = VueTerrain;
+                openCameraFromFile("initCam.txt");
+                terrainMesh.sizeX = 1.0;
+                terrainMesh.sizeY = 1.0;
+                terrainMesh.sizeZ = 1.0;
+                terrainMesh.generateMesh();
+
+                update();
+                point3d bbmin(0.0, 0.0, 0.0) , BBmax(1, 1, 1);
+                adjustCamera(bbmin, BBmax);
+
+            }
+
+            else if (/*nbMvtFPS < 20 &&*/ event->key() == Qt::Key_Up) {
                 qreal pitch = camera()->viewDirection().y;
 
                 if (pitch <= 0.4) {
                     qglviewer::Quaternion rotation;
                     rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
+                    nbMvtFPS++;
+                    //qDebug() << nbMvtFPS;
                 }
             }
-            else if (event->key() == Qt::Key_Down) {
+            else if (/*nbMvtFPS > 0 &&*/ event->key() == Qt::Key_Down) {
                 qreal pitch = camera()->viewDirection().y;
 
                 if (pitch >= -0.7) {
                     qglviewer::Quaternion rotation;
                     rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
+                    nbMvtFPS--;
+                    //qDebug() << nbMvtFPS;
                 }
             }
-            else if (event->key() == Qt::Key_Right) {
+            else if (nbMvtFPS == 0 && event->key() == Qt::Key_Right) {
                 qglviewer::Quaternion rotation;
                 rotation.setAxisAngle(qglviewer::Vec(0.0, -1.0, 0.0), stepRotate);
                 camera()->frame()->rotate(rotation);
             }
-            else if (event->key() == Qt::Key_Left) {
+            else if (nbMvtFPS == 0 && event->key() == Qt::Key_Left) {
                 qglviewer::Quaternion rotation;
                 rotation.setAxisAngle(qglviewer::Vec(0.0, 1.0, 0.0), stepRotate);
                 camera()->frame()->rotate(rotation);
@@ -740,11 +761,14 @@ public :
         update();
     }
 
-    void mousePressEvent(QMouseEvent *e) {
+    void mousePressEvent(QMouseEvent *event) {
+        if (vueActuelle == VuePremierePersonne) {
 
+
+        }
     }
 
-    void mouseMoveEvent(QMouseEvent *e) {
+    void mouseMoveEvent(QMouseEvent *event) {
 
     }
 

@@ -20,7 +20,7 @@ public :
     int seed;
 
 private :
-    int nH = 256, nW = 256;
+    int nH = 512, nW = 512;
 
 
     unsigned int generateRandomSeed();

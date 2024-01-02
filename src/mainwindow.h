@@ -115,6 +115,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QWidget* defaultCentralWidget;
     QLabel *backgroundWidget;
     MyViewer* viewer;
     bool isLeftButtonPressed;
@@ -145,6 +146,10 @@ protected:
 
     void update_label_perlinNoise(QImage editedImage, QImage layerImage);
     void combinePathsImages(QList<QImage> pathsImages);
+
+    void restaurerWidgetCentralParDefaut();
+
+    // void keyPressEvent(QKeyEvent *event) override;
 
 };
 

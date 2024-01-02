@@ -49,6 +49,23 @@ void Path::setPixelsPath(){
     }
 }
 
+cv::Mat QImageToCvMat(const QImage& image) {
+    cv::Mat mat(image.height(), image.width(), CV_8UC4, (uchar*)image.bits(), image.bytesPerLine());
+    return mat.clone();
+}
+
+QImage cvMatToQImage(const cv::Mat& mat) {
+    QImage image(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_ARGB32_Premultiplied);
+    return image.rgbSwapped(); // Si nécessaire (BGR -> RGB)
+}
+
+int Path::blurSize(){
+    int size = widthPen / 2;
+    if(size%2 == 0) size = size - 1;
+    //qDebug() << size;
+    return size;
+}
+
 void Path::addModification(QImage image){
     renderPathImage = QImage(image.size(), image.format());
     renderPathImage.fill(Qt::transparent);
@@ -69,6 +86,15 @@ void Path::addModification(QImage image){
         //renderPathImage = renderPathImage.convertToFormat(QImage::Format_RGB32);
         //qDebug() << "ici";
     }
+
+    int size;
+    size = blurSize();
+    cv::Mat mat = QImageToCvMat(renderPathImage);
+    cv::Mat blurredMat;
+    cv::GaussianBlur(mat, blurredMat, cv::Size(size, size), 0);
+    QImage blurredImage = cvMatToQImage(blurredMat);
+    renderPathImage = blurredImage.copy();
+
 }
 
 void Path::endDrawingPath(){
