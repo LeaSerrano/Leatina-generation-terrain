@@ -145,7 +145,7 @@ public:
         button_open_map->setText(QCoreApplication::translate("MainWindow", "ouvrir carte", nullptr));
         label_newHeightValue->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
         label_penSize->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
-        pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "FPS", nullptr));
+        pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "entrer mode FPS", nullptr));
     } // retranslateUi
 
 };

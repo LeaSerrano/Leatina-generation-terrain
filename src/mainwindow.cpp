@@ -379,6 +379,8 @@ void MainWindow::changerVuePremierePersonne() {
     if (viewer->vueActuelle == viewer->VueTerrain) {
         viewer->vueActuelle = viewer->VuePremierePersonne;
 
+        ui->pushButton_mode_FPS->setText("quitter mode FPS");
+
         viewer->terrainMesh.sizeX = 4.0;
         viewer->terrainMesh.sizeY = 4.0;
         viewer->terrainMesh.sizeZ = 4.0;
@@ -386,11 +388,24 @@ void MainWindow::changerVuePremierePersonne() {
 
         viewer->draw();
 
-        //ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
-        //viewer->setGeometry(0, 0, width(), height());
+        viewer->setFocus();
+    }
+    else {
+        ui->pushButton_mode_FPS->setText("entrer mode FPS");
+        viewer->vueActuelle = viewer->VueTerrain;
+        viewer->openCameraFromFile("initCam.txt");
+
+        viewer->terrainMesh.sizeX = 1.0;
+        viewer->terrainMesh.sizeY = 1.0;
+        viewer->terrainMesh.sizeZ = 1.0;
+        viewer->terrainMesh.generateMesh();
+
+        point3d bbmin(0.0, 0.0, 0.0) , BBmax(1, 1, 1);
+        viewer->adjustCamera(bbmin, BBmax);
+
+        viewer->draw();
 
         viewer->setFocus();
-
     }
 
 }
