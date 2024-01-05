@@ -417,7 +417,6 @@ public :
         camera()->setPosition(cameraPosition);
 
         drawBuffers();
-
         animate();
     }
 
@@ -691,7 +690,6 @@ public :
                     rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                     nbMvtFPS++;
-                    //qDebug() << nbMvtFPS;
                 }
             }
             else if (/*nbMvtFPS > 0 &&*/ event->key() == Qt::Key_Down) {
@@ -702,7 +700,6 @@ public :
                     rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                     nbMvtFPS--;
-                    //qDebug() << nbMvtFPS;
                 }
             }
             else if (nbMvtFPS == 0 && event->key() == Qt::Key_Right) {
