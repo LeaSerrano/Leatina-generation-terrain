@@ -386,8 +386,8 @@ void MainWindow::changerVuePremierePersonne() {
 
         viewer->draw();
 
-        //ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
-        //viewer->setGeometry(0, 0, width(), height());
+        ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
+        viewer->setGeometry(0, 0, width(), height());
 
         viewer->setFocus();
 
@@ -395,21 +395,21 @@ void MainWindow::changerVuePremierePersonne() {
 
 }
 
-// void MainWindow::keyPressEvent(QKeyEvent *event) {
-//     qDebug() << "Fonction keyPressEvent appelée.";
-//     qDebug() << "Touche appuyée : " << event->key();
-//     if (viewer->vueActuelle == viewer->VuePremierePersonne) {
-//         if (event->key() == Qt::Key_Escape) {
-//             qDebug() << "escape";
-//             //restaurerWidgetCentralParDefaut();
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    qDebug() << "Fonction keyPressEvent appelée.";
+    qDebug() << "Touche appuyée : " << event->key();
+    if (viewer->vueActuelle == viewer->VuePremierePersonne) {
+        if (event->key() == Qt::Key_Escape) {
+            qDebug() << "escape";
+            //restaurerWidgetCentralParDefaut();
 
-//             ui->widget_affichage_terrain->setGeometry(0, 0, 1024, 768);
-//             viewer->setGeometry(0, 0, 1024, 768);
+            ui->widget_affichage_terrain->setGeometry(0, 0, 1024, 768);
+            viewer->setGeometry(0, 0, 1024, 768);
 
-//         }
-//     }
+        }
+    }
 
 
-//     QMainWindow::keyPressEvent(event);
-// }
+    QMainWindow::keyPressEvent(event);
+}
 
