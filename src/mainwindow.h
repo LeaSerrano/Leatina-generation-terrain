@@ -114,6 +114,13 @@ private slots:
 
     void changerVuePremierePersonne();
 
+    //preview tracé pinceau
+    void updatePreviewPenSize(int penSize);
+
+    void hideParamMesh(bool hide);
+    void hideParam(bool hide);
+    void hideCarte(bool hide);
+
 private:
     Ui::MainWindow *ui;
     //QWidget* defaultCentralWidget;

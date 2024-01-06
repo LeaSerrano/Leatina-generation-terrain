@@ -789,36 +789,36 @@ public :
 
     }
 
-    void mousePressEvent(QMouseEvent *event) {
-        QGLViewer::mousePressEvent(event);
+    // void mousePressEvent(QMouseEvent *event) {
+    //     QGLViewer::mousePressEvent(event);
 
-        if (vueActuelle == VuePremierePersonne) {
+    //     if (vueActuelle == VuePremierePersonne) {
 
-        }
-    }
+    //     }
+    // }
 
-    void mouseMoveEvent(QMouseEvent *event) {
-        QGLViewer::mouseMoveEvent(event);
+    // void mouseMoveEvent(QMouseEvent *event) {
+    //     QGLViewer::mouseMoveEvent(event);
 
-        if (vueActuelle == VuePremierePersonne) {
+    //     if (vueActuelle == VuePremierePersonne) {
 
 
 
-        }
-    }
+    //     }
+    // }
 
-    void mouseReleaseEvent(QMouseEvent* event) {
-        QGLViewer::mouseReleaseEvent(event);
+    // void mouseReleaseEvent(QMouseEvent* event) {
+    //     QGLViewer::mouseReleaseEvent(event);
 
-        if (vueActuelle == VuePremierePersonne) {
+    //     if (vueActuelle == VuePremierePersonne) {
 
-            if (event->button() == Qt::RightButton)
-            {
+    //         if (event->button() == Qt::RightButton)
+    //         {
 
-            }
+    //         }
 
-        }
-    }
+    //     }
+    // }
 
     void animate() {
         qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;

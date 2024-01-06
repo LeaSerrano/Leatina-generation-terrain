@@ -64,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->statusbar->hide();
 
+    // CFG APPARENCE BOUTONS/BARRES
+
     QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect;
     shadowEffect->setBlurRadius(10);
     shadowEffect->setColor(QColor(0, 0, 0, 200)); // Couleur de l'ombre et opacité
@@ -72,21 +74,122 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->label_barre_haut->setGraphicsEffect(shadowEffect);
     ui->label_fond_carte->setGraphicsEffect(shadowEffect);
 
+
+    // Barre carte Perlin
     QLabel *barre = new QLabel();
     barre->setParent(ui->label_fond_carte);
     barre->setStyleSheet("background-color: white;");
     barre->setGeometry(0,0,ui->label_fond_carte->width(), 40);
 
+    QFont URWFont("URW Gothic L",11);
     QLabel *textebarre = new QLabel();
     textebarre->setParent(barre);
     textebarre->setText("Carte du bruit de perlin");
-    textebarre->setStyleSheet("background-color: transparent; background-color: rgb(52, 78, 65); border: none; color: white;");
-    textebarre->setGeometry(barre->geometry());
+    textebarre->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
+    textebarre->setGeometry(0,0,ui->label_fond_carte->width(), 40);
     textebarre->setContentsMargins(15, 10, 10, 10);
-    //textebarre->setFont(ui->label_titre->font().family());
+    textebarre->setFont(URWFont);
+
+    QPushButton *fermercarte = new QPushButton();
+    fermercarte->setParent(barre);
+    fermercarte->setGeometry(barre->width()-30, 10, 20,20);
+    fermercarte->setStyleSheet("QPushButton {background-color: rgb(200, 88, 88); border: none; border-radius: 10px;} "
+                               "QPushButton:hover {background-color: lightcoral; border: none; border-radius: 10px;} ");
+    fermercarte->setIcon(QIcon("./icons/fermer.png"));
+    QObject::connect(fermercarte, &QPushButton::clicked, this, [=]() {
+        hideCarte(true);
+    });
+    hideCarte(true);
+
+    QObject::connect(ui->button_show_map, &QPushButton::clicked, this, [=]() {
+        hideCarte(false);
+    });
+
+    QFont Libe("Liberation Sans Narrow",11);
+    QPushButton *boutonParam = new QPushButton();
+    boutonParam->setParent(barre);
+    boutonParam->setGeometry(ui->label_fond_carte->width()-180,10, 140, 20);
+    boutonParam->setStyleSheet("QPushButton {background-color: rgb(102, 128, 115); border: none; border-radius: 10px;} "
+                               "QPushButton:hover {background-color: rgb(122, 148, 135); border: none; border-radius: 10px;} ");
+    boutonParam->setText("Paramètres pinceau");
+    boutonParam->setFont(Libe);
+    boutonParam->setIcon(QIcon("./icons/editer.png"));
+    QObject::connect(boutonParam, &QPushButton::clicked, this, [=]() {
+        hideParam(false);
+    });
+
+
+    // Barre paramètres pinceau
+    QLabel *barreParam = new QLabel();
+    barreParam->setParent(ui->label_param_pen);
+    barreParam->setStyleSheet("background-color: white;");
+    barreParam->setGeometry(0,0,ui->label_fond_carte->width(), 40);
+
+    QLabel *textebarreParam = new QLabel();
+    textebarreParam->setParent(barreParam);
+    textebarreParam->setText("Paramètres pinceau");
+    textebarreParam->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
+    textebarreParam->setGeometry(0,0,ui->label_fond_carte->width(), 40);
+    textebarreParam->setContentsMargins(15, 10, 10, 10);
+    textebarreParam->setFont(URWFont);
+
+    QPushButton *fermerParam = new QPushButton();
+    fermerParam->setParent(barreParam);
+    fermerParam->setGeometry(barreParam->width()-30, 10, 20,20);
+    fermerParam->setStyleSheet("QPushButton {background-color: rgb(200, 88, 88); border: none; border-radius: 10px;} "
+                               "QPushButton:hover {background-color: lightcoral; border: none; border-radius: 10px;} ");
+    fermerParam->setIcon(QIcon("./icons/fermer.png"));
+    QObject::connect(fermerParam, &QPushButton::clicked, this, [=]() {
+        hideParam(true);
+    });
+
+    // Barre paramètres mesh
+    QLabel *barreParamMesh = new QLabel();
+    barreParamMesh->setParent(ui->label_param_mesh);
+    barreParamMesh->setStyleSheet("background-color: white;");
+    barreParamMesh->setGeometry(0,0,ui->label_param_mesh->width(), 40);
+
+    QLabel *textebarreParamMesh = new QLabel();
+    textebarreParamMesh->setParent(barreParamMesh);
+    textebarreParamMesh->setText("Paramètres du maillage de la carte");
+        textebarreParamMesh->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
+    textebarreParamMesh->setGeometry(0,0,ui->label_param_mesh->width(), 40);
+    textebarreParamMesh->setContentsMargins(15, 10, 10, 10);
+    textebarreParamMesh->setFont(URWFont);
+
+    QPushButton *fermerParamMesh = new QPushButton();
+    fermerParamMesh->setParent(barreParamMesh);
+    fermerParamMesh->setGeometry(barreParamMesh->width()-30, 10, 20,20);
+    fermerParamMesh->setStyleSheet("QPushButton {background-color: rgb(200, 88, 88); border: none; border-radius: 10px;} "
+                               "QPushButton:hover {background-color: lightcoral; border: none; border-radius: 10px;} ");
+    fermerParamMesh->setIcon(QIcon("./icons/fermer.png"));
+    QObject::connect(fermerParamMesh, &QPushButton::clicked, this, [=]() {
+        //hideParam(true);
+    });
+
+    ui->button_undo->setText("");
+    ui->button_undo->setIcon(QIcon("./icons/undo.png"));
+
+    ui->button_redo->setText("");
+    ui->button_redo->setIcon(QIcon("./icons/forward.png"));
+
+    // BOUTONS SAVE/OPEN CARTE
+    //Sauvegarde terrain
+    QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
+        downloadMap(viewer->terrainMesh.getMap());
+    });
+
+    //Ouverture terrain
+    QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
+        uploadMap();
+    });
+
+    // BOUTON MODE FPS
+    QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
     // AFFICHAGE DU TERRAIN
     ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
+    ui->widget_affichage_terrain->lower();
     viewer = new MyViewer();
     viewer->saveCameraInFile("initCam.txt");
     viewer->setParent(ui->widget_affichage_terrain);
@@ -109,8 +212,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //ui->pushButton_reload->setStyleSheet("background-color : white");
     QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
-    // CFG IMAGES CARTE
-
+    //----- CFG IMAGES CARTE -----//
     //Image originale
     originalImage = QImage("perlinNoise.png");
 
@@ -132,10 +234,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //Pinceau
     penSize = 10;
     ui->dial_penSize->setValue(penSize);
-    ui->label_penSize->setText(QString::number(penSize));
+    ui->label_penSize->setText("Taille pinceau : \n" + QString::number(penSize));
+    updatePreviewPenSize(penSize);
     QObject::connect(ui->dial_penSize, &QDial::valueChanged, this, [=](){
         penSize = ui->dial_penSize->value();
-        ui->label_penSize->setText(QString::number(penSize));
+        ui->label_penSize->setText("Taille pinceau : \n" + QString::number(penSize));
+        updatePreviewPenSize(penSize);
     });
 
     //Hauteur de la nouvelle valeur de hauteur (pinceau)
@@ -147,22 +251,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->label_newHeightValue->setText(QString::number(newHeightValue));
     });
 
-    // BOUTONS SAVE/OPEN CARTE
-
-    //Sauvegarde terrain
-    QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
-        downloadMap(viewer->terrainMesh.getMap());
-    });
-
-    //Ouverture terrain
-    QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
-        uploadMap();
-    });
-
-    // BOUTON MODE FPS
-
-    QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
-
 
     // FIN INITIALISATION
     combinePathsImages(pathsImages);
@@ -173,6 +261,67 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
     delete ui;
 }
+
+void MainWindow::updatePreviewPenSize(int penSize){
+    QPixmap previewPixmap(ui->label_penSizeIMG->size());
+    previewPixmap.fill(Qt::white);
+
+    QPainter previewPainter(&previewPixmap);
+
+    int squareSize = 10; // Taille du carré
+    int numRows = 100 / squareSize;
+    int numCols = 100 / squareSize;
+
+    for (int row = 0; row < numRows; ++row)
+    {
+        for (int col = 0; col < numCols; ++col)
+        {
+            if ((row + col) % 2 == 0)
+                previewPainter.fillRect(col * squareSize, row * squareSize, squareSize, squareSize, QColor(220, 220, 220));
+            else
+                previewPainter.fillRect(col * squareSize, row * squareSize, squareSize, squareSize, Qt::white);
+        }
+    }
+
+    QPen previewPen;
+    previewPen.setColor(QColor("lightcoral"));
+    previewPen.setWidth(penSize);
+    previewPen.setJoinStyle(Qt::RoundJoin);
+    previewPen.setCapStyle(Qt::RoundCap);
+    //QPainter previewPainter(&previewPixmap);
+    previewPainter.setPen(previewPen);
+    previewPainter.drawPoint(QPoint(50,50));
+    ui->label_penSizeIMG->setPixmap(previewPixmap);
+}
+
+void MainWindow::hideParamMesh(bool hide){
+    if(!hide){
+        ui->frame_param_mesh->show();
+
+    }else{
+        ui->frame_param_mesh->hide();
+    }
+}
+
+void MainWindow::hideParam(bool hide){
+    if(!hide){
+        ui->frame_pen->show();
+    }else{
+        ui->frame_pen->hide();
+    }
+}
+
+void MainWindow::hideCarte(bool hide){
+    if(!hide){
+        ui->frame_perlin->show();
+        ui->button_show_map->hide();
+    }else{
+        ui->frame_perlin->hide();
+        ui->button_show_map->show();
+        ui->frame_pen->hide();
+    }
+}
+
 
 // Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
@@ -403,7 +552,7 @@ void MainWindow::changerVuePremierePersonne() {
     if (viewer->vueActuelle == viewer->VueTerrain) {
         viewer->vueActuelle = viewer->VuePremierePersonne;
 
-        ui->pushButton_mode_FPS->setText("quitter mode FPS");
+        ui->pushButton_mode_FPS->setText("Quitter vue FPS");
 
         viewer->terrainMesh.sizeX = 4.0;
         viewer->terrainMesh.sizeY = 4.0;
@@ -415,7 +564,7 @@ void MainWindow::changerVuePremierePersonne() {
         viewer->setFocus();
     }
     else {
-        ui->pushButton_mode_FPS->setText("entrer mode FPS");
+        ui->pushButton_mode_FPS->setText("Afficher vue FPS");
         viewer->vueActuelle = viewer->VueTerrain;
         viewer->openCameraFromFile("initCam.txt");
 
