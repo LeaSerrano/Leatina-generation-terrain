@@ -57,36 +57,59 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     setWindowTitle("Leatina Generation Terrain");
 
-    backgroundWidget = new QLabel(this);
-    backgroundWidget->setGeometry(0, 0, width(), height());
-    backgroundWidget->setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));");
-    backgroundWidget->lower();
-
-    viewer = new MyViewer();
-    viewer->saveCameraInFile("initCam.txt");
-
-    defaultCentralWidget = ui->centralwidget;
+    //backgroundWidget = new QLabel(this);
+    //backgroundWidget->setGeometry(0, 0, width(), height());
+    //backgroundWidget->setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));");
+    //backgroundWidget->lower();
 
     ui->statusbar->hide();
 
+    QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect;
+    shadowEffect->setBlurRadius(10);
+    shadowEffect->setColor(QColor(0, 0, 0, 200)); // Couleur de l'ombre et opacité
+    shadowEffect->setOffset(10,10);
+
+    ui->label_barre_haut->setGraphicsEffect(shadowEffect);
+    ui->label_fond_carte->setGraphicsEffect(shadowEffect);
+
+    QLabel *barre = new QLabel();
+    barre->setParent(ui->label_fond_carte);
+    barre->setStyleSheet("background-color: white;");
+    barre->setGeometry(0,0,ui->label_fond_carte->width(), 40);
+
+    QLabel *textebarre = new QLabel();
+    textebarre->setParent(barre);
+    textebarre->setText("Carte du bruit de perlin");
+    textebarre->setStyleSheet("background-color: transparent; background-color: rgb(52, 78, 65); border: none; color: white;");
+    textebarre->setGeometry(barre->geometry());
+    textebarre->setContentsMargins(15, 10, 10, 10);
+    //textebarre->setFont(ui->label_titre->font().family());
+
+    // AFFICHAGE DU TERRAIN
+    ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
+    viewer = new MyViewer();
+    viewer->saveCameraInFile("initCam.txt");
     viewer->setParent(ui->widget_affichage_terrain);
     viewer->setGeometry(ui->widget_affichage_terrain->geometry());
 
+    // CFG SLIDER RESOLUTION
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(10);
     ui->horizontalSlider_resolution->setMaximum(180);
     QObject::connect(ui->horizontalSlider_resolution, SIGNAL(sliderReleased()), this, SLOT(onResolutionSliderReleased()));
 
+    // CFG SLIDER HAUTEUR
     ui->horizontalSlider_heightRange->setValue(viewer->terrainMesh.heightRange);
     ui->horizontalSlider_heightRange->setMinimum(10);
     ui->horizontalSlider_heightRange->setMaximum(180);
     QObject::connect(ui->horizontalSlider_heightRange, SIGNAL(sliderReleased()), this, SLOT(onHeightRangeSliderReleased()));
 
+    // CFG CHARGER NOUVELLE CARTE
     ui->pushButton_reload->setIcon(QIcon("./icons/reload_icon_black.png"));
-    ui->pushButton_reload->setStyleSheet("background-color : white");
+    //ui->pushButton_reload->setStyleSheet("background-color : white");
     QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
-    //QPixmap pixmap("perlinNoise.png");
+    // CFG IMAGES CARTE
 
     //Image originale
     originalImage = QImage("perlinNoise.png");
@@ -124,6 +147,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->label_newHeightValue->setText(QString::number(newHeightValue));
     });
 
+    // BOUTONS SAVE/OPEN CARTE
+
     //Sauvegarde terrain
     QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
         downloadMap(viewer->terrainMesh.getMap());
@@ -134,8 +159,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         uploadMap();
     });
 
+    // BOUTON MODE FPS
+
     QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
+
+    // FIN INITIALISATION
     combinePathsImages(pathsImages);
     setFocusPolicy(Qt::StrongFocus);
     viewer->setFocus();
@@ -144,11 +173,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
     delete ui;
 }
-
-void MainWindow::restaurerWidgetCentralParDefaut() {
-    this->setCentralWidget(defaultCentralWidget);
-}
-
 
 // Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
@@ -408,23 +432,5 @@ void MainWindow::changerVuePremierePersonne() {
         viewer->setFocus();
     }
 
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *event) {
-    qDebug() << "Fonction keyPressEvent appelée.";
-    qDebug() << "Touche appuyée : " << event->key();
-    if (viewer->vueActuelle == viewer->VuePremierePersonne) {
-        if (event->key() == Qt::Key_Escape) {
-            qDebug() << "escape";
-            //restaurerWidgetCentralParDefaut();
-
-            ui->widget_affichage_terrain->setGeometry(0, 0, 1024, 768);
-            viewer->setGeometry(0, 0, 1024, 768);
-
-        }
-    }
-
-
-    QMainWindow::keyPressEvent(event);
 }
 

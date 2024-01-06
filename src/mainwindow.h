@@ -78,6 +78,7 @@ private slots:
 #include <QPainterPath>
 #include <QStack>
 #include <QLabel>
+#include <QGraphicsDropShadowEffect>
 #include "MyViewer.h"
 #include "path.h"
 
@@ -115,7 +116,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QWidget* defaultCentralWidget;
+    //QWidget* defaultCentralWidget;
     QLabel *backgroundWidget;
     MyViewer* viewer;
     bool isLeftButtonPressed;
@@ -146,10 +147,6 @@ protected:
 
     void update_label_perlinNoise(QImage editedImage, QImage layerImage);
     void combinePathsImages(QList<QImage> pathsImages);
-
-    void restaurerWidgetCentralParDefaut();
-
-    void keyPressEvent(QKeyEvent *event) override;
 
 };
 
