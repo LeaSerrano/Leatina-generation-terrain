@@ -30,27 +30,34 @@
    <widget class="QPushButton" name="pushButton_reload">
     <property name="geometry">
      <rect>
-      <x>1000</x>
-      <y>10</y>
-      <width>40</width>
-      <height>40</height>
+      <x>535</x>
+      <y>0</y>
+      <width>200</width>
+      <height>59</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Liberation Sans Narrow</family>
+      <pointsize>11</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
     <property name="styleSheet">
-     <string notr="true">QPushButton { background-color: white; border-radius: 20px;}
-QPushButton:hover { background-color: lightblue; border-radius: 20px;}</string>
+     <string notr="true">QPushButton { background-color: rgb(52, 78, 65); color: white; border-radius: 0px;}
+QPushButton:hover { background-color: lightcoral;  color: white; border-radius: 0px;}</string>
     </property>
     <property name="text">
-     <string/>
+     <string>Générer une nouvelle carte</string>
     </property>
    </widget>
    <widget class="QPushButton" name="button_save_map">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>735</x>
       <y>0</y>
       <width>150</width>
-      <height>60</height>
+      <height>59</height>
      </rect>
     </property>
     <property name="font">
@@ -71,10 +78,10 @@ QPushButton:hover { background-color: lightcoral; border-radius: 0px;}</string>
    <widget class="QPushButton" name="button_open_map">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>400</x>
       <y>0</y>
-      <width>125</width>
-      <height>60</height>
+      <width>135</width>
+      <height>59</height>
      </rect>
     </property>
     <property name="font">
@@ -98,7 +105,7 @@ QPushButton:hover { background-color: lightcoral; border-radius: 0px;}</string>
       <x>1770</x>
       <y>0</y>
       <width>150</width>
-      <height>60</height>
+      <height>59</height>
      </rect>
     </property>
     <property name="font">
@@ -319,7 +326,7 @@ QPushButton:hover { background-color: lightgreen; border-radius: 10px;}</string>
       <string>0</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
     <widget class="QSlider" name="verticalSlider_newHeightValue">
@@ -450,10 +457,10 @@ border: 1px solid black;</string>
    <widget class="QPushButton" name="button_show_map">
     <property name="geometry">
      <rect>
-      <x>725</x>
+      <x>885</x>
       <y>0</y>
       <width>125</width>
-      <height>60</height>
+      <height>59</height>
      </rect>
     </property>
     <property name="font">
@@ -575,6 +582,30 @@ border: 1px solid black;</string>
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="button_show_param_mesh">
+    <property name="geometry">
+     <rect>
+      <x>1530</x>
+      <y>0</y>
+      <width>240</width>
+      <height>59</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Liberation Sans Narrow</family>
+      <pointsize>11</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}
+QPushButton:hover { background-color: lightcoral; border-radius: 0px;}</string>
+    </property>
+    <property name="text">
+     <string>Afficher les paramètres du maillage</string>
+    </property>
+   </widget>
    <zorder>widget_affichage_terrain</zorder>
    <zorder>frame_perlin</zorder>
    <zorder>frame_pen</zorder>
@@ -586,6 +617,7 @@ border: 1px solid black;</string>
    <zorder>label_titre</zorder>
    <zorder>button_show_map</zorder>
    <zorder>frame_param_mesh</zorder>
+   <zorder>button_show_param_mesh</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

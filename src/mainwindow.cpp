@@ -74,7 +74,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->label_barre_haut->setGraphicsEffect(shadowEffect);
     ui->label_fond_carte->setGraphicsEffect(shadowEffect);
 
-
     // Barre carte Perlin
     QLabel *barre = new QLabel();
     barre->setParent(ui->label_fond_carte);
@@ -101,10 +100,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     });
     hideCarte(true);
 
+    // Bouton affichage carte
+    ui->button_show_map->setIcon(QIcon("./icons/visible_w.png"));
     QObject::connect(ui->button_show_map, &QPushButton::clicked, this, [=]() {
         hideCarte(false);
     });
 
+    // Bouton affichage paramètres pinceau
     QFont Libe("Liberation Sans Narrow",11);
     QPushButton *boutonParam = new QPushButton();
     boutonParam->setParent(barre);
@@ -115,9 +117,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     boutonParam->setFont(Libe);
     boutonParam->setIcon(QIcon("./icons/editer.png"));
     QObject::connect(boutonParam, &QPushButton::clicked, this, [=]() {
-        hideParam(false);
+        isHidden = !isHidden;
+        hideParam(isHidden);
     });
-
 
     // Barre paramètres pinceau
     QLabel *barreParam = new QLabel();
@@ -141,9 +143,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     fermerParam->setIcon(QIcon("./icons/fermer.png"));
     QObject::connect(fermerParam, &QPushButton::clicked, this, [=]() {
         hideParam(true);
+        isHidden = true;
     });
 
-    // Barre paramètres mesh
+    // Barre paramètres mesh (A DROITE)
     QLabel *barreParamMesh = new QLabel();
     barreParamMesh->setParent(ui->label_param_mesh);
     barreParamMesh->setStyleSheet("background-color: white;");
@@ -152,7 +155,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QLabel *textebarreParamMesh = new QLabel();
     textebarreParamMesh->setParent(barreParamMesh);
     textebarreParamMesh->setText("Paramètres du maillage de la carte");
-        textebarreParamMesh->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
+    textebarreParamMesh->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
     textebarreParamMesh->setGeometry(0,0,ui->label_param_mesh->width(), 40);
     textebarreParamMesh->setContentsMargins(15, 10, 10, 10);
     textebarreParamMesh->setFont(URWFont);
@@ -164,7 +167,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                                "QPushButton:hover {background-color: lightcoral; border: none; border-radius: 10px;} ");
     fermerParamMesh->setIcon(QIcon("./icons/fermer.png"));
     QObject::connect(fermerParamMesh, &QPushButton::clicked, this, [=]() {
-        //hideParam(true);
+        hideParamMesh(true);
+    });
+    hideParamMesh(true);
+
+    ui->button_show_param_mesh->setIcon(QIcon("./icons/grid_w.png"));
+    QObject::connect(ui->button_show_param_mesh, &QPushButton::clicked, this, [=]() {
+        hideParamMesh(false);
     });
 
     ui->button_undo->setText("");
@@ -174,17 +183,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->button_redo->setIcon(QIcon("./icons/forward.png"));
 
     // BOUTONS SAVE/OPEN CARTE
-    //Sauvegarde terrain
+    //Sauvegarde CARTE
+    ui->button_save_map->setIcon(QIcon("./icons/download_w.png"));
     QObject::connect(ui->button_save_map, &QPushButton::clicked, this, [=]() {
         downloadMap(viewer->terrainMesh.getMap());
     });
 
-    //Ouverture terrain
+    //Ouverture CARTE
+    ui->button_open_map->setIcon(QIcon("./icons/upload_w.png"));
     QObject::connect(ui->button_open_map, &QPushButton::clicked, this, [=]() {
         uploadMap();
     });
 
     // BOUTON MODE FPS
+    ui->pushButton_mode_FPS->setIcon(QIcon("./icons/360_w.png"));
     QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
     // AFFICHAGE DU TERRAIN
@@ -207,8 +219,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->horizontalSlider_heightRange->setMaximum(180);
     QObject::connect(ui->horizontalSlider_heightRange, SIGNAL(sliderReleased()), this, SLOT(onHeightRangeSliderReleased()));
 
-    // CFG CHARGER NOUVELLE CARTE
-    ui->pushButton_reload->setIcon(QIcon("./icons/reload_icon_black.png"));
+    // CFG GENERER NOUVELLE CARTE
+    ui->pushButton_reload->setIcon(QIcon("./icons/regen.png"));
     //ui->pushButton_reload->setStyleSheet("background-color : white");
     QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
 
@@ -297,9 +309,11 @@ void MainWindow::updatePreviewPenSize(int penSize){
 void MainWindow::hideParamMesh(bool hide){
     if(!hide){
         ui->frame_param_mesh->show();
+        ui->button_show_param_mesh->hide();
 
     }else{
         ui->frame_param_mesh->hide();
+        ui->button_show_param_mesh->show();
     }
 }
 
@@ -552,6 +566,11 @@ void MainWindow::changerVuePremierePersonne() {
     if (viewer->vueActuelle == viewer->VueTerrain) {
         viewer->vueActuelle = viewer->VuePremierePersonne;
 
+        hideCarte(true);
+        ui->button_show_map->hide();
+        hideParamMesh(true);
+        ui->button_show_param_mesh->hide();
+
         ui->pushButton_mode_FPS->setText("Quitter vue FPS");
 
         viewer->terrainMesh.sizeX = 4.0;
@@ -566,6 +585,10 @@ void MainWindow::changerVuePremierePersonne() {
     else {
         ui->pushButton_mode_FPS->setText("Afficher vue FPS");
         viewer->vueActuelle = viewer->VueTerrain;
+
+        ui->button_show_map->show();
+        ui->button_show_param_mesh->show();
+
         viewer->openCameraFromFile("initCam.txt");
 
         viewer->terrainMesh.sizeX = 1.0;

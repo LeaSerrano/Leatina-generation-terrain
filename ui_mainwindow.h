@@ -56,6 +56,7 @@ public:
     QSlider *horizontalSlider_resolution;
     QLabel *label_heightRange;
     QSlider *horizontalSlider_heightRange;
+    QPushButton *button_show_param_mesh;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -72,28 +73,29 @@ public:
         widget_affichage_terrain->setStyleSheet(QString::fromUtf8("background-color:rgb(36, 31, 49);"));
         pushButton_reload = new QPushButton(centralwidget);
         pushButton_reload->setObjectName(QString::fromUtf8("pushButton_reload"));
-        pushButton_reload->setGeometry(QRect(1000, 10, 40, 40));
-        pushButton_reload->setStyleSheet(QString::fromUtf8("QPushButton { background-color: white; border-radius: 20px;}\n"
-"QPushButton:hover { background-color: lightblue; border-radius: 20px;}"));
-        button_save_map = new QPushButton(centralwidget);
-        button_save_map->setObjectName(QString::fromUtf8("button_save_map"));
-        button_save_map->setGeometry(QRect(580, 0, 150, 60));
+        pushButton_reload->setGeometry(QRect(535, 0, 200, 59));
         QFont font;
         font.setFamily(QString::fromUtf8("Liberation Sans Narrow"));
         font.setPointSize(11);
         font.setBold(true);
+        pushButton_reload->setFont(font);
+        pushButton_reload->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); color: white; border-radius: 0px;}\n"
+"QPushButton:hover { background-color: lightcoral;  color: white; border-radius: 0px;}"));
+        button_save_map = new QPushButton(centralwidget);
+        button_save_map->setObjectName(QString::fromUtf8("button_save_map"));
+        button_save_map->setGeometry(QRect(735, 0, 150, 59));
         button_save_map->setFont(font);
         button_save_map->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
 "QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
         button_open_map = new QPushButton(centralwidget);
         button_open_map->setObjectName(QString::fromUtf8("button_open_map"));
-        button_open_map->setGeometry(QRect(450, 0, 125, 60));
+        button_open_map->setGeometry(QRect(400, 0, 135, 59));
         button_open_map->setFont(font);
         button_open_map->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
 "QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
         pushButton_mode_FPS = new QPushButton(centralwidget);
         pushButton_mode_FPS->setObjectName(QString::fromUtf8("pushButton_mode_FPS"));
-        pushButton_mode_FPS->setGeometry(QRect(1770, 0, 150, 60));
+        pushButton_mode_FPS->setGeometry(QRect(1770, 0, 150, 59));
         pushButton_mode_FPS->setFont(font);
         pushButton_mode_FPS->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
 "QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
@@ -164,7 +166,7 @@ public:
         label_newHeightValue = new QLabel(frame_pen);
         label_newHeightValue->setObjectName(QString::fromUtf8("label_newHeightValue"));
         label_newHeightValue->setGeometry(QRect(350, 80, 40, 40));
-        label_newHeightValue->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        label_newHeightValue->setAlignment(Qt::AlignCenter);
         verticalSlider_newHeightValue = new QSlider(frame_pen);
         verticalSlider_newHeightValue->setObjectName(QString::fromUtf8("verticalSlider_newHeightValue"));
         verticalSlider_newHeightValue->setGeometry(QRect(430, 50, 16, 100));
@@ -203,7 +205,7 @@ public:
 "border: 1px solid black;"));
         button_show_map = new QPushButton(centralwidget);
         button_show_map->setObjectName(QString::fromUtf8("button_show_map"));
-        button_show_map->setGeometry(QRect(725, 0, 125, 60));
+        button_show_map->setGeometry(QRect(885, 0, 125, 59));
         button_show_map->setFont(font);
         button_show_map->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
 "QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
@@ -236,6 +238,12 @@ public:
         horizontalSlider_heightRange->setObjectName(QString::fromUtf8("horizontalSlider_heightRange"));
         horizontalSlider_heightRange->setGeometry(QRect(380, 40, 150, 60));
         horizontalSlider_heightRange->setOrientation(Qt::Horizontal);
+        button_show_param_mesh = new QPushButton(centralwidget);
+        button_show_param_mesh->setObjectName(QString::fromUtf8("button_show_param_mesh"));
+        button_show_param_mesh->setGeometry(QRect(1530, 0, 240, 59));
+        button_show_param_mesh->setFont(font);
+        button_show_param_mesh->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
         MainWindow->setCentralWidget(centralwidget);
         widget_affichage_terrain->raise();
         frame_perlin->raise();
@@ -248,6 +256,7 @@ public:
         label_titre->raise();
         button_show_map->raise();
         frame_param_mesh->raise();
+        button_show_param_mesh->raise();
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
         menubar->setGeometry(QRect(0, 0, 1920, 22));
@@ -264,7 +273,7 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        pushButton_reload->setText(QString());
+        pushButton_reload->setText(QCoreApplication::translate("MainWindow", "G\303\251n\303\251rer une nouvelle carte", nullptr));
         button_save_map->setText(QCoreApplication::translate("MainWindow", "Sauvegarder la carte", nullptr));
         button_open_map->setText(QCoreApplication::translate("MainWindow", "Charger une carte", nullptr));
         pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "Afficher vue FPS", nullptr));
@@ -284,6 +293,7 @@ public:
         label_param_mesh->setText(QString());
         label_resolution->setText(QCoreApplication::translate("MainWindow", "R\303\251solution : ", nullptr));
         label_heightRange->setText(QCoreApplication::translate("MainWindow", "Plage de hauteurs : ", nullptr));
+        button_show_param_mesh->setText(QCoreApplication::translate("MainWindow", "Afficher les param\303\250tres du maillage", nullptr));
     } // retranslateUi
 
 };

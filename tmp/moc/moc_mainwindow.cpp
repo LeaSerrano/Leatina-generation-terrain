@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[16];
-    char stringdata0[230];
+    QByteArrayData data[17];
+    char stringdata0[244];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -45,9 +45,10 @@ QT_MOC_LITERAL(9, 139, 9), // "uploadMap"
 QT_MOC_LITERAL(10, 149, 26), // "changerVuePremierePersonne"
 QT_MOC_LITERAL(11, 176, 20), // "updatePreviewPenSize"
 QT_MOC_LITERAL(12, 197, 7), // "penSize"
-QT_MOC_LITERAL(13, 205, 9), // "hideParam"
-QT_MOC_LITERAL(14, 215, 4), // "hide"
-QT_MOC_LITERAL(15, 220, 9) // "hideCarte"
+QT_MOC_LITERAL(13, 205, 13), // "hideParamMesh"
+QT_MOC_LITERAL(14, 219, 4), // "hide"
+QT_MOC_LITERAL(15, 224, 9), // "hideParam"
+QT_MOC_LITERAL(16, 234, 9) // "hideCarte"
 
     },
     "MainWindow\0onResolutionSliderReleased\0"
@@ -55,8 +56,8 @@ QT_MOC_LITERAL(15, 220, 9) // "hideCarte"
     "onReloadButtonClicked\0undoDrawingPath\0"
     "redoDrawingPath\0downloadMap\0image\0"
     "uploadMap\0changerVuePremierePersonne\0"
-    "updatePreviewPenSize\0penSize\0hideParam\0"
-    "hide\0hideCarte"
+    "updatePreviewPenSize\0penSize\0hideParamMesh\0"
+    "hide\0hideParam\0hideCarte"
 };
 #undef QT_MOC_LITERAL
 
@@ -66,7 +67,7 @@ static const uint qt_meta_data_MainWindow[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      12,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -74,17 +75,18 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   69,    2, 0x08 /* Private */,
-       3,    0,   70,    2, 0x08 /* Private */,
-       4,    0,   71,    2, 0x08 /* Private */,
-       5,    0,   72,    2, 0x08 /* Private */,
-       6,    0,   73,    2, 0x08 /* Private */,
-       7,    1,   74,    2, 0x08 /* Private */,
-       9,    0,   77,    2, 0x08 /* Private */,
-      10,    0,   78,    2, 0x08 /* Private */,
-      11,    1,   79,    2, 0x08 /* Private */,
-      13,    1,   82,    2, 0x08 /* Private */,
-      15,    1,   85,    2, 0x08 /* Private */,
+       1,    0,   74,    2, 0x08 /* Private */,
+       3,    0,   75,    2, 0x08 /* Private */,
+       4,    0,   76,    2, 0x08 /* Private */,
+       5,    0,   77,    2, 0x08 /* Private */,
+       6,    0,   78,    2, 0x08 /* Private */,
+       7,    1,   79,    2, 0x08 /* Private */,
+       9,    0,   82,    2, 0x08 /* Private */,
+      10,    0,   83,    2, 0x08 /* Private */,
+      11,    1,   84,    2, 0x08 /* Private */,
+      13,    1,   87,    2, 0x08 /* Private */,
+      15,    1,   90,    2, 0x08 /* Private */,
+      16,    1,   93,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -96,6 +98,7 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   12,
+    QMetaType::Void, QMetaType::Bool,   14,
     QMetaType::Void, QMetaType::Bool,   14,
     QMetaType::Void, QMetaType::Bool,   14,
 
@@ -117,8 +120,9 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 6: _t->uploadMap(); break;
         case 7: _t->changerVuePremierePersonne(); break;
         case 8: _t->updatePreviewPenSize((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 9: _t->hideParam((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 10: _t->hideCarte((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 9: _t->hideParamMesh((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 10: _t->hideParam((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 11: _t->hideCarte((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -153,13 +157,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 12;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 11)
+        if (_id < 12)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 11;
+        _id -= 12;
     }
     return _id;
 }

@@ -147,6 +147,8 @@ private:
 
     int penSize;
 
+    bool isHidden = true;
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
