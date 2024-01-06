@@ -30,6 +30,7 @@
 #include <QtMath>
 #include <algorithm>
 #include <QImage>
+#include <QQuaternion>
 
 #include <limits>
 #include <QDebug>
@@ -758,19 +759,66 @@ public :
         update();
     }
 
-    void mousePressEvent(QMouseEvent *event) {
-        if (vueActuelle == VuePremierePersonne) {
+    void wheelEvent(QWheelEvent *e) {
+        static int nbZoom = 0;
+
+        if (vueActuelle == VueTerrain) {
+            float delta = e->delta();
+
+            qglviewer::Vec cameraPosition = camera()->position();
+            qglviewer::Vec cameraViewDir = camera()->viewDirection();
+            float zoomFactor = 0.2;
+
+            if (delta > 0){
+                camera()->setPosition(cameraPosition + zoomFactor * cameraViewDir); // Zoom in
+                nbZoom++;
+            } else{
+                if(nbZoom > -1){
+                    camera()->setPosition(cameraPosition - zoomFactor * cameraViewDir); // Zoom out
+                    nbZoom--;
+                }
+
+            }
+            qDebug() << nbZoom;
 
 
+
+            update();
         }
-    }
 
-    void mouseMoveEvent(QMouseEvent *event) {
 
     }
 
-    void mouseReleaseEvent(QMouseEvent* e) {
-    }
+    // void mousePressEvent(QMouseEvent *event) {
+    //     QGLViewer::mousePressEvent(event);
+
+    //     if (vueActuelle == VuePremierePersonne) {
+
+    //     }
+    // }
+
+    // void mouseMoveEvent(QMouseEvent *event) {
+    //     QGLViewer::mouseMoveEvent(event);
+
+    //     if (vueActuelle == VuePremierePersonne) {
+
+
+
+    //     }
+    // }
+
+    // void mouseReleaseEvent(QMouseEvent* event) {
+    //     QGLViewer::mouseReleaseEvent(event);
+
+    //     if (vueActuelle == VuePremierePersonne) {
+
+    //         if (event->button() == Qt::RightButton)
+    //         {
+
+    //         }
+
+    //     }
+    // }
 
     void animate() {
         qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;

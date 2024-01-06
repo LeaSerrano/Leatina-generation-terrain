@@ -1,7 +1,8 @@
 #include "path.h"
 
 Path::Path() {
-    pathPen.setColor(Qt::red);
+    //pathPen.setColor(Qt::red);
+    pathPen.setColor(QColor("lightcoral"));
     pathPen.setWidth(widthPen);
     pathPen.setJoinStyle(Qt::RoundJoin);
     pathPen.setCapStyle(Qt::RoundCap);
@@ -40,7 +41,7 @@ void Path::setPixelsPath(){
             QColor pixelLayerValue = layerImage.pixel(x, y);
 
             // Vérifier si le pixel appartient au tracé rouge
-            if (pixelLayerValue == Qt::red) {
+            if (pixelLayerValue == /*Qt::red*/QColor("lightcoral")) {
                 // Ajouter les coordonnées du pixel à la liste
                 pixelsPath.append(QPoint(x, y));
                 //qDebug() << "X:" << x << ", Y:" << y;

@@ -12,6 +12,7 @@
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDial>
+#include <QtWidgets/QFrame>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
@@ -27,21 +28,35 @@ class Ui_MainWindow
 public:
     QWidget *centralwidget;
     QWidget *widget_affichage_terrain;
-    QSlider *horizontalSlider_resolution;
-    QLabel *label_resolution;
-    QSlider *horizontalSlider_heightRange;
-    QLabel *label_heightRange;
     QPushButton *pushButton_reload;
-    QLabel *label_perlinNoise;
-    QPushButton *button_undo;
-    QPushButton *button_redo;
     QPushButton *button_save_map;
     QPushButton *button_open_map;
-    QSlider *verticalSlider_newHeightValue;
-    QLabel *label_newHeightValue;
+    QPushButton *pushButton_mode_FPS;
+    QLabel *label_barre_haut;
+    QLabel *label_titre;
+    QFrame *frame_pen;
+    QLabel *label_param_pen;
+    QLabel *label_penSizeIMG;
     QDial *dial_penSize;
     QLabel *label_penSize;
-    QPushButton *pushButton_mode_FPS;
+    QPushButton *button_undo;
+    QPushButton *button_redo;
+    QLabel *label_newHeightValue;
+    QSlider *verticalSlider_newHeightValue;
+    QLabel *label_p255;
+    QLabel *label_0;
+    QLabel *label_m255;
+    QFrame *frame_perlin;
+    QLabel *label_fond_carte;
+    QLabel *label_perlinNoise;
+    QPushButton *button_show_map;
+    QFrame *frame_param_mesh;
+    QLabel *label_param_mesh;
+    QLabel *label_resolution;
+    QSlider *horizontalSlider_resolution;
+    QLabel *label_heightRange;
+    QSlider *horizontalSlider_heightRange;
+    QPushButton *button_show_param_mesh;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -49,60 +64,78 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(1920, 1200);
+        MainWindow->resize(1920, 1020);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         widget_affichage_terrain = new QWidget(centralwidget);
         widget_affichage_terrain->setObjectName(QString::fromUtf8("widget_affichage_terrain"));
-        widget_affichage_terrain->setGeometry(QRect(0, 0, 1024, 768));
+        widget_affichage_terrain->setGeometry(QRect(610, 160, 700, 700));
         widget_affichage_terrain->setStyleSheet(QString::fromUtf8("background-color:rgb(36, 31, 49);"));
-        horizontalSlider_resolution = new QSlider(centralwidget);
-        horizontalSlider_resolution->setObjectName(QString::fromUtf8("horizontalSlider_resolution"));
-        horizontalSlider_resolution->setGeometry(QRect(1350, 10, 160, 16));
-        horizontalSlider_resolution->setOrientation(Qt::Horizontal);
-        label_resolution = new QLabel(centralwidget);
-        label_resolution->setObjectName(QString::fromUtf8("label_resolution"));
-        label_resolution->setGeometry(QRect(1260, 10, 91, 25));
-        horizontalSlider_heightRange = new QSlider(centralwidget);
-        horizontalSlider_heightRange->setObjectName(QString::fromUtf8("horizontalSlider_heightRange"));
-        horizontalSlider_heightRange->setGeometry(QRect(1650, 10, 160, 16));
-        horizontalSlider_heightRange->setOrientation(Qt::Horizontal);
-        label_heightRange = new QLabel(centralwidget);
-        label_heightRange->setObjectName(QString::fromUtf8("label_heightRange"));
-        label_heightRange->setGeometry(QRect(1520, 10, 141, 25));
         pushButton_reload = new QPushButton(centralwidget);
         pushButton_reload->setObjectName(QString::fromUtf8("pushButton_reload"));
-        pushButton_reload->setGeometry(QRect(1030, 10, 28, 28));
-        label_perlinNoise = new QLabel(centralwidget);
-        label_perlinNoise->setObjectName(QString::fromUtf8("label_perlinNoise"));
-        label_perlinNoise->setGeometry(QRect(1216, 128, 512, 512));
-        label_perlinNoise->setStyleSheet(QString::fromUtf8("background-color :rgb(92, 115, 84);"));
-        button_undo = new QPushButton(centralwidget);
-        button_undo->setObjectName(QString::fromUtf8("button_undo"));
-        button_undo->setGeometry(QRect(1210, 100, 89, 25));
-        button_redo = new QPushButton(centralwidget);
-        button_redo->setObjectName(QString::fromUtf8("button_redo"));
-        button_redo->setGeometry(QRect(1300, 100, 89, 25));
+        pushButton_reload->setGeometry(QRect(535, 0, 200, 59));
+        QFont font;
+        font.setFamily(QString::fromUtf8("Liberation Sans Narrow"));
+        font.setPointSize(11);
+        font.setBold(true);
+        pushButton_reload->setFont(font);
+        pushButton_reload->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); color: white; border-radius: 0px;}\n"
+"QPushButton:hover { background-color: lightcoral;  color: white; border-radius: 0px;}"));
         button_save_map = new QPushButton(centralwidget);
         button_save_map->setObjectName(QString::fromUtf8("button_save_map"));
-        button_save_map->setGeometry(QRect(1160, 10, 89, 25));
+        button_save_map->setGeometry(QRect(735, 0, 150, 59));
+        button_save_map->setFont(font);
+        button_save_map->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
         button_open_map = new QPushButton(centralwidget);
         button_open_map->setObjectName(QString::fromUtf8("button_open_map"));
-        button_open_map->setGeometry(QRect(1070, 10, 89, 25));
-        verticalSlider_newHeightValue = new QSlider(centralwidget);
-        verticalSlider_newHeightValue->setObjectName(QString::fromUtf8("verticalSlider_newHeightValue"));
-        verticalSlider_newHeightValue->setGeometry(QRect(1150, 280, 16, 160));
-        verticalSlider_newHeightValue->setMinimum(-255);
-        verticalSlider_newHeightValue->setMaximum(255);
-        verticalSlider_newHeightValue->setOrientation(Qt::Vertical);
-        verticalSlider_newHeightValue->setTickPosition(QSlider::TicksAbove);
-        verticalSlider_newHeightValue->setTickInterval(50);
-        label_newHeightValue = new QLabel(centralwidget);
-        label_newHeightValue->setObjectName(QString::fromUtf8("label_newHeightValue"));
-        label_newHeightValue->setGeometry(QRect(1130, 250, 71, 17));
-        dial_penSize = new QDial(centralwidget);
+        button_open_map->setGeometry(QRect(400, 0, 135, 59));
+        button_open_map->setFont(font);
+        button_open_map->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
+        pushButton_mode_FPS = new QPushButton(centralwidget);
+        pushButton_mode_FPS->setObjectName(QString::fromUtf8("pushButton_mode_FPS"));
+        pushButton_mode_FPS->setGeometry(QRect(1770, 0, 150, 59));
+        pushButton_mode_FPS->setFont(font);
+        pushButton_mode_FPS->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
+        label_barre_haut = new QLabel(centralwidget);
+        label_barre_haut->setObjectName(QString::fromUtf8("label_barre_haut"));
+        label_barre_haut->setGeometry(QRect(0, 0, 1920, 60));
+        label_barre_haut->setStyleSheet(QString::fromUtf8("background-color: rgb(52, 78, 65);\n"
+"border-bottom: 1px solid black;"));
+        label_titre = new QLabel(centralwidget);
+        label_titre->setObjectName(QString::fromUtf8("label_titre"));
+        label_titre->setGeometry(QRect(0, 0, 400, 60));
+        QFont font1;
+        font1.setFamily(QString::fromUtf8("URW Gothic L"));
+        font1.setPointSize(20);
+        font1.setBold(false);
+        label_titre->setFont(font1);
+        label_titre->setStyleSheet(QString::fromUtf8("color : white;"));
+        label_titre->setAlignment(Qt::AlignCenter);
+        label_titre->setWordWrap(false);
+        label_titre->setIndent(0);
+        frame_pen = new QFrame(centralwidget);
+        frame_pen->setObjectName(QString::fromUtf8("frame_pen"));
+        frame_pen->setGeometry(QRect(35, 80, 540, 180));
+        frame_pen->setFrameShape(QFrame::StyledPanel);
+        frame_pen->setFrameShadow(QFrame::Raised);
+        label_param_pen = new QLabel(frame_pen);
+        label_param_pen->setObjectName(QString::fromUtf8("label_param_pen"));
+        label_param_pen->setGeometry(QRect(0, 0, 540, 180));
+        label_param_pen->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255,255);\n"
+"background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));\n"
+"border: 1px solid black;"));
+        label_penSizeIMG = new QLabel(frame_pen);
+        label_penSizeIMG->setObjectName(QString::fromUtf8("label_penSizeIMG"));
+        label_penSizeIMG->setGeometry(QRect(25, 60, 100, 100));
+        label_penSizeIMG->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);\n"
+"border : 1px solid black;\n"
+""));
+        dial_penSize = new QDial(frame_pen);
         dial_penSize->setObjectName(QString::fromUtf8("dial_penSize"));
-        dial_penSize->setGeometry(QRect(1140, 550, 50, 64));
+        dial_penSize->setGeometry(QRect(155, 110, 50, 50));
         dial_penSize->setMinimum(10);
         dial_penSize->setMaximum(100);
         dial_penSize->setSingleStep(10);
@@ -112,13 +145,118 @@ public:
         dial_penSize->setInvertedAppearance(false);
         dial_penSize->setWrapping(false);
         dial_penSize->setNotchesVisible(true);
-        label_penSize = new QLabel(centralwidget);
+        label_penSize = new QLabel(frame_pen);
         label_penSize->setObjectName(QString::fromUtf8("label_penSize"));
-        label_penSize->setGeometry(QRect(1150, 520, 67, 17));
-        pushButton_mode_FPS = new QPushButton(centralwidget);
-        pushButton_mode_FPS->setObjectName(QString::fromUtf8("pushButton_mode_FPS"));
-        pushButton_mode_FPS->setGeometry(QRect(1810, 20, 89, 25));
+        label_penSize->setGeometry(QRect(125, 60, 111, 40));
+        QFont font2;
+        font2.setFamily(QString::fromUtf8("Liberation Sans Narrow"));
+        font2.setPointSize(11);
+        label_penSize->setFont(font2);
+        label_penSize->setAlignment(Qt::AlignCenter);
+        button_undo = new QPushButton(frame_pen);
+        button_undo->setObjectName(QString::fromUtf8("button_undo"));
+        button_undo->setGeometry(QRect(180, 10, 20, 20));
+        button_undo->setStyleSheet(QString::fromUtf8("QPushButton { background-color: white; border-radius: 10px;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 10px;}"));
+        button_redo = new QPushButton(frame_pen);
+        button_redo->setObjectName(QString::fromUtf8("button_redo"));
+        button_redo->setGeometry(QRect(210, 10, 20, 20));
+        button_redo->setStyleSheet(QString::fromUtf8("QPushButton { background-color: white; border-radius: 10px;}\n"
+"QPushButton:hover { background-color: lightgreen; border-radius: 10px;}"));
+        label_newHeightValue = new QLabel(frame_pen);
+        label_newHeightValue->setObjectName(QString::fromUtf8("label_newHeightValue"));
+        label_newHeightValue->setGeometry(QRect(350, 80, 40, 40));
+        label_newHeightValue->setAlignment(Qt::AlignCenter);
+        verticalSlider_newHeightValue = new QSlider(frame_pen);
+        verticalSlider_newHeightValue->setObjectName(QString::fromUtf8("verticalSlider_newHeightValue"));
+        verticalSlider_newHeightValue->setGeometry(QRect(430, 50, 16, 100));
+        verticalSlider_newHeightValue->setMinimum(-255);
+        verticalSlider_newHeightValue->setMaximum(255);
+        verticalSlider_newHeightValue->setOrientation(Qt::Vertical);
+        verticalSlider_newHeightValue->setTickPosition(QSlider::TicksBelow);
+        verticalSlider_newHeightValue->setTickInterval(50);
+        label_p255 = new QLabel(frame_pen);
+        label_p255->setObjectName(QString::fromUtf8("label_p255"));
+        label_p255->setGeometry(QRect(460, 40, 40, 40));
+        label_p255->setAlignment(Qt::AlignCenter);
+        label_0 = new QLabel(frame_pen);
+        label_0->setObjectName(QString::fromUtf8("label_0"));
+        label_0->setGeometry(QRect(460, 70, 40, 40));
+        label_0->setAlignment(Qt::AlignCenter);
+        label_m255 = new QLabel(frame_pen);
+        label_m255->setObjectName(QString::fromUtf8("label_m255"));
+        label_m255->setGeometry(QRect(450, 120, 40, 40));
+        label_m255->setAlignment(Qt::AlignCenter);
+        frame_perlin = new QFrame(centralwidget);
+        frame_perlin->setObjectName(QString::fromUtf8("frame_perlin"));
+        frame_perlin->setGeometry(QRect(35, 280, 540, 580));
+        frame_perlin->setFrameShape(QFrame::StyledPanel);
+        frame_perlin->setFrameShadow(QFrame::Raised);
+        label_fond_carte = new QLabel(frame_perlin);
+        label_fond_carte->setObjectName(QString::fromUtf8("label_fond_carte"));
+        label_fond_carte->setGeometry(QRect(0, 0, 540, 580));
+        label_fond_carte->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255,255);\n"
+"background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));\n"
+"border: 1px solid black;"));
+        label_perlinNoise = new QLabel(frame_perlin);
+        label_perlinNoise->setObjectName(QString::fromUtf8("label_perlinNoise"));
+        label_perlinNoise->setGeometry(QRect(15, 55, 512, 512));
+        label_perlinNoise->setStyleSheet(QString::fromUtf8("background-color :rgb(92, 115, 84);\n"
+"border: 1px solid black;"));
+        button_show_map = new QPushButton(centralwidget);
+        button_show_map->setObjectName(QString::fromUtf8("button_show_map"));
+        button_show_map->setGeometry(QRect(885, 0, 125, 59));
+        button_show_map->setFont(font);
+        button_show_map->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
+        frame_param_mesh = new QFrame(centralwidget);
+        frame_param_mesh->setObjectName(QString::fromUtf8("frame_param_mesh"));
+        frame_param_mesh->setGeometry(QRect(1345, 80, 540, 100));
+        frame_param_mesh->setFrameShape(QFrame::StyledPanel);
+        frame_param_mesh->setFrameShadow(QFrame::Raised);
+        label_param_mesh = new QLabel(frame_param_mesh);
+        label_param_mesh->setObjectName(QString::fromUtf8("label_param_mesh"));
+        label_param_mesh->setGeometry(QRect(0, 0, 540, 100));
+        label_param_mesh->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255,255);\n"
+"background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));\n"
+"border: 1px solid black;"));
+        label_resolution = new QLabel(frame_param_mesh);
+        label_resolution->setObjectName(QString::fromUtf8("label_resolution"));
+        label_resolution->setGeometry(QRect(0, 40, 90, 60));
+        label_resolution->setFont(font2);
+        label_resolution->setAlignment(Qt::AlignCenter);
+        horizontalSlider_resolution = new QSlider(frame_param_mesh);
+        horizontalSlider_resolution->setObjectName(QString::fromUtf8("horizontalSlider_resolution"));
+        horizontalSlider_resolution->setGeometry(QRect(90, 40, 150, 60));
+        horizontalSlider_resolution->setOrientation(Qt::Horizontal);
+        label_heightRange = new QLabel(frame_param_mesh);
+        label_heightRange->setObjectName(QString::fromUtf8("label_heightRange"));
+        label_heightRange->setGeometry(QRect(240, 40, 141, 60));
+        label_heightRange->setFont(font2);
+        label_heightRange->setAlignment(Qt::AlignCenter);
+        horizontalSlider_heightRange = new QSlider(frame_param_mesh);
+        horizontalSlider_heightRange->setObjectName(QString::fromUtf8("horizontalSlider_heightRange"));
+        horizontalSlider_heightRange->setGeometry(QRect(380, 40, 150, 60));
+        horizontalSlider_heightRange->setOrientation(Qt::Horizontal);
+        button_show_param_mesh = new QPushButton(centralwidget);
+        button_show_param_mesh->setObjectName(QString::fromUtf8("button_show_param_mesh"));
+        button_show_param_mesh->setGeometry(QRect(1530, 0, 240, 59));
+        button_show_param_mesh->setFont(font);
+        button_show_param_mesh->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
         MainWindow->setCentralWidget(centralwidget);
+        widget_affichage_terrain->raise();
+        frame_perlin->raise();
+        frame_pen->raise();
+        label_barre_haut->raise();
+        pushButton_reload->raise();
+        button_save_map->raise();
+        button_open_map->raise();
+        pushButton_mode_FPS->raise();
+        label_titre->raise();
+        button_show_map->raise();
+        frame_param_mesh->raise();
+        button_show_param_mesh->raise();
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
         menubar->setGeometry(QRect(0, 0, 1920, 22));
@@ -135,17 +273,27 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        label_resolution->setText(QCoreApplication::translate("MainWindow", "Resolution : ", nullptr));
-        label_heightRange->setText(QCoreApplication::translate("MainWindow", "Plage de hauteurs : ", nullptr));
-        pushButton_reload->setText(QString());
-        label_perlinNoise->setText(QString());
+        pushButton_reload->setText(QCoreApplication::translate("MainWindow", "G\303\251n\303\251rer une nouvelle carte", nullptr));
+        button_save_map->setText(QCoreApplication::translate("MainWindow", "Sauvegarder la carte", nullptr));
+        button_open_map->setText(QCoreApplication::translate("MainWindow", "Charger une carte", nullptr));
+        pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "Afficher vue FPS", nullptr));
+        label_titre->setText(QCoreApplication::translate("MainWindow", "Leatina Generation Terrain", nullptr));
+        label_param_pen->setText(QString());
+        label_penSizeIMG->setText(QString());
+        label_penSize->setText(QCoreApplication::translate("MainWindow", "<html><head/><body><p>Taille pinceau :<br/>0</p></body></html>", nullptr));
         button_undo->setText(QCoreApplication::translate("MainWindow", "undo", nullptr));
         button_redo->setText(QCoreApplication::translate("MainWindow", "redo", nullptr));
-        button_save_map->setText(QCoreApplication::translate("MainWindow", "sauvegarder carte", nullptr));
-        button_open_map->setText(QCoreApplication::translate("MainWindow", "ouvrir carte", nullptr));
         label_newHeightValue->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
-        label_penSize->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
-        pushButton_mode_FPS->setText(QCoreApplication::translate("MainWindow", "entrer mode FPS", nullptr));
+        label_p255->setText(QCoreApplication::translate("MainWindow", "+255", nullptr));
+        label_0->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
+        label_m255->setText(QCoreApplication::translate("MainWindow", "-255", nullptr));
+        label_fond_carte->setText(QString());
+        label_perlinNoise->setText(QString());
+        button_show_map->setText(QCoreApplication::translate("MainWindow", "Afficher la carte", nullptr));
+        label_param_mesh->setText(QString());
+        label_resolution->setText(QCoreApplication::translate("MainWindow", "R\303\251solution : ", nullptr));
+        label_heightRange->setText(QCoreApplication::translate("MainWindow", "Plage de hauteurs : ", nullptr));
+        button_show_param_mesh->setText(QCoreApplication::translate("MainWindow", "Afficher les param\303\250tres du maillage", nullptr));
     } // retranslateUi
 
 };
