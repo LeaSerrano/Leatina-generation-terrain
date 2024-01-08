@@ -789,36 +789,11 @@ public :
 
     }
 
-    // void mousePressEvent(QMouseEvent *event) {
-    //     QGLViewer::mousePressEvent(event);
+    void mousePressEvent(QMouseEvent *event) {}
 
-    //     if (vueActuelle == VuePremierePersonne) {
+    void mouseMoveEvent(QMouseEvent *event) {}
 
-    //     }
-    // }
-
-    // void mouseMoveEvent(QMouseEvent *event) {
-    //     QGLViewer::mouseMoveEvent(event);
-
-    //     if (vueActuelle == VuePremierePersonne) {
-
-
-
-    //     }
-    // }
-
-    // void mouseReleaseEvent(QMouseEvent* event) {
-    //     QGLViewer::mouseReleaseEvent(event);
-
-    //     if (vueActuelle == VuePremierePersonne) {
-
-    //         if (event->button() == Qt::RightButton)
-    //         {
-
-    //         }
-
-    //     }
-    // }
+    void mouseReleaseEvent(QMouseEvent* event) {}
 
     void animate() {
         qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;
