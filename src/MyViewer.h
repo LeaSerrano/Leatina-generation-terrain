@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <QImage>
 #include <QQuaternion>
+#include <QRandomGenerator>
 
 #include <limits>
 #include <QDebug>
@@ -68,9 +69,11 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
     GLuint vertexbuffer, indexbuffer, normalBuffer, textureCoordBuffer;
     GLuint textureEauID,textureHerbeID, textureRocheID, textureNeigeID, textureHeightmapID;
 
+    qglviewer::Camera camVuePremierePersonne;
 
 public :
     TerrainMesh terrainMesh;
+    float camPosX, camPosZ;
 
     enum Vue { VueTerrain, VuePremierePersonne };
     Vue vueActuelle;
@@ -313,6 +316,15 @@ public :
         return textureID;
     }
 
+    void loadTextures() {
+        textureEauID = loadTexture("./images/textureEau.jpg");
+        textureHerbeID = loadTexture("./images/textureHerbe.jpg");
+        textureRocheID = loadTexture("./images/textureRoche.jpg");
+        textureNeigeID = loadTexture("./images/textureNeige.jpg");
+        //textureHeightmapID = loadTexture("perlinNoise.png");
+        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
+    }
+
     void drawBuffers() {
         //GLuint vertexbuffer;
         glGenBuffers(1, &vertexbuffer);
@@ -357,12 +369,12 @@ public :
         shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
 
         // Charger les textures
-        textureEauID = loadTexture("./images/textureEau.jpg");
+        /*textureEauID = loadTexture("./images/textureEau.jpg");
         textureHerbeID = loadTexture("./images/textureHerbe.jpg");
         textureRocheID = loadTexture("./images/textureRoche.jpg");
         textureNeigeID = loadTexture("./images/textureNeige.jpg");
         //textureHeightmapID = loadTexture("perlinNoise.png");
-        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
+        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);*/
 
         // Associer les textures aux unités de texture
         glActiveTexture(GL_TEXTURE0);
@@ -392,28 +404,76 @@ public :
 
     }
 
+    bool isActualTextureWater(qglviewer::Vec cameraPosition) {
+        GLfloat centerY = cameraPosition.y - 0.2f;
 
+        if (centerY <= 0.0f && centerY < 0.2) {
+            return true;
+        }
+
+        return false;
+    }
 
 
     void drawTerrainView() {
         drawBuffers();
     }
 
-    void drawPremierePersonneView() {
-        float centerX = terrainMesh.sizeX / 2.0f;
-        float centerZ = terrainMesh.sizeZ / 2.0f;
-
+    GLfloat getThisPositionHeight(float camPosX, float camPosZ) {
         float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
         float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
 
-        int i = static_cast<int>(centerX / stepX);
-        int j = static_cast<int>(centerZ / stepZ);
+        int i = static_cast<int>(camPosX / stepX);
+        int j = static_cast<int>(camPosZ / stepZ);
 
         float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
         GLfloat centerY;
         terrainMesh.getHeightAtPerlinPx(centerY, perlin);
 
-        qglviewer::Vec cameraPosition(centerX, centerY+0.2f, centerZ);
+        return centerY;
+    }
+
+    /*void initPremierePersonneCamera() {
+        float centerX = terrainMesh.sizeX / 2.0f;
+        float centerZ = terrainMesh.sizeZ / 2.0f;
+
+        QMatrix4x4 customModelViewMatrix;
+        customModelViewMatrix.setToIdentity();
+
+        modelMatrix.setToIdentity();
+        applyRotation(modelMatrix);
+
+        camVuePremierePersonne.loadModelViewMatrix(customModelViewMatrix.data());
+
+        GLfloat centerY = getThisPositionHeight(centerX, centerZ) + 0.2f;
+
+        qglviewer::Vec cameraPosition(centerX, centerY, centerZ);
+        camVuePremierePersonne.setPosition(cameraPosition);
+    }*/
+
+    qglviewer::Vec spawnAt() {
+        qglviewer::Vec cameraPosition;
+
+        QMatrix4x4 customModelViewMatrix;
+        customModelViewMatrix.setToIdentity();
+
+        modelMatrix.setToIdentity();
+        applyRotation(modelMatrix);
+
+        camera()->loadModelViewMatrix(customModelViewMatrix.data());
+
+        GLfloat y = getThisPositionHeight(camPosX, camPosX) + 0.2f;
+
+        cameraPosition.x = camPosX;
+        cameraPosition.y = y;
+        cameraPosition.z = camPosX;
+
+        return cameraPosition;
+    }
+
+    void drawPremierePersonneView() {
+        qglviewer::Vec cameraPosition = spawnAt();
+
         camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
         camera()->setPosition(cameraPosition);
 
@@ -421,18 +481,10 @@ public :
         animate();
     }
 
+
     void setCameraPositionWithPerlinHeight() {
         qglviewer::Vec cameraPosition = camera()->position();
-
-        float stepX = static_cast<float>(terrainMesh.sizeX) / static_cast<float>(terrainMesh.resolution);
-        float stepZ = static_cast<float>(terrainMesh.sizeZ) / static_cast<float>(terrainMesh.resolution);
-
-        int i = static_cast<int>(cameraPosition.x / stepX);
-        int j = static_cast<int>(cameraPosition.z / stepZ);
-
-        float perlin = terrainMesh.perlinNoise->getPerlinAt(i, j, terrainMesh.resolution);
-        GLfloat centerY;
-        terrainMesh.getHeightAtPerlinPx(centerY, perlin);
+        GLfloat centerY = getThisPositionHeight(cameraPosition.x, cameraPosition.z);
 
         cameraPosition.y = centerY+ 0.2f;
         camera()->setPosition(cameraPosition);
@@ -559,6 +611,7 @@ public :
     }
 
 
+
     void init() {
         makeCurrent();
         initializeOpenGLFunctions();
@@ -567,10 +620,8 @@ public :
 
         // Lights:
         GLTools::initLights();
-        //GLTools::setSunsetLight();
-        //GLTools::setDefaultMaterial();
-
         //
+
         glShadeModel(GL_SMOOTH);
         glFrontFace(GL_CCW); // CCW ou CW
 
@@ -593,6 +644,10 @@ public :
         adjustCamera(bbmin, BBmax);
 
         modelMatrix = QMatrix4x4();
+
+        //initPremierePersonneCamera();
+
+        loadTextures();
 
     }
 
@@ -755,7 +810,6 @@ public :
         translationMatrix.translate(objectCenter);
         modelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * modelMatrix;
 
-        //modelMatrixS =
         update();
     }
 
@@ -798,11 +852,13 @@ public :
     void animate() {
         qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;
 
-        if (cameraPosition.x <= terrainMesh.sizeX && cameraPosition.x >= 0.0 && cameraPosition.z <= terrainMesh.sizeZ && cameraPosition.z >= 0.0) {
-            camera()->setPosition(cameraPosition);
-            setCameraPositionWithPerlinHeight();
-        }
+        cameraPosition.x = qBound(0.2f, (float)cameraPosition.x, (float)terrainMesh.sizeX-0.2f);
+        cameraPosition.z = qBound(0.2f, (float)cameraPosition.z, (float)terrainMesh.sizeZ-0.2f);
+
+        camera()->setPosition(cameraPosition);
+        setCameraPositionWithPerlinHeight();
     }
+
 
 signals:
     void windowTitleUpdated( const QString & );

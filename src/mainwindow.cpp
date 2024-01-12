@@ -578,6 +578,9 @@ void MainWindow::changerVuePremierePersonne() {
         viewer->terrainMesh.sizeZ = 4.0;
         viewer->terrainMesh.generateMesh();
 
+        viewer->camPosX = QRandomGenerator::global()->generateDouble();
+        viewer->camPosZ = QRandomGenerator::global()->generateDouble();
+
         viewer->draw();
 
         viewer->setFocus();
