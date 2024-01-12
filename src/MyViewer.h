@@ -73,7 +73,7 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
 public :
     TerrainMesh terrainMesh;
-    float randPosX, randPosZ;
+    float camPosX, camPosZ;
 
     enum Vue { VueTerrain, VuePremierePersonne };
     Vue vueActuelle;
@@ -462,11 +462,11 @@ public :
 
         camera()->loadModelViewMatrix(customModelViewMatrix.data());
 
-        GLfloat y = getThisPositionHeight(randPosX, randPosZ) + 0.2f;
+        GLfloat y = getThisPositionHeight(camPosX, camPosX) + 0.2f;
 
-        cameraPosition.x = randPosX;
+        cameraPosition.x = camPosX;
         cameraPosition.y = y;
-        cameraPosition.z = randPosZ;
+        cameraPosition.z = camPosX;
 
         return cameraPosition;
     }
