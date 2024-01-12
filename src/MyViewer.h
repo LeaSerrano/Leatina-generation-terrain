@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <QImage>
 #include <QQuaternion>
+#include <QRandomGenerator>
 
 #include <limits>
 #include <QDebug>
@@ -70,9 +71,9 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
     qglviewer::Camera camVuePremierePersonne;
 
-
 public :
     TerrainMesh terrainMesh;
+    float randPosX, randPosZ;
 
     enum Vue { VueTerrain, VuePremierePersonne };
     Vue vueActuelle;
@@ -432,7 +433,7 @@ public :
         return centerY;
     }
 
-    void initPremierePersonneCamera() {
+    /*void initPremierePersonneCamera() {
         float centerX = terrainMesh.sizeX / 2.0f;
         float centerZ = terrainMesh.sizeZ / 2.0f;
 
@@ -448,13 +449,10 @@ public :
 
         qglviewer::Vec cameraPosition(centerX, centerY, centerZ);
         camVuePremierePersonne.setPosition(cameraPosition);
-    }
+    }*/
 
-    void drawPremierePersonneView() {
-        //qglviewer::Vec cameraPosition(camVuePremierePersonne.position().x, camVuePremierePersonne.position().y, camVuePremierePersonne.position().z);
-
-        float centerX = terrainMesh.sizeX / 2.0f;
-        float centerZ = terrainMesh.sizeZ / 2.0f;
+    qglviewer::Vec spawnAt() {
+        qglviewer::Vec cameraPosition;
 
         QMatrix4x4 customModelViewMatrix;
         customModelViewMatrix.setToIdentity();
@@ -464,9 +462,17 @@ public :
 
         camera()->loadModelViewMatrix(customModelViewMatrix.data());
 
-        GLfloat centerY = getThisPositionHeight(centerX, centerZ) + 0.2f;
+        GLfloat y = getThisPositionHeight(randPosX, randPosZ) + 0.2f;
 
-        qglviewer::Vec cameraPosition(centerX, centerY, centerZ);
+        cameraPosition.x = randPosX;
+        cameraPosition.y = y;
+        cameraPosition.z = randPosZ;
+
+        return cameraPosition;
+    }
+
+    void drawPremierePersonneView() {
+        qglviewer::Vec cameraPosition = spawnAt();
 
         camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
         camera()->setPosition(cameraPosition);
@@ -639,7 +645,7 @@ public :
 
         modelMatrix = QMatrix4x4();
 
-        initPremierePersonneCamera();
+        //initPremierePersonneCamera();
 
         loadTextures();
 
@@ -844,13 +850,13 @@ public :
     void mouseReleaseEvent(QMouseEvent* event) {}
 
     void animate() {
-            qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;
+        qglviewer::Vec cameraPosition = camera()->position() + accumulatedKeyTranslation;
 
-            cameraPosition.x = qBound(0.2f, (float)cameraPosition.x, (float)terrainMesh.sizeX-0.2f);
-            cameraPosition.z = qBound(0.2f, (float)cameraPosition.z, (float)terrainMesh.sizeZ-0.2f);
+        cameraPosition.x = qBound(0.2f, (float)cameraPosition.x, (float)terrainMesh.sizeX-0.2f);
+        cameraPosition.z = qBound(0.2f, (float)cameraPosition.z, (float)terrainMesh.sizeZ-0.2f);
 
-            camera()->setPosition(cameraPosition);
-            setCameraPositionWithPerlinHeight();
+        camera()->setPosition(cameraPosition);
+        setCameraPositionWithPerlinHeight();
     }
 
 
