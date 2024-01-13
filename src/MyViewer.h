@@ -317,12 +317,20 @@ public :
     }
 
     void loadTextures() {
-        textureEauID = loadTexture("./images/textureEau.jpg");
-        textureHerbeID = loadTexture("./images/textureHerbe.jpg");
-        textureRocheID = loadTexture("./images/textureRoche.jpg");
-        textureNeigeID = loadTexture("./images/textureNeige.jpg");
-        //textureHeightmapID = loadTexture("perlinNoise.png");
-        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
+            textureEauID = loadTexture("./images/textureEau.jpg");
+            if(textureEauID == 0) qDebug() << "Failed to load textureEau";
+
+            textureHerbeID = loadTexture("./images/textureHerbe.jpg");
+            if(textureHerbeID == 0) qDebug() << "Failed to load textureHerbe";
+
+            textureRocheID = loadTexture("./images/textureRoche.jpg");
+            if(textureRocheID == 0) qDebug() << "Failed to load textureRoche";
+
+            textureNeigeID = loadTexture("./images/textureNeige.jpg");
+            if(textureNeigeID == 0) qDebug() << "Failed to load textureNeige";
+
+            textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
+            if(textureHeightmapID == 0) qDebug() << "Failed to load textureHeightmap";
     }
 
     void drawBuffers() {
@@ -368,40 +376,29 @@ public :
 
         shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
 
-        // Charger les textures
-        /*textureEauID = loadTexture("./images/textureEau.jpg");
-        textureHerbeID = loadTexture("./images/textureHerbe.jpg");
-        textureRocheID = loadTexture("./images/textureRoche.jpg");
-        textureNeigeID = loadTexture("./images/textureNeige.jpg");
-        //textureHeightmapID = loadTexture("perlinNoise.png");
-        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);*/
-
-        // Associer les textures aux unités de texture
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureEauID);
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureEau"), 0);
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textureHerbeID);
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureHerbe"), 1);
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, textureRocheID);
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureRoche"), 2);
 
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, textureNeigeID);
+        glUniform1i(glGetUniformLocation(shaderProgram, "textureNeige"), 3);
 
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, textureHeightmapID);
-
-        glUniform1i(glGetUniformLocation(shaderProgram, "textureEau"), 0);
-        glUniform1i(glGetUniformLocation(shaderProgram, "textureHerbe"), 1);
-        glUniform1i(glGetUniformLocation(shaderProgram, "textureRoche"), 2);
-        glUniform1i(glGetUniformLocation(shaderProgram, "textureNeige"), 3);
         glUniform1i(glGetUniformLocation(shaderProgram, "textureHeightmap"), 4);
 
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glUniform1i(glGetUniformLocation(shaderProgram, "cubemapTexture"), 5);
-
     }
 
     bool isActualTextureWater(qglviewer::Vec cameraPosition) {
@@ -412,11 +409,6 @@ public :
         }
 
         return false;
-    }
-
-
-    void drawTerrainView() {
-        drawBuffers();
     }
 
     GLfloat getThisPositionHeight(float camPosX, float camPosZ) {
@@ -432,24 +424,6 @@ public :
 
         return centerY;
     }
-
-    /*void initPremierePersonneCamera() {
-        float centerX = terrainMesh.sizeX / 2.0f;
-        float centerZ = terrainMesh.sizeZ / 2.0f;
-
-        QMatrix4x4 customModelViewMatrix;
-        customModelViewMatrix.setToIdentity();
-
-        modelMatrix.setToIdentity();
-        applyRotation(modelMatrix);
-
-        camVuePremierePersonne.loadModelViewMatrix(customModelViewMatrix.data());
-
-        GLfloat centerY = getThisPositionHeight(centerX, centerZ) + 0.2f;
-
-        qglviewer::Vec cameraPosition(centerX, centerY, centerZ);
-        camVuePremierePersonne.setPosition(cameraPosition);
-    }*/
 
     qglviewer::Vec spawnAt() {
         qglviewer::Vec cameraPosition;
@@ -477,7 +451,6 @@ public :
         camera()->setSceneRadius(terrainMesh.sizeX * 2.0);
         camera()->setPosition(cameraPosition);
 
-        drawBuffers();
         animate();
     }
 
@@ -523,11 +496,11 @@ public :
         qglviewer::Vec cameraView = camera()->viewDirection();
         glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), cameraView[0], cameraView[1], cameraView[2]);
 
-        if (vueActuelle == VueTerrain) {
-            drawTerrainView();
-        } else if (vueActuelle == VuePremierePersonne) {
+        if (vueActuelle == VuePremierePersonne) {
             drawPremierePersonneView();
         }
+
+        drawBuffers();
 
         glEnable(GL_DEPTH_TEST);
         glEnable( GL_LIGHTING );
@@ -637,6 +610,7 @@ public :
 
         loadCubemap();
         loadSkybox();
+        loadTextures();
 
         //
 
@@ -644,10 +618,6 @@ public :
         adjustCamera(bbmin, BBmax);
 
         modelMatrix = QMatrix4x4();
-
-        //initPremierePersonneCamera();
-
-        loadTextures();
 
     }
 
@@ -855,8 +825,12 @@ public :
         cameraPosition.x = qBound(0.2f, (float)cameraPosition.x, (float)terrainMesh.sizeX-0.2f);
         cameraPosition.z = qBound(0.2f, (float)cameraPosition.z, (float)terrainMesh.sizeZ-0.2f);
 
-        camera()->setPosition(cameraPosition);
-        setCameraPositionWithPerlinHeight();
+        if (cameraPosition.y != 0.0f) {
+            setCameraPositionWithPerlinHeight();
+
+            camera()->setPosition(cameraPosition);
+            setCameraPositionWithPerlinHeight();
+        }
     }
 
 

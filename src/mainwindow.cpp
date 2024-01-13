@@ -363,6 +363,7 @@ void MainWindow::onHeightRangeSliderReleased() {
 void MainWindow::onReloadButtonClicked() {
     viewer->terrainMesh.perlinNoiseCreated = false;
     viewer->terrainMesh.generateMesh();
+    viewer->loadTextures();
 
     originalImage = QImage("perlinNoise.png");
     //ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
