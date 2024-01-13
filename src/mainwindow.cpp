@@ -74,18 +74,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->label_barre_haut->setGraphicsEffect(shadowEffect);
     ui->label_fond_carte->setGraphicsEffect(shadowEffect);
 
-    // Barre carte Perlin
+    // Barre carte Perlin------------------------------------------------------------------------------------------------
     QLabel *barre = new QLabel();
     barre->setParent(ui->label_fond_carte);
     barre->setStyleSheet("background-color: white;");
-    barre->setGeometry(0,0,ui->label_fond_carte->width(), 40);
+    barre->setGeometry(0,0,ui->frame_perlin->width(), 40);
 
     QFont URWFont("URW Gothic L",11);
     QLabel *textebarre = new QLabel();
     textebarre->setParent(barre);
     textebarre->setText("Carte du bruit de perlin");
     textebarre->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
-    textebarre->setGeometry(0,0,ui->label_fond_carte->width(), 40);
+    textebarre->setGeometry(0,0,ui->frame_perlin->width(), 40);
     textebarre->setContentsMargins(15, 10, 10, 10);
     textebarre->setFont(URWFont);
 
@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QFont Libe("Liberation Sans Narrow",11);
     QPushButton *boutonParam = new QPushButton();
     boutonParam->setParent(barre);
-    boutonParam->setGeometry(ui->label_fond_carte->width()-180,10, 140, 20);
+    boutonParam->setGeometry(ui->frame_perlin->width()-180,10, 140, 20);
     boutonParam->setStyleSheet("QPushButton {background-color: rgb(102, 128, 115); border: none; border-radius: 10px;} "
                                "QPushButton:hover {background-color: rgb(122, 148, 135); border: none; border-radius: 10px;} ");
     boutonParam->setText("Paramètres pinceau");
@@ -121,23 +121,43 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         hideParam(isHidden);
     });
 
-    // Barre paramètres pinceau
+    // Bouton affichage marqueur pour setup localisation FPS
+    QPushButton *boutonMarqueur = new QPushButton();
+    boutonMarqueur->setParent(barre);
+    boutonMarqueur->setGeometry(190,10, 20, 20);
+    boutonMarqueur->setStyleSheet("QPushButton {background-color: rgb(102, 128, 115); border: none; border-radius: 10px;} "
+                               "QPushButton:hover {background-color: rgb(255, 0, 0); border: none; border-radius: 10px;} "
+                               "QPushButton:checked {background-color: rgb(255, 0, 0); border: none; border-radius: 10px;} ");
+    boutonMarqueur->setIcon(QIcon("./icons/marqueur.png"));
+    boutonMarqueur->setCheckable(true);
+    QObject::connect(boutonMarqueur, &QPushButton::clicked, this, [=]() {
+        isMarqueurMode = !isMarqueurMode;
+        if(!isMarqueurMode){
+            ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
+            boutonMarqueur->setChecked(false);
+        } else {
+            mergeImages(editedImage, markedImage);
+            boutonMarqueur->setChecked(true);
+        }
+    });
+
+    // Barre paramètres pinceau-------------------------------------------------------------------------------------------
     QLabel *barreParam = new QLabel();
     barreParam->setParent(ui->label_param_pen);
     barreParam->setStyleSheet("background-color: white;");
-    barreParam->setGeometry(0,0,ui->label_fond_carte->width(), 40);
+    barreParam->setGeometry(0,0,ui->frame_pen->width(), 40);
 
     QLabel *textebarreParam = new QLabel();
     textebarreParam->setParent(barreParam);
     textebarreParam->setText("Paramètres pinceau");
     textebarreParam->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
-    textebarreParam->setGeometry(0,0,ui->label_fond_carte->width(), 40);
+    textebarreParam->setGeometry(0,0,ui->frame_pen->width(), 40);
     textebarreParam->setContentsMargins(15, 10, 10, 10);
     textebarreParam->setFont(URWFont);
 
     QPushButton *fermerParam = new QPushButton();
     fermerParam->setParent(barreParam);
-    fermerParam->setGeometry(barreParam->width()-30, 10, 20,20);
+    fermerParam->setGeometry(textebarreParam->width()-30, 10, 20,20);
     fermerParam->setStyleSheet("QPushButton {background-color: rgb(200, 88, 88); border: none; border-radius: 10px;} "
                                "QPushButton:hover {background-color: lightcoral; border: none; border-radius: 10px;} ");
     fermerParam->setIcon(QIcon("./icons/fermer.png"));
@@ -146,17 +166,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         isHidden = true;
     });
 
-    // Barre paramètres mesh (A DROITE)
+    // Barre paramètres mesh (A DROITE)-------------------------------------------------------------------------------------
     QLabel *barreParamMesh = new QLabel();
     barreParamMesh->setParent(ui->label_param_mesh);
     barreParamMesh->setStyleSheet("background-color: white;");
-    barreParamMesh->setGeometry(0,0,ui->label_param_mesh->width(), 40);
+    barreParamMesh->setGeometry(0,0,ui->frame_param_mesh->width(), 40);
 
     QLabel *textebarreParamMesh = new QLabel();
     textebarreParamMesh->setParent(barreParamMesh);
     textebarreParamMesh->setText("Paramètres du maillage de la carte");
     textebarreParamMesh->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
-    textebarreParamMesh->setGeometry(0,0,ui->label_param_mesh->width(), 40);
+    textebarreParamMesh->setGeometry(0,0,ui->frame_param_mesh->width(), 40);
     textebarreParamMesh->setContentsMargins(15, 10, 10, 10);
     textebarreParamMesh->setFont(URWFont);
 
@@ -175,6 +195,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->button_show_param_mesh, &QPushButton::clicked, this, [=]() {
         hideParamMesh(false);
     });
+
+    //-------------------------------------------------------------------------------------------------------------------------
 
     ui->button_undo->setText("");
     ui->button_undo->setIcon(QIcon("./icons/undo.png"));
@@ -231,6 +253,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     editedImage = originalImage.copy();
     editedImage = editedImage.convertToFormat(QImage::Format_ARGB32);
 
+    markedImage = originalImage.copy();
+    markedImage = markedImage.convertToFormat(QImage::Format_ARGB32);
+    markedImage.fill(Qt::transparent);
+
     //ui->label_perlinNoise->setPixmap(pixmap);
     ui->label_perlinNoise->setMouseTracking(true);
     ui->label_perlinNoise->installEventFilter(this);
@@ -246,21 +272,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //Pinceau
     penSize = 10;
     ui->dial_penSize->setValue(penSize);
-    ui->label_penSize->setText("Taille pinceau : \n" + QString::number(penSize));
+    ui->label_penSize->setText("Taille pinceau : " + QString::number(penSize));
     updatePreviewPenSize(penSize);
     QObject::connect(ui->dial_penSize, &QDial::valueChanged, this, [=](){
         penSize = ui->dial_penSize->value();
-        ui->label_penSize->setText("Taille pinceau : \n" + QString::number(penSize));
+        ui->label_penSize->setText("Taille pinceau : " + QString::number(penSize));
         updatePreviewPenSize(penSize);
     });
 
     //Hauteur de la nouvelle valeur de hauteur (pinceau)
     newHeightValue = -10;
     ui->verticalSlider_newHeightValue->setValue(newHeightValue);
-    ui->label_newHeightValue->setText(QString::number(newHeightValue));
+    ui->label_newHeightValue->setText("Hauteur : " + QString::number(newHeightValue));
     QObject::connect(ui->verticalSlider_newHeightValue, &QSlider::valueChanged, this, [=]() {
         newHeightValue = ui->verticalSlider_newHeightValue->value();
-        ui->label_newHeightValue->setText(QString::number(newHeightValue));
+        ui->label_newHeightValue->setText("Hauteur : " + QString::number(newHeightValue));
     });
 
 
@@ -272,6 +298,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+void MainWindow::updateMarker(int x, int y){
+    markedImage.fill(Qt::transparent);
+
+    QPainter previewPainter(&markedImage);
+    QPen previewPen;
+    previewPen.setColor(Qt::red);
+    previewPen.setWidth(12);
+    previewPen.setJoinStyle(Qt::RoundJoin);
+    previewPen.setCapStyle(Qt::RoundCap);
+    previewPainter.setPen(previewPen);
+    previewPainter.drawPoint(QPoint(x,y));
 }
 
 void MainWindow::updatePreviewPenSize(int penSize){
@@ -336,7 +375,6 @@ void MainWindow::hideCarte(bool hide){
     }
 }
 
-
 // Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
     int value = ui->horizontalSlider_resolution->value();
@@ -384,56 +422,75 @@ void MainWindow::onReloadButtonClicked() {
 
 // Permet de savoir si la souris est en train de faire un clic gauche + mouvement dans le label de la carte
 bool MainWindow::eventFilter(QObject *obj, QEvent *event){
-    if (obj == ui->label_perlinNoise) {
-            if (event->type() == QEvent::MouseButtonPress) {
-                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-                if (mouseEvent->button() == Qt::LeftButton) {
-                    isLeftButtonPressed = true;
+    if (!isMarqueurMode && obj == ui->label_perlinNoise) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                isLeftButtonPressed = true;
 
-                    currentPath = new Path();
-                    currentPath->setHeightValue(newHeightValue);
-                    currentPath->setPathPen_width(penSize);
-                    currentPath->startDrawingPath(mouseEvent);
+                currentPath = new Path();
+                currentPath->setHeightValue(newHeightValue);
+                currentPath->setPathPen_width(penSize);
+                currentPath->startDrawingPath(mouseEvent);
 
-                    undoPaths.append(currentPath);
-                    redoPaths.clear();
-                }
-            } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
-                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+                undoPaths.append(currentPath);
+                redoPaths.clear();
+            }
+        } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
 
-                currentPath->drawingPath(mouseEvent, editedImage); //Appel editedImage  : juste pour la taille img
-                //editedImage = currentPath->getPathImage().copy();
+            currentPath->drawingPath(mouseEvent, editedImage); //Appel editedImage  : juste pour la taille img
+            //editedImage = currentPath->getPathImage().copy();
 
-                //Affichage Image résultat + Image tracé rouge
-                update_label_perlinNoise(combinedImage, currentPath->getLayerImage());
+            //Affichage Image résultat + Image tracé rouge
+            update_label_perlinNoise(combinedImage, currentPath->getLayerImage());
 
-            } else if (event->type() == QEvent::MouseButtonRelease) {
-                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-                if (mouseEvent->button() == Qt::LeftButton) {
-                    isLeftButtonPressed = false;
+        } else if (event->type() == QEvent::MouseButtonRelease) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                isLeftButtonPressed = false;
 
-                    currentPath->setPixelsPath();
-                    currentPath->addModification(editedImage); //Appel editedImage : récup couleur de base
+                currentPath->setPixelsPath();
+                currentPath->addModification(editedImage); //Appel editedImage : récup couleur de base
 
-                    //Ajout du tracé dans la liste
-                    pathsImages.append(currentPath->renderPathImage);
+                //Ajout du tracé dans la liste
+                pathsImages.append(currentPath->renderPathImage);
 
-                    //Génération image combinée des tracés
-                    combinePathsImages(pathsImages);
+                //Génération image combinée des tracés
+                combinePathsImages(pathsImages);
 
-                    editedImage = combinedImage.copy();
-                    updateMesh(editedImage);
+                editedImage = combinedImage.copy();
+                updateMesh(editedImage);
 
-                    // editedImage.save("edited.png");
-                    // combinedImage.save("combined.png");
+                // editedImage.save("edited.png");
+                // combinedImage.save("combined.png");
 
-                    //Affichage du tracé rouge
-                    //update_label_perlinNoise(editedImage, currentPath->getLayerImage());
+                //Affichage du tracé rouge
+                //update_label_perlinNoise(editedImage, currentPath->getLayerImage());
 
-                    currentPath->endDrawingPath();
+                currentPath->endDrawingPath();
+            }
+        }
+    } else if(isMarqueurMode && obj == ui->label_perlinNoise){
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                int x = mouseEvent->pos().x();
+                int y = mouseEvent->pos().y();
+                qDebug() << x;
+                qDebug() << y;
+
+                QColor couleurPixel = editedImage.pixelColor(x,y);
+                if(couleurPixel.red() > 25){
+                    updateMarker(x,y);
+                    mergeImages(editedImage, markedImage);
+
+                    viewer->camPosX = float(x)/512.;
+                    viewer->camPosZ = float(y)/512.; // Z est le y du mesh
                 }
             }
         }
+    }
 
     viewer->setFocus();
     return QMainWindow::eventFilter(obj, event);
@@ -449,6 +506,18 @@ void MainWindow::update_label_perlinNoise(QImage editedImage, QImage layerImage)
     cpainter.end();
 
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(combinedImage));
+}
+
+void MainWindow::mergeImages(QImage img1, QImage img2) {
+    QImage mergedImages(img1.size(), QImage::Format_ARGB32);
+    mergedImages.fill(Qt::transparent);
+
+    QPainter cpainter(&mergedImages);
+    cpainter.drawImage(0, 0, img1);
+    cpainter.drawImage(0, 0, img2);
+    cpainter.end();
+
+    ui->label_perlinNoise->setPixmap(QPixmap::fromImage(mergedImages));
 }
 
 void MainWindow::combinePathsImages(QList<QImage> pathsImages){
@@ -578,8 +647,8 @@ void MainWindow::changerVuePremierePersonne() {
         viewer->terrainMesh.sizeZ = 4.0;
         viewer->terrainMesh.generateMesh();
 
-        viewer->camPosX = QRandomGenerator::global()->generateDouble();
-        viewer->camPosZ = QRandomGenerator::global()->generateDouble();
+        //viewer->camPosX = QRandomGenerator::global()->generateDouble();
+        //viewer->camPosZ = QRandomGenerator::global()->generateDouble();
 
         viewer->draw();
 

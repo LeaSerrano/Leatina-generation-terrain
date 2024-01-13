@@ -117,6 +117,9 @@ private slots:
     //preview tracé pinceau
     void updatePreviewPenSize(int penSize);
 
+    //update marqueur
+    void updateMarker(int x, int y);
+
     void hideParamMesh(bool hide);
     void hideParam(bool hide);
     void hideCarte(bool hide);
@@ -138,6 +141,9 @@ private:
     QList<QImage> pathsImages; //regroupe toutes les calques
     QImage combinedImage;
 
+    //Image du marqueur
+    QImage markedImage;
+
     Path* currentPath;
 
     QList<Path*> undoPaths;
@@ -149,6 +155,8 @@ private:
 
     bool isHidden = true;
 
+    bool isMarqueurMode = false;
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
@@ -156,6 +164,8 @@ protected:
 
     void update_label_perlinNoise(QImage editedImage, QImage layerImage);
     void combinePathsImages(QList<QImage> pathsImages);
+
+    void mergeImages(QImage img1, QImage img2);
 
 };
 

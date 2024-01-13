@@ -2,6 +2,7 @@
 #define MYVIEWER_H
 
 #include "point3.h"
+#include "Mesh.h"
 
 // Parsing:
 #include "BasicIO.h"
@@ -48,6 +49,11 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
 
+    Mesh pointerMesh;
+    GLuint pointerMeshShader;
+    GLuint pointerMeshVAO, pointerMeshVBO;
+
+
     QWidget * controls;
 
     GLuint shaderProgram;
@@ -73,7 +79,8 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
 public :
     TerrainMesh terrainMesh;
-    float camPosX, camPosZ;
+    float camPosX = QRandomGenerator::global()->generateDouble();
+    float camPosZ = QRandomGenerator::global()->generateDouble();
 
     enum Vue { VueTerrain, VuePremierePersonne };
     Vue vueActuelle;
@@ -101,6 +108,71 @@ public :
         toolBar->addAction( saveCamera );
         toolBar->addAction( openCamera );
         toolBar->addAction( saveSnapShotPlusPlus );
+    }
+
+    void loadPointerMesh(){
+        QString pointerMeshVertexShaderSource = readShaderFile("src/pointerMesh_vshader.glsl");
+        QString pointerMeshFragmentShaderSource = readShaderFile("src/pointerMesh_fshader.glsl");
+
+        pointerMeshShader = createShaderProgram(pointerMeshVertexShaderSource.toUtf8().constData(), pointerMeshFragmentShaderSource.toUtf8().constData());
+
+        OBJIO::openTriMesh("./obj/pointer-cone.obj", pointerMesh.vertices, pointerMesh.triangles);
+
+        glGenVertexArrays(1, &pointerMeshVAO); //vertex array
+        glGenBuffers(1, &pointerMeshVBO); //vertexbuffer
+
+        glBindVertexArray(pointerMeshVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, pointerMeshVBO);
+        glBufferData(GL_ARRAY_BUFFER, pointerMesh.vertices.size() * sizeof(Vertex), &pointerMesh.vertices[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(Vertex), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+    }
+
+    void drawPointerMesh(){
+        glUseProgram(pointerMeshShader);
+        GLfloat angle = 180.0f;
+        QMatrix4x4 rotationMMatrix;
+        rotationMMatrix.rotate(angle, 0.0f, 0.0f, 1.0f);
+        QMatrix4x4 modelMMatrix;
+        modelMMatrix = rotationMMatrix * modelMatrix;
+
+        GLfloat scaleFactor = 0.1f;  // ajustez la valeur selon vos besoins
+        modelMMatrix.scale(scaleFactor);
+
+        glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "modelP"), 1, GL_FALSE, modelMMatrix.data());
+
+        GLfloat viewMatrix[16];
+        camera()->getModelViewMatrix(viewMatrix);
+        glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "viewP"), 1, GL_FALSE, viewMatrix);
+
+        GLfloat projectionMatrix[16];
+        camera()->getProjectionMatrix(projectionMatrix);
+
+        glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "projectionP"), 1, GL_FALSE, projectionMatrix);
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable( GL_LIGHTING );
+        glColor3f(0.5,0.5,0.8);
+        glBegin(GL_TRIANGLES);
+        for( unsigned int t = 0 ; t < pointerMesh.triangles.size() ; ++t ) {
+            point3d const & p0 = pointerMesh.vertices[ pointerMesh.triangles[t][0] ].p;
+            point3d const & p1 = pointerMesh.vertices[ pointerMesh.triangles[t][1] ].p;
+            point3d const & p2 = pointerMesh.vertices[ pointerMesh.triangles[t][2] ].p;
+            point3d const & n = point3d::cross( p1-p0 , p2-p0 ).direction();
+            glNormal3f(n[0],n[1],n[2]);
+            glVertex3f(p0[0],p0[1],p0[2]);
+            glVertex3f(p1[0],p1[1],p1[2]);
+            glVertex3f(p2[0],p2[1],p2[2]);
+        }
+        glEnd();
+        glUseProgram(0);
+
     }
 
     void loadSkybox() {
@@ -316,14 +388,14 @@ public :
         return textureID;
     }
 
-    void loadTextures() {
-        textureEauID = loadTexture("./images/textureEau.jpg");
-        textureHerbeID = loadTexture("./images/textureHerbe.jpg");
-        textureRocheID = loadTexture("./images/textureRoche.jpg");
-        textureNeigeID = loadTexture("./images/textureNeige.jpg");
-        //textureHeightmapID = loadTexture("perlinNoise.png");
-        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
-    }
+    // void loadTextures() {
+    //     textureEauID = loadTexture("./images/textureEau.jpg");
+    //     textureHerbeID = loadTexture("./images/textureHerbe.jpg");
+    //     textureRocheID = loadTexture("./images/textureRoche.jpg");
+    //     textureNeigeID = loadTexture("./images/textureNeige.jpg");
+    //     //textureHeightmapID = loadTexture("perlinNoise.png");
+    //     textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
+    // }
 
     void drawBuffers() {
         //GLuint vertexbuffer;
@@ -369,12 +441,12 @@ public :
         shaderProgram = createShaderProgram(vertexShaderSource.toUtf8().constData(), fragmentShaderSource.toUtf8().constData());
 
         // Charger les textures
-        /*textureEauID = loadTexture("./images/textureEau.jpg");
+        textureEauID = loadTexture("./images/textureEau.jpg");
         textureHerbeID = loadTexture("./images/textureHerbe.jpg");
         textureRocheID = loadTexture("./images/textureRoche.jpg");
         textureNeigeID = loadTexture("./images/textureNeige.jpg");
         //textureHeightmapID = loadTexture("perlinNoise.png");
-        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);*/
+        textureHeightmapID = loadTextureHeightmap(terrainMesh.perlinNoise->ImgPerlin);
 
         // Associer les textures aux unités de texture
         glActiveTexture(GL_TEXTURE0);
@@ -494,6 +566,7 @@ public :
         //skybox
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         drawSkybox();
+        drawPointerMesh();
 
         glUseProgram(shaderProgram);
 
@@ -637,6 +710,8 @@ public :
 
         loadCubemap();
         loadSkybox();
+        loadPointerMesh();
+
 
         //
 
@@ -647,7 +722,7 @@ public :
 
         //initPremierePersonneCamera();
 
-        loadTextures();
+        //loadTextures();
 
     }
 
