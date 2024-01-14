@@ -21,6 +21,8 @@ public:
 
     PerlinNoise* perlinNoise;
     QImage getMap();
+    QImage ImgGradient;
+    QImage ImgErosion;
 
     float sizeX = 1.0, sizeY = 1.0, sizeZ = 1.0;
     float averageHeight;
@@ -29,6 +31,12 @@ public:
     void generateMesh();
     bool perlinNoiseCreated;
     void getHeightAtPerlinPx(GLfloat &y, float perlin);
+    void generateGradientMap(QImage perlinMap);
+    void simulateHydraulicErosion(int dropNumber);
+    std::vector<QPoint> followGradient(QPoint startPoint, int maxIterations);
+    float getErosionAt(int i, int j, int resolution);
+
+    int nbRainDrops = 100;
 
 private:
     void generatePlan();

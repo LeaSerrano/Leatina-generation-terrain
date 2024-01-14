@@ -22,7 +22,6 @@ public :
 private :
     int nH = 512, nW = 512;
 
-
     unsigned int generateRandomSeed();
     double noise(int x, int y, int seed);
     double cubicInterpolate(double beforeP0, double p0, double p1, double afterP1, double t);

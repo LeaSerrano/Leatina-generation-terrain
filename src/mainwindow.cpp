@@ -579,8 +579,10 @@ void MainWindow::changerVuePremierePersonne() {
         viewer->terrainMesh.sizeZ = 4.0;
         viewer->terrainMesh.generateMesh();
 
-        viewer->camPosX = QRandomGenerator::global()->generateDouble();
-        viewer->camPosZ = QRandomGenerator::global()->generateDouble();
+        double randomValueX = QRandomGenerator::global()->generateDouble();
+        double randomValueZ = QRandomGenerator::global()->generateDouble();
+        viewer->camPosX = 0.2 + randomValueX * (3.8 - 0.2);
+        viewer->camPosZ = 0.2 + randomValueZ * (3.8 - 0.2);
 
         viewer->draw();
 

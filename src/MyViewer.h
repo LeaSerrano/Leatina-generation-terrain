@@ -825,12 +825,10 @@ public :
         cameraPosition.x = qBound(0.2f, (float)cameraPosition.x, (float)terrainMesh.sizeX-0.2f);
         cameraPosition.z = qBound(0.2f, (float)cameraPosition.z, (float)terrainMesh.sizeZ-0.2f);
 
-        if (cameraPosition.y != 0.0f) {
-            setCameraPositionWithPerlinHeight();
+        setCameraPositionWithPerlinHeight();
 
-            camera()->setPosition(cameraPosition);
-            setCameraPositionWithPerlinHeight();
-        }
+        camera()->setPosition(cameraPosition);
+        setCameraPositionWithPerlinHeight();
     }
 
 
