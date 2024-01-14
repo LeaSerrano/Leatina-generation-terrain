@@ -6,5 +6,7 @@
         <file>skybox_vshader.glsl</file>
         <file>pointerMesh_fshader.glsl</file>
         <file>pointerMesh_vshader.glsl</file>
+        <file>markerMesh_fshader.glsl</file>
+        <file>markerMesh_vshader.glsl</file>
     </qresource>
 </RCC>

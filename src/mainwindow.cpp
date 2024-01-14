@@ -57,10 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     setWindowTitle("Leatina Generation Terrain");
 
-    //backgroundWidget = new QLabel(this);
-    //backgroundWidget->setGeometry(0, 0, width(), height());
-    //backgroundWidget->setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));");
-    //backgroundWidget->lower();
+    this->setStyleSheet("background-color: rgb(52, 78, 65);");
 
     ui->statusbar->hide();
 
@@ -135,9 +132,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         if(!isMarqueurMode){
             ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
             boutonMarqueur->setChecked(false);
+            viewer->isMarkerOn = false;
+            viewer->update();
         } else {
             mergeImages(editedImage, markedImage);
             boutonMarqueur->setChecked(true);
+            viewer->isMarkerOn = true;
+            viewer->update();
         }
     });
 
@@ -289,8 +290,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->label_newHeightValue->setText("Hauteur : " + QString::number(newHeightValue));
     });
 
-    viewer->movePointerMeshRelativeToTerrain(1,1,1);
-
     // FIN INITIALISATION
     combinePathsImages(pathsImages);
     setFocusPolicy(Qt::StrongFocus);
@@ -423,92 +422,83 @@ void MainWindow::onReloadButtonClicked() {
 
 // Permet de savoir si la souris est en train de faire un clic gauche + mouvement dans le label de la carte
 bool MainWindow::eventFilter(QObject *obj, QEvent *event){
-    if (!isMarqueurMode && obj == ui->label_perlinNoise) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-        viewer->isPointerOn = true;
+    QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+    if(obj == ui->label_perlinNoise){
         float x = mouseEvent->pos().x();
-        x = x/512.;
         float z = mouseEvent->pos().y();
-        z = z/512.;
-        float y = viewer->getThisPositionHeight(x,z);
-        qDebug() << "x " << x;
-        qDebug() << "y " << y;
-        qDebug() << "z " << z;
+        float x_div = x/512.;
+        float z_div = z/512.;
 
-        viewer->movePointerMeshRelativeToTerrain(x,y,z);
+        //qDebug() << "x " << x;
+        //qDebug() << "y " << y;
+        //qDebug() << "z " << z;
 
-        if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent->button() == Qt::LeftButton) {
-                isLeftButtonPressed = true;
+        float y = viewer->getThisPositionHeight(x_div,z_div);
+        if (!isMarqueurMode/* && obj == ui->label_perlinNoise*/) {
+            viewer->isPointerOn = true;
+            viewer->movePointerMeshRelativeToTerrain(x_div, y, z_div);
 
-                currentPath = new Path();
-                currentPath->setHeightValue(newHeightValue);
-                currentPath->setPathPen_width(penSize);
-                currentPath->startDrawingPath(mouseEvent);
+            if (event->type() == QEvent::MouseButtonPress) {
+                if (mouseEvent->button() == Qt::LeftButton) {
+                    isLeftButtonPressed = true;
 
-                undoPaths.append(currentPath);
-                redoPaths.clear();
-            }
-        } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+                    currentPath = new Path();
+                    currentPath->setHeightValue(newHeightValue);
+                    currentPath->setPathPen_width(penSize);
+                    currentPath->startDrawingPath(mouseEvent);
 
-            currentPath->drawingPath(mouseEvent, editedImage); //Appel editedImage  : juste pour la taille img
-            //editedImage = currentPath->getPathImage().copy();
+                    undoPaths.append(currentPath);
+                    redoPaths.clear();
+                }
+            } else if (event->type() == QEvent::MouseMove && isLeftButtonPressed) {
+                currentPath->drawingPath(mouseEvent, editedImage); //Appel editedImage  : juste pour la taille img
 
-            //Affichage Image résultat + Image tracé rouge
-            update_label_perlinNoise(combinedImage, currentPath->getLayerImage());
+                //Affichage Image résultat + Image tracé rouge
+                update_label_perlinNoise(combinedImage, currentPath->getLayerImage());
 
-        } else if (event->type() == QEvent::MouseButtonRelease) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent->button() == Qt::LeftButton) {
-                isLeftButtonPressed = false;
+            } else if (event->type() == QEvent::MouseButtonRelease) {
+                if (mouseEvent->button() == Qt::LeftButton) {
+                    isLeftButtonPressed = false;
 
-                currentPath->setPixelsPath();
-                currentPath->addModification(editedImage); //Appel editedImage : récup couleur de base
+                    currentPath->setPixelsPath();
+                    currentPath->addModification(editedImage); //Appel editedImage : récup couleur de base
 
-                //Ajout du tracé dans la liste
-                pathsImages.append(currentPath->renderPathImage);
+                    //Ajout du tracé dans la liste
+                    pathsImages.append(currentPath->renderPathImage);
 
-                //Génération image combinée des tracés
-                combinePathsImages(pathsImages);
+                    //Génération image combinée des tracés
+                    combinePathsImages(pathsImages);
 
-                editedImage = combinedImage.copy();
-                updateMesh(editedImage);
+                    editedImage = combinedImage.copy();
+                    updateMesh(editedImage);
 
-                // editedImage.save("edited.png");
-                // combinedImage.save("combined.png");
+                    // editedImage.save("edited.png");
+                    // combinedImage.save("combined.png");
 
-                //Affichage du tracé rouge
-                //update_label_perlinNoise(editedImage, currentPath->getLayerImage());
+                    //Affichage du tracé rouge
+                    //update_label_perlinNoise(editedImage, currentPath->getLayerImage());
 
-                currentPath->endDrawingPath();
-            }
-        }
-    } else if(isMarqueurMode && obj == ui->label_perlinNoise){
-        if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent->button() == Qt::LeftButton) {
-                int x = mouseEvent->pos().x();
-                int y = mouseEvent->pos().y();
-                //qDebug() << x;
-                //qDebug() << y;
-
-                QColor couleurPixel = editedImage.pixelColor(x,y);
-                if(couleurPixel.red() > 25){
-                    updateMarker(x,y);
-                    mergeImages(editedImage, markedImage);
-
-                    viewer->camPosX = float(x)/512.;
-                    viewer->camPosZ = float(y)/512.; // Z est le y du mesh
+                    currentPath->endDrawingPath();
                 }
             }
+        } else if(isMarqueurMode /*&& obj == ui->label_perlinNoise*/){
+            viewer->isPointerOn = false;
+            if (event->type() == QEvent::MouseButtonPress) {
+                if (mouseEvent->button() == Qt::LeftButton) {
+                    QColor couleurPixel = editedImage.pixelColor(x,z); // le y de l'img est le z du mesh
+                    if(couleurPixel.red() > 25){
+                        updateMarker(x,z);
+                        mergeImages(editedImage, markedImage);
+                        viewer->moveMarkerMeshRelativeToTerrain(x_div,y,z_div);
+                        viewer->camPosX = x_div;
+                        viewer->camPosZ = z_div; // Z est le y du mesh
+                    }
+                }
+            }
+        }else{ //Hors de la carte
+            viewer->isPointerOn = false;
         }
-    }else{
-        viewer->isPointerOn = false;
     }
-
-
 
     viewer->setFocus();
     return QMainWindow::eventFilter(obj, event);
