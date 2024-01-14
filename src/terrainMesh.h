@@ -33,7 +33,7 @@ public:
     void getHeightAtPerlinPx(GLfloat &y, float perlin);
     void generateGradientMap(QImage perlinMap);
     void simulateHydraulicErosion(int dropNumber);
-    std::vector<QPoint> followGradient(QPoint startPoint, int maxIterations);
+    std::vector<QPoint> followGradient(QPoint startPoint);
     float getErosionAt(int i, int j, int resolution);
 
     int nbRainDrops = 100;

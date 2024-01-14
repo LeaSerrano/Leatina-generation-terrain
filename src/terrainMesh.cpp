@@ -115,7 +115,7 @@ void TerrainMesh::generateIndices() {
 
 void TerrainMesh::calculateNormals() {
 
-       normal_buffer.clear();
+    normal_buffer.clear();
 
        QVector<QVector3D> normals(vertex_buffer.size(), QVector3D(0.0, 0.0, 0.0));
 
@@ -146,7 +146,6 @@ void TerrainMesh::calculateNormals() {
            normal_buffer.push_back(normals[i].y());
            normal_buffer.push_back(normals[i].z());
        }
-
 }
 
 //Générer un nouveau maillage
@@ -154,9 +153,7 @@ void TerrainMesh::generateMesh() {
     generatePlan();
     generateIndices();
     calculateNormals();
-
 }
-
 
 
 //Mettre une carte
@@ -170,30 +167,6 @@ QImage TerrainMesh::getMap(){
     return perlinNoise->ImgPerlin;
 }
 
-/*
-void TerrainMesh::generateGradientMap(QImage perlinMap)
-{
-    int largeur = perlinMap.width();
-    int hauteur = perlinMap.height();
-
-    ImgGradient = QImage(largeur, hauteur, QImage::Format_Grayscale8);
-
-    for (int x = 0; x < largeur; ++x) {
-        for (int y = 0; y < hauteur; ++y) {
-            double diffHauteurX = perlinMap.pixelColor(qBound(0, x + 1, largeur - 1), y).value() - perlinMap.pixelColor(x, y).value();
-            double diffHauteurY = perlinMap.pixelColor(x, qBound(0, y + 1, hauteur - 1)).value() - perlinMap.pixelColor(x, y).value();
-
-            double pente = atan2(diffHauteurY, diffHauteurX);
-
-            int valeurPixel = static_cast<int>((pente + M_PI) / (2.0 * M_PI) * 255.0);
-
-            ImgGradient.setPixel(x, y, qRgb(valeurPixel, valeurPixel, valeurPixel));
-        }
-    }
-
-    ImgGradient.save("gradient.png");
-}*/
-
 void TerrainMesh::generateGradientMap(QImage perlinMap)
 {
     int largeur = perlinMap.width();
@@ -202,7 +175,7 @@ void TerrainMesh::generateGradientMap(QImage perlinMap)
     ImgGradient = QImage(largeur, hauteur, QImage::Format_Grayscale8);
 
     for (int x = 1; x < largeur - 1; ++x) {
-           for (int y = 1; y < hauteur - 1; ++y) {
+        for (int y = 1; y < hauteur - 1; ++y) {
             // Calcul du gradient avec l'opérateur de Sobel
             double diffHauteurX = (perlinMap.pixelColor(x + 1, y - 1).value() + 2 * perlinMap.pixelColor(x + 1, y).value() + perlinMap.pixelColor(x + 1, y + 1).value())
                                   - (perlinMap.pixelColor(x - 1, y - 1).value() + 2 * perlinMap.pixelColor(x - 1, y).value() + perlinMap.pixelColor(x - 1, y + 1).value());
@@ -215,46 +188,48 @@ void TerrainMesh::generateGradientMap(QImage perlinMap)
             int valeurPixel = static_cast<int>((pente + M_PI) / (2.0 * M_PI) * 255.0);
 
             ImgGradient.setPixel(x, y, qRgb(valeurPixel, valeurPixel, valeurPixel));
-           }
+        }
     }
 
     ImgGradient.save("gradient.png");
 }
 
 
-std::vector<QPoint> TerrainMesh::followGradient(QPoint startPoint, int maxIterations)
+std::vector<QPoint> TerrainMesh::followGradient(QPoint startPoint)
 {
     std::vector<QPoint> positionsList;
 
-    int x = qBound(0, startPoint.x(), ImgGradient.width() - 1);
-    int y = qBound(0, startPoint.y(), ImgGradient.height() - 1);
+    int x = qBound(1, startPoint.x(), ImgGradient.width() - 2);
+    int y = qBound(1, startPoint.y(), ImgGradient.height() - 2);
+
+    positionsList.push_back(QPoint(x, y));
 
     for (int i = 0; i < 200; i++) {
 
         int pixelValue = ImgGradient.pixel(x, y);
         double angle = 2.0 * M_PI * pixelValue / 255.0;
-        double gradientX = cos(angle);
-        double gradientY = sin(angle);
 
-        double gradientMagnitude = std::sqrt(gradientX * gradientX + gradientY * gradientY);
-        double seuil_plateau = 0.3;
+        double step = 1.0;
+        double gradientX = step * cos(angle);
+        double gradientY = step * sin(angle);
 
-        if (gradientMagnitude >= seuil_plateau) {
-            int newX = x + gradientX;
-            int newY = y + gradientY;
+        double newX = x + gradientX;
+        double newY = y + gradientY;
 
-            x = newX;
-            y = newY;
+        x = qBound(1, qRound(newX), ImgGradient.width() - 2);
+        y = qBound(1, qRound(newY), ImgGradient.height() - 2);
 
-            QPoint currentPoint = QPoint(newX, newY);
+        QPoint currentPoint = QPoint(x, y);
+
+        auto it = std::find(positionsList.begin(), positionsList.end(), currentPoint);
+
+        if (it == positionsList.end()) {
             positionsList.push_back(currentPoint);
         }
     }
 
     return positionsList;
 }
-
-
 
 void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
     srand(time(NULL));
@@ -281,49 +256,13 @@ void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
         int x = dropPosition.x();
         int y = dropPosition.y();
 
-        //while (x >= 0 && x < width && y >= 0 && y < height) {
+        std::vector<QPoint> positionsList = followGradient(QPoint(x, y));
 
-            ImgErosion.setPixel(x, y, qRgb(255, 255, 255));
-        //qDebug() << x << " " << y;
-
-            double pente = static_cast<double>(ImgGradient.pixelColor(x, y).value()) / 255.0 * 2.0 * M_PI - M_PI;
-
-            std::vector<QPoint> positionsList = followGradient(QPoint(x, y), 100);
-
-            //qDebug() << positionsList.size();
-
+        if (positionsList.size() > 10) {
             for (int i = 0; i < positionsList.size(); i++) {
-                if (positionsList.size() > 10) {
-                    ImgErosion.setPixel(positionsList[i].x(), positionsList[i].y(), qRgb(255, 255, 255));
-                }//qDebug() << dropPosition.x() << " " << dropPosition.y() << " " << positionsList[i].x() << " " << positionsList[i].y();
+                ImgErosion.setPixel(positionsList[i].x(), positionsList[i].y(), qRgb(255, 255, 255));
             }
-
-            /*qDebug() << "pente : " << pente;
-
-            // Déplacer la goutte vers le voisin avec la plus grande pente descendante
-            double meilleurAngle = 0.0;
-            double meilleurePente = 0.0;
-
-            for (int dx = -1; dx <= 1; ++dx) {
-                for (int dy = -1; dy <= 1; ++dy) {
-                    if (dx != 0 || dy != 0) {
-                        int voisinX = x + dx;
-                        int voisinY = y + dy;
-
-                        if (voisinX >= 0 && voisinX < width && voisinY >= 0 && voisinY < height) {
-                            double penteVoisin = static_cast<double>(ImgGradient.pixelColor(voisinX, voisinY).value()) / 255.0 * 2.0 * M_PI - M_PI;
-                            if (penteVoisin < meilleurePente) {
-                                meilleurePente = penteVoisin;
-                                meilleurAngle = atan2(dy, dx);
-                            }
-                        }
-                    }
-                }
-            }
-
-            x += static_cast<int>(cos(meilleurAngle));
-            y += static_cast<int>(sin(meilleurAngle));
-        }*/
+        }
     }
 
     ImgErosion.save("hydraulicErosion.png");
@@ -331,14 +270,15 @@ void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
 
 float TerrainMesh::getErosionAt(int i, int j, int resolution) {
     if (!ImgErosion.isNull()) {
-            int scaledI = static_cast<int>(i * ImgErosion.width() / resolution);
-            int scaledJ = static_cast<int>(j * ImgErosion.height() / resolution);
+        int scaledI = static_cast<int>(i * ImgErosion.width() / resolution);
+        int scaledJ = static_cast<int>(j * ImgErosion.height() / resolution);
 
-            if (scaledI > 0 && scaledI < ImgErosion.width() && scaledJ > 0 && scaledJ < ImgErosion.height()) {
+        if (scaledI > 0 && scaledI < ImgErosion.width() && scaledJ > 0 && scaledJ < ImgErosion.height()) {
             QRgb pixelValue = ImgErosion.pixel(scaledI, scaledJ);
             return static_cast<float>(qGray(pixelValue));
-            }
+        }
     }
+
     return 0.0f;
 }
 
