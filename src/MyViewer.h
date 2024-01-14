@@ -48,12 +48,6 @@
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
-
-    Mesh pointerMesh;
-    GLuint pointerMeshShader;
-    GLuint pointerMeshVAO, pointerMeshVBO;
-
-
     QWidget * controls;
 
     GLuint shaderProgram;
@@ -77,10 +71,18 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
     qglviewer::Camera camVuePremierePersonne;
 
+
+    Mesh pointerMesh;
+    GLuint pointerMeshShader;
+    GLuint pointerMeshVAO, pointerMeshVBO;
+    QMatrix4x4 modelMMatrix;
+
 public :
     TerrainMesh terrainMesh;
     float camPosX = QRandomGenerator::global()->generateDouble();
     float camPosZ = QRandomGenerator::global()->generateDouble();
+
+    bool isPointerOn = false;
 
     enum Vue { VueTerrain, VuePremierePersonne };
     Vue vueActuelle;
@@ -116,7 +118,7 @@ public :
 
         pointerMeshShader = createShaderProgram(pointerMeshVertexShaderSource.toUtf8().constData(), pointerMeshFragmentShaderSource.toUtf8().constData());
 
-        OBJIO::openTriMesh("./obj/pointer-cone.obj", pointerMesh.vertices, pointerMesh.triangles);
+        OBJIO::openTriMesh("./obj/pointer-cone2.obj", pointerMesh.vertices, pointerMesh.triangles);
 
         glGenVertexArrays(1, &pointerMeshVAO); //vertex array
         glGenBuffers(1, &pointerMeshVBO); //vertexbuffer
@@ -135,14 +137,10 @@ public :
     }
 
     void drawPointerMesh(){
+        if(!isPointerOn) return;
         glUseProgram(pointerMeshShader);
-        GLfloat angle = 180.0f;
-        QMatrix4x4 rotationMMatrix;
-        rotationMMatrix.rotate(angle, 0.0f, 0.0f, 1.0f);
-        QMatrix4x4 modelMMatrix;
-        modelMMatrix = rotationMMatrix * modelMatrix;
 
-        GLfloat scaleFactor = 0.1f;  // ajustez la valeur selon vos besoins
+        GLfloat scaleFactor = 0.1f;
         modelMMatrix.scale(scaleFactor);
 
         glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "modelP"), 1, GL_FALSE, modelMMatrix.data());
@@ -174,6 +172,14 @@ public :
         glUseProgram(0);
 
     }
+
+    void movePointerMeshRelativeToTerrain(float dx, float dy, float dz) {
+        modelMMatrix = modelMatrix;
+        modelMMatrix.translate(dx,dy,dz);
+
+        update();
+    }
+
 
     void loadSkybox() {
         // Load the skybox shaders
@@ -317,10 +323,10 @@ public :
 
         if (image.isNull()) {
             qDebug() << "Failed to load texture: " << filePath;
-            return 0;  // Retourner 0 en cas d'échec du chargement de l'image
+            return 0;
         }
 
-        // Convertir l'image en format adapté à OpenGL
+        // Convertir l'image
         image = image.convertToFormat(QImage::Format_RGBA8888);
 
         // Générer une texture OpenGL
@@ -566,11 +572,15 @@ public :
         //skybox
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         drawSkybox();
+
+        //Pointeur
         drawPointerMesh();
 
         glUseProgram(shaderProgram);
 
+
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, modelMatrix.data());
+
 
         GLfloat projectionMatrix[16];
         camera()->getProjectionMatrix(projectionMatrix);
@@ -719,6 +729,8 @@ public :
         adjustCamera(bbmin, BBmax);
 
         modelMatrix = QMatrix4x4();
+        modelMatrix.setToIdentity();
+        modelMMatrix.setToIdentity();
 
         //initPremierePersonneCamera();
 

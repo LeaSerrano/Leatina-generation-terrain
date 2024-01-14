@@ -289,6 +289,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->label_newHeightValue->setText("Hauteur : " + QString::number(newHeightValue));
     });
 
+    viewer->movePointerMeshRelativeToTerrain(1,1,1);
 
     // FIN INITIALISATION
     combinePathsImages(pathsImages);
@@ -423,6 +424,19 @@ void MainWindow::onReloadButtonClicked() {
 // Permet de savoir si la souris est en train de faire un clic gauche + mouvement dans le label de la carte
 bool MainWindow::eventFilter(QObject *obj, QEvent *event){
     if (!isMarqueurMode && obj == ui->label_perlinNoise) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+        viewer->isPointerOn = true;
+        float x = mouseEvent->pos().x();
+        x = x/512.;
+        float z = mouseEvent->pos().y();
+        z = z/512.;
+        float y = viewer->getThisPositionHeight(x,z);
+        qDebug() << "x " << x;
+        qDebug() << "y " << y;
+        qDebug() << "z " << z;
+
+        viewer->movePointerMeshRelativeToTerrain(x,y,z);
+
         if (event->type() == QEvent::MouseButtonPress) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
             if (mouseEvent->button() == Qt::LeftButton) {
@@ -477,8 +491,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
             if (mouseEvent->button() == Qt::LeftButton) {
                 int x = mouseEvent->pos().x();
                 int y = mouseEvent->pos().y();
-                qDebug() << x;
-                qDebug() << y;
+                //qDebug() << x;
+                //qDebug() << y;
 
                 QColor couleurPixel = editedImage.pixelColor(x,y);
                 if(couleurPixel.red() > 25){
@@ -490,7 +504,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 }
             }
         }
+    }else{
+        viewer->isPointerOn = false;
     }
+
+
 
     viewer->setFocus();
     return QMainWindow::eventFilter(obj, event);
