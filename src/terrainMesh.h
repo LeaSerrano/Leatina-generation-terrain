@@ -46,7 +46,6 @@ private:
     void calculateNormals();
     void setMap(QImage image);
 
-
 };
 
 #endif // TERRAINMESH_H

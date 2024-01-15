@@ -487,7 +487,7 @@ public :
         glUniform3f(glGetUniformLocation(shaderProgram, "lightColor"), 1.0, 1.0, 1.0);
         glUniform3f(glGetUniformLocation(shaderProgram, "ambientMaterial"), 0.2, 0.2, 0.2);
         glUniform3f(glGetUniformLocation(shaderProgram, "diffuseMaterial"), 0.5, 0.5, 0.5);
-        glUniform3f(glGetUniformLocation(shaderProgram, "specularMaterial"), 0.3, 0.3, 0.3);
+        glUniform3f(glGetUniformLocation(shaderProgram, "specularMaterial"), 0.1, 0.1, 0.1);
         glUniform1f(glGetUniformLocation(shaderProgram, "shininessMaterial"), 0.2);
 
         qglviewer::Vec cameraPosition = camera()->position();

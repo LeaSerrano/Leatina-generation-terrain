@@ -198,8 +198,8 @@ std::vector<QPoint> TerrainMesh::followGradient(QPoint startPoint)
 {
     std::vector<QPoint> positionsList;
 
-    int x = qBound(0, startPoint.x(), ImgGradient.width() - 1);
-    int y = qBound(0, startPoint.y(), ImgGradient.height() - 1);
+    double x = qBound(0, startPoint.x(), ImgGradient.width() - 1);
+    double y = qBound(0, startPoint.y(), ImgGradient.height() - 1);
 
     positionsList.push_back(QPoint(x, y));
 
@@ -211,11 +211,20 @@ std::vector<QPoint> TerrainMesh::followGradient(QPoint startPoint)
         double gradientX = cos(angle);
         double gradientY = sin(angle);
 
+        double magnitude = sqrt(gradientX * gradientX + gradientY * gradientY);
+        if (magnitude > 0) {
+            gradientX /= magnitude;
+            gradientY /= magnitude;
+        }
+
         double newX = x + gradientX;
         double newY = y + gradientY;
 
-        x = qBound(0, qRound(newX), ImgGradient.width() - 1);
-        y = qBound(0, qRound(newY), ImgGradient.height() - 1);
+        newX = qBound(0.0, newX, static_cast<double>(ImgGradient.width() - 1));
+        newY = qBound(0.0, newY, static_cast<double>(ImgGradient.height() - 1));
+
+        x = qRound(newX);
+        y = qRound(newY);
 
         QPoint currentPoint = QPoint(x, y);
 
@@ -229,6 +238,7 @@ std::vector<QPoint> TerrainMesh::followGradient(QPoint startPoint)
     return positionsList;
 }
 
+
 void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
     srand(time(NULL));
 
@@ -239,8 +249,8 @@ void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
 
     QVector<QPointF> dropPositions;
     for (int i = 0; i < dropNumber; ++i) {
-        int x = std::rand()%width;
-        int y = std::rand()%height;
+        double x = std::rand()%width;
+        double y = std::rand()%height;
         dropPositions.append(QPoint(x, y));
     }
 
@@ -251,8 +261,8 @@ void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
     }
 
     for (const QPointF& dropPosition : dropPositions) {
-        int x = dropPosition.x();
-        int y = dropPosition.y();
+        double x = dropPosition.x();
+        double y = dropPosition.y();
 
         std::vector<QPoint> positionsList = followGradient(QPoint(x, y));
 
