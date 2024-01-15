@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     setWindowTitle("Leatina Generation Terrain");
 
-    this->setStyleSheet("background-color: rgb(52, 78, 65);");
+    //this->setStyleSheet("background-color: rgb(52, 78, 65);");
 
     ui->statusbar->hide();
 
@@ -290,6 +290,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->label_newHeightValue->setText("Hauteur : " + QString::number(newHeightValue));
     });
 
+    //Position initiale du marqueur
+    //updateMarker((viewer->camPosX/4.)*512., (viewer->camPosZ/4.)*512.);
+    viewer->moveMarkerMeshRelativeToTerrain(viewer->camPosX, viewer->getThisPositionHeight(viewer->camPosX,viewer->camPosZ), viewer->camPosZ);
+
     // FIN INITIALISATION
     combinePathsImages(pathsImages);
     setFocusPolicy(Qt::StrongFocus);
@@ -401,13 +405,14 @@ void MainWindow::onHeightRangeSliderReleased() {
 void MainWindow::onReloadButtonClicked() {
     viewer->terrainMesh.perlinNoiseCreated = false;
     viewer->terrainMesh.generateMesh();
+    viewer->loadTextures();
+    viewer->camPosX = QRandomGenerator::global()->generateDouble();
+    viewer->camPosZ = QRandomGenerator::global()->generateDouble();
 
     originalImage = QImage("perlinNoise.png");
-    //ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
     editedImage = originalImage.copy();
     editedImage = editedImage.convertToFormat(QImage::Format_ARGB32);
 
-    //currentPath.clear();
     undoPaths.clear();
     redoPaths.clear();
 
@@ -416,6 +421,10 @@ void MainWindow::onReloadButtonClicked() {
     updateMesh(combinedImage);
 
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
+
+    //Marqueur reset
+    //updateMarker((viewer->camPosX/4.)*512., (viewer->camPosZ/4.)*512.);
+    viewer->moveMarkerMeshRelativeToTerrain(viewer->camPosX, viewer->getThisPositionHeight(viewer->camPosX,viewer->camPosZ), viewer->camPosZ);
 
     viewer->setFocus();
 }
@@ -437,6 +446,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
         if (!isMarqueurMode/* && obj == ui->label_perlinNoise*/) {
             viewer->isPointerOn = true;
             viewer->movePointerMeshRelativeToTerrain(x_div, y, z_div);
+            if(x_div == 0 && y == 0 && z_div == 0){
+                viewer->isPointerOn = false;
+                viewer->update();
+            }
 
             if (event->type() == QEvent::MouseButtonPress) {
                 if (mouseEvent->button() == Qt::LeftButton) {
@@ -495,9 +508,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                     }
                 }
             }
-        }else{ //Hors de la carte
+        }else{
             viewer->isPointerOn = false;
         }
+    }else{ //Hors de la carte
+        viewer->isPointerOn = false;
     }
 
     viewer->setFocus();
@@ -654,9 +669,6 @@ void MainWindow::changerVuePremierePersonne() {
         viewer->terrainMesh.sizeY = 4.0;
         viewer->terrainMesh.sizeZ = 4.0;
         viewer->terrainMesh.generateMesh();
-
-        //viewer->camPosX = QRandomGenerator::global()->generateDouble();
-        //viewer->camPosZ = QRandomGenerator::global()->generateDouble();
 
         viewer->draw();
 

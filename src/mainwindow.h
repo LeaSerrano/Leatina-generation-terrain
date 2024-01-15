@@ -78,6 +78,7 @@ private slots:
 #include <QPainterPath>
 #include <QStack>
 #include <QLabel>
+#include <QRandomGenerator>
 #include <QGraphicsDropShadowEffect>
 #include "MyViewer.h"
 #include "path.h"
