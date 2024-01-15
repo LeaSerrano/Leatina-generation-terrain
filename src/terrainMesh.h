@@ -36,7 +36,9 @@ public:
     std::vector<QPoint> followGradient(QPoint startPoint);
     float getErosionAt(int i, int j, int resolution);
 
-    int nbRainDrops = 100;
+    int nbRainDrops = 50;
+    int nbErosionIterations = 100;
+    bool renderErosion = true;
 
 private:
     void generatePlan();

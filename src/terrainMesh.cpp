@@ -60,9 +60,6 @@ void TerrainMesh::generatePlan() {
     float stepX = static_cast<float>(sizeX) / static_cast<float>(resolution);
     float stepZ = static_cast<float>(sizeZ) / static_cast<float>(resolution);
 
-    float minHeight = std::numeric_limits<float>::max();
-    float maxHeight = std::numeric_limits<float>::lowest();
-
     for (int i = 0; i <= resolution; ++i) {
         for (int j = 0; j <= resolution; ++j) {
             GLfloat x = i * stepX;
@@ -73,11 +70,13 @@ void TerrainMesh::generatePlan() {
             GLfloat y;
             getHeightAtPerlinPx(y, perlin);
 
-            int gradientValue = getErosionAt(i, j, resolution);
+            if (renderErosion) {
+                int gradientValue = getErosionAt(i, j, resolution);
 
-            if (gradientValue == 255) {
-                if (y - 0.1 >= 0.0) {
-                    y -= 0.1;
+                if (gradientValue == 255) {
+                    if (y - 0.1 >= 0.0) {
+                        y -= 0.1;
+                    }
                 }
             }
 
@@ -199,25 +198,24 @@ std::vector<QPoint> TerrainMesh::followGradient(QPoint startPoint)
 {
     std::vector<QPoint> positionsList;
 
-    int x = qBound(1, startPoint.x(), ImgGradient.width() - 2);
-    int y = qBound(1, startPoint.y(), ImgGradient.height() - 2);
+    int x = qBound(0, startPoint.x(), ImgGradient.width() - 1);
+    int y = qBound(0, startPoint.y(), ImgGradient.height() - 1);
 
     positionsList.push_back(QPoint(x, y));
 
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < nbErosionIterations; i++) {
 
         int pixelValue = ImgGradient.pixel(x, y);
         double angle = 2.0 * M_PI * pixelValue / 255.0;
 
-        double step = 1.0;
-        double gradientX = step * cos(angle);
-        double gradientY = step * sin(angle);
+        double gradientX = cos(angle);
+        double gradientY = sin(angle);
 
         double newX = x + gradientX;
         double newY = y + gradientY;
 
-        x = qBound(1, qRound(newX), ImgGradient.width() - 2);
-        y = qBound(1, qRound(newY), ImgGradient.height() - 2);
+        x = qBound(0, qRound(newX), ImgGradient.width() - 1);
+        y = qBound(0, qRound(newY), ImgGradient.height() - 1);
 
         QPoint currentPoint = QPoint(x, y);
 
