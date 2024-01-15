@@ -126,7 +126,7 @@ public :
 
         pointerMeshShader = createShaderProgram(pointerMeshVertexShaderSource.toUtf8().constData(), pointerMeshFragmentShaderSource.toUtf8().constData());
 
-        OBJIO::openTriMesh("./obj/pointer-cone2.obj", pointerMesh.vertices, pointerMesh.triangles);
+        OBJIO::openTriMesh("./obj/pointer-cone.obj", pointerMesh.vertices, pointerMesh.triangles);
 
         glGenVertexArrays(1, &pointerMeshVAO); //vertex array
         glGenBuffers(1, &pointerMeshVBO); //vertexbuffer
@@ -141,15 +141,14 @@ public :
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
-
     }
 
     void drawPointerMesh(){
         if(!isPointerOn) return;
         glUseProgram(pointerMeshShader);
 
-        GLfloat scaleFactor = 0.1f;
-        pointerMeshModelMatrix.scale(scaleFactor);
+        //GLfloat scaleFactor = 0.1f;
+        //pointerMeshModelMatrix.scale(scaleFactor);
 
         glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "modelP"), 1, GL_FALSE, pointerMeshModelMatrix.data());
 
@@ -217,8 +216,8 @@ public :
         if(!isMarkerOn) return;
         glUseProgram(markerMeshShader);
 
-        GLfloat scaleFactor = 0.1f;
-        markerMeshModelMatrix.scale(scaleFactor);
+        //GLfloat scaleFactor = 0.05f;
+        //markerMeshModelMatrix.scale(scaleFactor);
         qDebug() << markerMeshModelMatrix;
 
         glUniformMatrix4fv(glGetUniformLocation(markerMeshShader, "modelM"), 1, GL_FALSE, markerMeshModelMatrix.data());
@@ -248,7 +247,6 @@ public :
         }
         glEnd();
         glUseProgram(0);
-
     }
 
     void moveMarkerMeshRelativeToTerrain(float dx, float dy, float dz) {
@@ -653,12 +651,16 @@ public :
 
         //Pointeur
         drawPointerMesh();
+
+        //Marqueur
         drawMarkerMesh();
 
         glUseProgram(shaderProgram);
 
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, modelMatrix.data());
+        // GLfloat scaleFactor = 0.05f;
+        // markerMeshModelMatrix.scale(scaleFactor);
 
 
         GLfloat projectionMatrix[16];
@@ -974,6 +976,8 @@ public :
         QMatrix4x4 translationMatrix;
         translationMatrix.translate(objectCenter);
         modelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * modelMatrix;
+        pointerMeshModelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * pointerMeshModelMatrix;
+        markerMeshModelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * markerMeshModelMatrix;
         update();
     }
 

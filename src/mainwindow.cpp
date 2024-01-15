@@ -486,12 +486,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
             if (event->type() == QEvent::MouseButtonPress) {
                 if (mouseEvent->button() == Qt::LeftButton) {
                     QColor couleurPixel = editedImage.pixelColor(x,z); // le y de l'img est le z du mesh
-                    if(couleurPixel.red() > 25){
+                    if(couleurPixel.red() > 15){
                         updateMarker(x,z);
                         mergeImages(editedImage, markedImage);
                         viewer->moveMarkerMeshRelativeToTerrain(x_div,y,z_div);
-                        viewer->camPosX = x_div;
-                        viewer->camPosZ = z_div; // Z est le y du mesh
+                        viewer->camPosX = x_div*4;
+                        viewer->camPosZ = z_div*4; // Z est le y du mesh
                     }
                 }
             }
