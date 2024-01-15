@@ -147,9 +147,6 @@ public :
         if(!isPointerOn) return;
         glUseProgram(pointerMeshShader);
 
-        //GLfloat scaleFactor = 0.1f;
-        //pointerMeshModelMatrix.scale(scaleFactor);
-
         glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "modelP"), 1, GL_FALSE, pointerMeshModelMatrix.data());
 
         GLfloat viewMatrix[16];
@@ -215,10 +212,6 @@ public :
     void drawMarkerMesh(){
         if(!isMarkerOn) return;
         glUseProgram(markerMeshShader);
-
-        //GLfloat scaleFactor = 0.05f;
-        //markerMeshModelMatrix.scale(scaleFactor);
-        qDebug() << markerMeshModelMatrix;
 
         glUniformMatrix4fv(glGetUniformLocation(markerMeshShader, "modelM"), 1, GL_FALSE, markerMeshModelMatrix.data());
 
