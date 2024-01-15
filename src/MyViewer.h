@@ -2,6 +2,7 @@
 #define MYVIEWER_H
 
 #include "point3.h"
+#include "Mesh.h"
 
 // Parsing:
 #include "BasicIO.h"
@@ -47,7 +48,6 @@
 class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 {
     Q_OBJECT
-
     QWidget * controls;
 
     GLuint shaderProgram;
@@ -71,9 +71,25 @@ class MyViewer : public QGLViewer , public QOpenGLFunctions_4_3_Core
 
     qglviewer::Camera camVuePremierePersonne;
 
+    //Pointeur
+    Mesh pointerMesh;
+    GLuint pointerMeshShader;
+    GLuint pointerMeshVAO, pointerMeshVBO;
+    QMatrix4x4 pointerMeshModelMatrix;
+
+    //Marqueur GPS
+    Mesh markerMesh;
+    GLuint markerMeshShader;
+    GLuint markerMeshVAO, markerMeshVBO;
+    QMatrix4x4 markerMeshModelMatrix;
+
 public :
     TerrainMesh terrainMesh;
-    float camPosX, camPosZ;
+    float camPosX = QRandomGenerator::global()->generateDouble();
+    float camPosZ = QRandomGenerator::global()->generateDouble();
+
+    bool isPointerOn = false;
+    bool isMarkerOn = false;
 
     enum Vue { VueTerrain, VuePremierePersonne };
     Vue vueActuelle;
@@ -102,6 +118,144 @@ public :
         toolBar->addAction( openCamera );
         toolBar->addAction( saveSnapShotPlusPlus );
     }
+
+    //------------------POINTERMESH--------------------
+    void loadPointerMesh(){
+        QString pointerMeshVertexShaderSource = readShaderFile("src/pointerMesh_vshader.glsl");
+        QString pointerMeshFragmentShaderSource = readShaderFile("src/pointerMesh_fshader.glsl");
+
+        pointerMeshShader = createShaderProgram(pointerMeshVertexShaderSource.toUtf8().constData(), pointerMeshFragmentShaderSource.toUtf8().constData());
+
+        OBJIO::openTriMesh("./obj/pointer-cone.obj", pointerMesh.vertices, pointerMesh.triangles);
+
+        glGenVertexArrays(1, &pointerMeshVAO); //vertex array
+        glGenBuffers(1, &pointerMeshVBO); //vertexbuffer
+
+        glBindVertexArray(pointerMeshVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, pointerMeshVBO);
+        glBufferData(GL_ARRAY_BUFFER, pointerMesh.vertices.size() * sizeof(Vertex), &pointerMesh.vertices[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(Vertex), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    void drawPointerMesh(){
+        if(!isPointerOn) return;
+        glUseProgram(pointerMeshShader);
+
+        //GLfloat scaleFactor = 0.1f;
+        //pointerMeshModelMatrix.scale(scaleFactor);
+
+        glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "modelP"), 1, GL_FALSE, pointerMeshModelMatrix.data());
+
+        GLfloat viewMatrix[16];
+        camera()->getModelViewMatrix(viewMatrix);
+        glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "viewP"), 1, GL_FALSE, viewMatrix);
+
+        GLfloat projectionMatrix[16];
+        camera()->getProjectionMatrix(projectionMatrix);
+
+        glUniformMatrix4fv(glGetUniformLocation(pointerMeshShader, "projectionP"), 1, GL_FALSE, projectionMatrix);
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable( GL_LIGHTING );
+        glColor3f(0.5,0.5,0.8);
+        glBegin(GL_TRIANGLES);
+        for( unsigned int t = 0 ; t < pointerMesh.triangles.size() ; ++t ) {
+            point3d const & p0 = pointerMesh.vertices[ pointerMesh.triangles[t][0] ].p;
+            point3d const & p1 = pointerMesh.vertices[ pointerMesh.triangles[t][1] ].p;
+            point3d const & p2 = pointerMesh.vertices[ pointerMesh.triangles[t][2] ].p;
+            point3d const & n = point3d::cross( p1-p0 , p2-p0 ).direction();
+            glNormal3f(n[0],n[1],n[2]);
+            glVertex3f(p0[0],p0[1],p0[2]);
+            glVertex3f(p1[0],p1[1],p1[2]);
+            glVertex3f(p2[0],p2[1],p2[2]);
+        }
+        glEnd();
+        glUseProgram(0);
+
+    }
+
+    void movePointerMeshRelativeToTerrain(float dx, float dy, float dz) {
+        pointerMeshModelMatrix = modelMatrix;
+        pointerMeshModelMatrix.translate(dx,dy,dz);
+        update();
+    }
+
+    //------------------MARKERMESH--------------------
+
+    void loadMarkerMesh(){
+        QString markerMeshVertexShaderSource = readShaderFile("src/markerMesh_vshader.glsl");
+        QString markerMeshFragmentShaderSource = readShaderFile("src/markerMesh_fshader.glsl");
+
+        markerMeshShader = createShaderProgram(markerMeshVertexShaderSource.toUtf8().constData(), markerMeshFragmentShaderSource.toUtf8().constData());
+
+        OBJIO::openTriMesh("./obj/pin.obj", markerMesh.vertices, markerMesh.triangles);
+
+        glGenVertexArrays(1, &markerMeshVAO); //vertex array
+        glGenBuffers(1, &markerMeshVBO); //vertexbuffer
+
+        glBindVertexArray(markerMeshVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, markerMeshVBO);
+        glBufferData(GL_ARRAY_BUFFER, markerMesh.vertices.size() * sizeof(Vertex), &markerMesh.vertices[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(Vertex), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+    }
+
+    void drawMarkerMesh(){
+        if(!isMarkerOn) return;
+        glUseProgram(markerMeshShader);
+
+        //GLfloat scaleFactor = 0.05f;
+        //markerMeshModelMatrix.scale(scaleFactor);
+        qDebug() << markerMeshModelMatrix;
+
+        glUniformMatrix4fv(glGetUniformLocation(markerMeshShader, "modelM"), 1, GL_FALSE, markerMeshModelMatrix.data());
+
+        GLfloat viewMatrix[16];
+        camera()->getModelViewMatrix(viewMatrix);
+        glUniformMatrix4fv(glGetUniformLocation(markerMeshShader, "viewM"), 1, GL_FALSE, viewMatrix);
+
+        GLfloat projectionMatrix[16];
+        camera()->getProjectionMatrix(projectionMatrix);
+
+        glUniformMatrix4fv(glGetUniformLocation(markerMeshShader, "projectionM"), 1, GL_FALSE, projectionMatrix);
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable( GL_LIGHTING );
+        glColor3f(0.5,0.5,0.8);
+        glBegin(GL_TRIANGLES);
+        for( unsigned int t = 0 ; t < markerMesh.triangles.size() ; ++t ) {
+            point3d const & p0 = markerMesh.vertices[ markerMesh.triangles[t][0] ].p;
+            point3d const & p1 = markerMesh.vertices[ markerMesh.triangles[t][1] ].p;
+            point3d const & p2 = markerMesh.vertices[ markerMesh.triangles[t][2] ].p;
+            point3d const & n = point3d::cross( p1-p0 , p2-p0 ).direction();
+            glNormal3f(n[0],n[1],n[2]);
+            glVertex3f(p0[0],p0[1],p0[2]);
+            glVertex3f(p1[0],p1[1],p1[2]);
+            glVertex3f(p2[0],p2[1],p2[2]);
+        }
+        glEnd();
+        glUseProgram(0);
+    }
+
+    void moveMarkerMeshRelativeToTerrain(float dx, float dy, float dz) {
+        markerMeshModelMatrix = modelMatrix;
+        markerMeshModelMatrix.translate(dx,dy,dz);
+        update();
+    }
+
+    //------------------SKYBOX--------------------
 
     void loadSkybox() {
         // Load the skybox shaders
@@ -245,10 +399,10 @@ public :
 
         if (image.isNull()) {
             qDebug() << "Failed to load texture: " << filePath;
-            return 0;  // Retourner 0 en cas d'échec du chargement de l'image
+            return 0;
         }
 
-        // Convertir l'image en format adapté à OpenGL
+        // Convertir l'image
         image = image.convertToFormat(QImage::Format_RGBA8888);
 
         // Générer une texture OpenGL
@@ -468,9 +622,19 @@ public :
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         drawSkybox();
 
+        //Pointeur
+        drawPointerMesh();
+
+        //Marqueur
+        drawMarkerMesh();
+
         glUseProgram(shaderProgram);
 
+
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, modelMatrix.data());
+        // GLfloat scaleFactor = 0.05f;
+        // markerMeshModelMatrix.scale(scaleFactor);
+
 
         GLfloat projectionMatrix[16];
         camera()->getProjectionMatrix(projectionMatrix);
@@ -611,6 +775,9 @@ public :
         loadCubemap();
         loadSkybox();
         loadTextures();
+        loadPointerMesh();
+        loadMarkerMesh();
+
 
         //
 
@@ -779,7 +946,8 @@ public :
         QMatrix4x4 translationMatrix;
         translationMatrix.translate(objectCenter);
         modelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * modelMatrix;
-
+        pointerMeshModelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * pointerMeshModelMatrix;
+        markerMeshModelMatrix = translationMatrix * rotationMatrix * translationMatrix.inverted() * markerMeshModelMatrix;
         update();
     }
 

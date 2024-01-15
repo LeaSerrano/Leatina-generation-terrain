@@ -118,12 +118,12 @@ public:
         label_titre->setIndent(0);
         frame_pen = new QFrame(centralwidget);
         frame_pen->setObjectName(QString::fromUtf8("frame_pen"));
-        frame_pen->setGeometry(QRect(35, 80, 540, 180));
+        frame_pen->setGeometry(QRect(35, 80, 260, 180));
         frame_pen->setFrameShape(QFrame::StyledPanel);
         frame_pen->setFrameShadow(QFrame::Raised);
         label_param_pen = new QLabel(frame_pen);
         label_param_pen->setObjectName(QString::fromUtf8("label_param_pen"));
-        label_param_pen->setGeometry(QRect(0, 0, 540, 180));
+        label_param_pen->setGeometry(QRect(0, 0, 260, 180));
         label_param_pen->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255,255);\n"
 "background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));\n"
 "border: 1px solid black;"));
@@ -135,7 +135,7 @@ public:
 ""));
         dial_penSize = new QDial(frame_pen);
         dial_penSize->setObjectName(QString::fromUtf8("dial_penSize"));
-        dial_penSize->setGeometry(QRect(155, 110, 50, 50));
+        dial_penSize->setGeometry(QRect(100, 130, 50, 50));
         dial_penSize->setMinimum(10);
         dial_penSize->setMaximum(100);
         dial_penSize->setSingleStep(10);
@@ -147,7 +147,7 @@ public:
         dial_penSize->setNotchesVisible(true);
         label_penSize = new QLabel(frame_pen);
         label_penSize->setObjectName(QString::fromUtf8("label_penSize"));
-        label_penSize->setGeometry(QRect(125, 60, 111, 40));
+        label_penSize->setGeometry(QRect(20, 30, 111, 40));
         QFont font2;
         font2.setFamily(QString::fromUtf8("Liberation Sans Narrow"));
         font2.setPointSize(11);
@@ -155,21 +155,22 @@ public:
         label_penSize->setAlignment(Qt::AlignCenter);
         button_undo = new QPushButton(frame_pen);
         button_undo->setObjectName(QString::fromUtf8("button_undo"));
-        button_undo->setGeometry(QRect(180, 10, 20, 20));
+        button_undo->setGeometry(QRect(170, 10, 20, 20));
         button_undo->setStyleSheet(QString::fromUtf8("QPushButton { background-color: white; border-radius: 10px;}\n"
 "QPushButton:hover { background-color: lightcoral; border-radius: 10px;}"));
         button_redo = new QPushButton(frame_pen);
         button_redo->setObjectName(QString::fromUtf8("button_redo"));
-        button_redo->setGeometry(QRect(210, 10, 20, 20));
+        button_redo->setGeometry(QRect(200, 10, 20, 20));
         button_redo->setStyleSheet(QString::fromUtf8("QPushButton { background-color: white; border-radius: 10px;}\n"
 "QPushButton:hover { background-color: lightgreen; border-radius: 10px;}"));
         label_newHeightValue = new QLabel(frame_pen);
         label_newHeightValue->setObjectName(QString::fromUtf8("label_newHeightValue"));
-        label_newHeightValue->setGeometry(QRect(350, 80, 40, 40));
+        label_newHeightValue->setGeometry(QRect(140, 30, 100, 40));
+        label_newHeightValue->setFont(font2);
         label_newHeightValue->setAlignment(Qt::AlignCenter);
         verticalSlider_newHeightValue = new QSlider(frame_pen);
         verticalSlider_newHeightValue->setObjectName(QString::fromUtf8("verticalSlider_newHeightValue"));
-        verticalSlider_newHeightValue->setGeometry(QRect(430, 50, 16, 100));
+        verticalSlider_newHeightValue->setGeometry(QRect(200, 60, 16, 100));
         verticalSlider_newHeightValue->setMinimum(-255);
         verticalSlider_newHeightValue->setMaximum(255);
         verticalSlider_newHeightValue->setOrientation(Qt::Vertical);
@@ -177,15 +178,18 @@ public:
         verticalSlider_newHeightValue->setTickInterval(50);
         label_p255 = new QLabel(frame_pen);
         label_p255->setObjectName(QString::fromUtf8("label_p255"));
-        label_p255->setGeometry(QRect(460, 40, 40, 40));
+        label_p255->setGeometry(QRect(220, 50, 40, 40));
+        label_p255->setFont(font2);
         label_p255->setAlignment(Qt::AlignCenter);
         label_0 = new QLabel(frame_pen);
         label_0->setObjectName(QString::fromUtf8("label_0"));
-        label_0->setGeometry(QRect(460, 70, 40, 40));
+        label_0->setGeometry(QRect(220, 90, 40, 40));
+        label_0->setFont(font2);
         label_0->setAlignment(Qt::AlignCenter);
         label_m255 = new QLabel(frame_pen);
         label_m255->setObjectName(QString::fromUtf8("label_m255"));
-        label_m255->setGeometry(QRect(450, 120, 40, 40));
+        label_m255->setGeometry(QRect(220, 130, 40, 40));
+        label_m255->setFont(font2);
         label_m255->setAlignment(Qt::AlignCenter);
         frame_perlin = new QFrame(centralwidget);
         frame_perlin->setObjectName(QString::fromUtf8("frame_perlin"));
@@ -280,10 +284,10 @@ public:
         label_titre->setText(QCoreApplication::translate("MainWindow", "Leatina Generation Terrain", nullptr));
         label_param_pen->setText(QString());
         label_penSizeIMG->setText(QString());
-        label_penSize->setText(QCoreApplication::translate("MainWindow", "<html><head/><body><p>Taille pinceau :<br/>0</p></body></html>", nullptr));
+        label_penSize->setText(QCoreApplication::translate("MainWindow", "<html><head/><body><p>Taille pinceau : 0</p></body></html>", nullptr));
         button_undo->setText(QCoreApplication::translate("MainWindow", "undo", nullptr));
         button_redo->setText(QCoreApplication::translate("MainWindow", "redo", nullptr));
-        label_newHeightValue->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
+        label_newHeightValue->setText(QCoreApplication::translate("MainWindow", "Hauteur : 0", nullptr));
         label_p255->setText(QCoreApplication::translate("MainWindow", "+255", nullptr));
         label_0->setText(QCoreApplication::translate("MainWindow", "0", nullptr));
         label_m255->setText(QCoreApplication::translate("MainWindow", "-255", nullptr));
