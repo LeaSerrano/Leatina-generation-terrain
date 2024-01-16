@@ -18,6 +18,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
+#include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 
@@ -57,6 +58,27 @@ public:
     QLabel *label_heightRange;
     QSlider *horizontalSlider_heightRange;
     QPushButton *button_show_param_mesh;
+    QFrame *frame_controls;
+    QLabel *label_controls;
+    QLabel *label_q;
+    QLabel *label_s;
+    QLabel *label_d;
+    QLabel *label_z;
+    QLabel *label_gauche;
+    QLabel *label_bas;
+    QLabel *label_droite;
+    QLabel *label_haut;
+    QPushButton *button_show_controls;
+    QPushButton *button_show_erosion;
+    QFrame *frame_erosion;
+    QLabel *label_erosion;
+    QLabel *label_nbRaindrops;
+    QLabel *label_nbIteErosion;
+    QSpinBox *spinBox_nbRaindrops;
+    QSpinBox *spinBox_nbIteErosion;
+    QPushButton *pushButton_erosion;
+    QLabel *label_impact;
+    QSpinBox *spinBox_impact;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -248,6 +270,137 @@ public:
         button_show_param_mesh->setFont(font);
         button_show_param_mesh->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
 "QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
+        frame_controls = new QFrame(centralwidget);
+        frame_controls->setObjectName(QString::fromUtf8("frame_controls"));
+        frame_controls->setGeometry(QRect(1345, 760, 540, 200));
+        frame_controls->setFrameShape(QFrame::StyledPanel);
+        frame_controls->setFrameShadow(QFrame::Raised);
+        label_controls = new QLabel(frame_controls);
+        label_controls->setObjectName(QString::fromUtf8("label_controls"));
+        label_controls->setGeometry(QRect(0, 0, 540, 200));
+        label_controls->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255,255);\n"
+"background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));\n"
+"border: 1px solid black;"));
+        label_q = new QLabel(frame_controls);
+        label_q->setObjectName(QString::fromUtf8("label_q"));
+        label_q->setGeometry(QRect(20, 125, 64, 64));
+        QFont font3;
+        font3.setFamily(QString::fromUtf8("Liberation Sans Narrow"));
+        font3.setPointSize(25);
+        label_q->setFont(font3);
+        label_q->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_q->setAlignment(Qt::AlignCenter);
+        label_s = new QLabel(frame_controls);
+        label_s->setObjectName(QString::fromUtf8("label_s"));
+        label_s->setGeometry(QRect(90, 125, 64, 64));
+        label_s->setFont(font3);
+        label_s->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_s->setAlignment(Qt::AlignCenter);
+        label_d = new QLabel(frame_controls);
+        label_d->setObjectName(QString::fromUtf8("label_d"));
+        label_d->setGeometry(QRect(160, 125, 64, 64));
+        label_d->setFont(font3);
+        label_d->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_d->setAlignment(Qt::AlignCenter);
+        label_z = new QLabel(frame_controls);
+        label_z->setObjectName(QString::fromUtf8("label_z"));
+        label_z->setGeometry(QRect(90, 55, 64, 64));
+        label_z->setFont(font3);
+        label_z->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_z->setAlignment(Qt::AlignCenter);
+        label_gauche = new QLabel(frame_controls);
+        label_gauche->setObjectName(QString::fromUtf8("label_gauche"));
+        label_gauche->setGeometry(QRect(456, 125, 64, 64));
+        QFont font4;
+        font4.setPointSize(25);
+        label_gauche->setFont(font4);
+        label_gauche->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_gauche->setAlignment(Qt::AlignCenter);
+        label_bas = new QLabel(frame_controls);
+        label_bas->setObjectName(QString::fromUtf8("label_bas"));
+        label_bas->setGeometry(QRect(386, 125, 64, 64));
+        label_bas->setFont(font4);
+        label_bas->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_bas->setAlignment(Qt::AlignCenter);
+        label_droite = new QLabel(frame_controls);
+        label_droite->setObjectName(QString::fromUtf8("label_droite"));
+        label_droite->setGeometry(QRect(316, 125, 64, 64));
+        label_droite->setFont(font4);
+        label_droite->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_droite->setAlignment(Qt::AlignCenter);
+        label_haut = new QLabel(frame_controls);
+        label_haut->setObjectName(QString::fromUtf8("label_haut"));
+        label_haut->setGeometry(QRect(386, 55, 64, 64));
+        label_haut->setFont(font4);
+        label_haut->setStyleSheet(QString::fromUtf8("background-color : white;\n"
+"border : 1px solid;\n"
+"border-radius : 10px;"));
+        label_haut->setAlignment(Qt::AlignCenter);
+        button_show_controls = new QPushButton(centralwidget);
+        button_show_controls->setObjectName(QString::fromUtf8("button_show_controls"));
+        button_show_controls->setGeometry(QRect(1360, 0, 170, 59));
+        button_show_controls->setFont(font);
+        button_show_controls->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
+        button_show_erosion = new QPushButton(centralwidget);
+        button_show_erosion->setObjectName(QString::fromUtf8("button_show_erosion"));
+        button_show_erosion->setGeometry(QRect(1010, 0, 125, 59));
+        button_show_erosion->setFont(font);
+        button_show_erosion->setStyleSheet(QString::fromUtf8("QPushButton { background-color: rgb(52, 78, 65); border-radius: 0px; color : white;}\n"
+"QPushButton:hover { background-color: lightcoral; border-radius: 0px;}"));
+        frame_erosion = new QFrame(centralwidget);
+        frame_erosion->setObjectName(QString::fromUtf8("frame_erosion"));
+        frame_erosion->setGeometry(QRect(1345, 200, 540, 150));
+        frame_erosion->setFrameShape(QFrame::StyledPanel);
+        frame_erosion->setFrameShadow(QFrame::Raised);
+        label_erosion = new QLabel(frame_erosion);
+        label_erosion->setObjectName(QString::fromUtf8("label_erosion"));
+        label_erosion->setGeometry(QRect(0, 0, 540, 150));
+        label_erosion->setStyleSheet(QString::fromUtf8("background-color: rgba(255, 255, 255,255);\n"
+"background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(193, 223, 196, 255), stop:1 rgba(222, 236, 221, 255));\n"
+"border: 1px solid black;"));
+        label_nbRaindrops = new QLabel(frame_erosion);
+        label_nbRaindrops->setObjectName(QString::fromUtf8("label_nbRaindrops"));
+        label_nbRaindrops->setGeometry(QRect(0, 40, 130, 60));
+        label_nbRaindrops->setFont(font2);
+        label_nbRaindrops->setAlignment(Qt::AlignCenter);
+        label_nbIteErosion = new QLabel(frame_erosion);
+        label_nbIteErosion->setObjectName(QString::fromUtf8("label_nbIteErosion"));
+        label_nbIteErosion->setGeometry(QRect(185, 40, 120, 60));
+        label_nbIteErosion->setFont(font2);
+        label_nbIteErosion->setAlignment(Qt::AlignCenter);
+        spinBox_nbRaindrops = new QSpinBox(frame_erosion);
+        spinBox_nbRaindrops->setObjectName(QString::fromUtf8("spinBox_nbRaindrops"));
+        spinBox_nbRaindrops->setGeometry(QRect(130, 50, 50, 40));
+        spinBox_nbIteErosion = new QSpinBox(frame_erosion);
+        spinBox_nbIteErosion->setObjectName(QString::fromUtf8("spinBox_nbIteErosion"));
+        spinBox_nbIteErosion->setGeometry(QRect(305, 50, 50, 40));
+        pushButton_erosion = new QPushButton(frame_erosion);
+        pushButton_erosion->setObjectName(QString::fromUtf8("pushButton_erosion"));
+        pushButton_erosion->setGeometry(QRect(220, 100, 100, 40));
+        pushButton_erosion->setFont(font2);
+        label_impact = new QLabel(frame_erosion);
+        label_impact->setObjectName(QString::fromUtf8("label_impact"));
+        label_impact->setGeometry(QRect(365, 40, 100, 60));
+        label_impact->setFont(font2);
+        label_impact->setAlignment(Qt::AlignCenter);
+        spinBox_impact = new QSpinBox(frame_erosion);
+        spinBox_impact->setObjectName(QString::fromUtf8("spinBox_impact"));
+        spinBox_impact->setGeometry(QRect(475, 50, 50, 40));
         MainWindow->setCentralWidget(centralwidget);
         widget_affichage_terrain->raise();
         frame_perlin->raise();
@@ -261,6 +414,10 @@ public:
         button_show_map->raise();
         frame_param_mesh->raise();
         button_show_param_mesh->raise();
+        frame_controls->raise();
+        button_show_controls->raise();
+        button_show_erosion->raise();
+        frame_erosion->raise();
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
         menubar->setGeometry(QRect(0, 0, 1920, 22));
@@ -298,6 +455,22 @@ public:
         label_resolution->setText(QCoreApplication::translate("MainWindow", "R\303\251solution : ", nullptr));
         label_heightRange->setText(QCoreApplication::translate("MainWindow", "Plage de hauteurs : ", nullptr));
         button_show_param_mesh->setText(QCoreApplication::translate("MainWindow", "Afficher les param\303\250tres du maillage", nullptr));
+        label_controls->setText(QString());
+        label_q->setText(QCoreApplication::translate("MainWindow", "Q", nullptr));
+        label_s->setText(QCoreApplication::translate("MainWindow", "S", nullptr));
+        label_d->setText(QCoreApplication::translate("MainWindow", "D", nullptr));
+        label_z->setText(QCoreApplication::translate("MainWindow", "Z", nullptr));
+        label_gauche->setText(QCoreApplication::translate("MainWindow", "\342\206\222", nullptr));
+        label_bas->setText(QCoreApplication::translate("MainWindow", "\342\206\223", nullptr));
+        label_droite->setText(QCoreApplication::translate("MainWindow", "\342\206\220", nullptr));
+        label_haut->setText(QCoreApplication::translate("MainWindow", "\342\206\221", nullptr));
+        button_show_controls->setText(QCoreApplication::translate("MainWindow", "Afficher les contr\303\264les", nullptr));
+        button_show_erosion->setText(QCoreApplication::translate("MainWindow", "Eroder la carte", nullptr));
+        label_erosion->setText(QString());
+        label_nbRaindrops->setText(QCoreApplication::translate("MainWindow", "Nombre de gouttes :", nullptr));
+        label_nbIteErosion->setText(QCoreApplication::translate("MainWindow", "Longueur \303\251rosion :", nullptr));
+        pushButton_erosion->setText(QCoreApplication::translate("MainWindow", "Eroder", nullptr));
+        label_impact->setText(QCoreApplication::translate("MainWindow", "Intensit\303\251 impact :", nullptr));
     } // retranslateUi
 
 };

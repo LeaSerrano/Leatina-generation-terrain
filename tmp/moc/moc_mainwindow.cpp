@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[20];
-    char stringdata0[261];
+    QByteArrayData data[25];
+    char stringdata0[370];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -51,7 +51,12 @@ QT_MOC_LITERAL(15, 220, 1), // "y"
 QT_MOC_LITERAL(16, 222, 13), // "hideParamMesh"
 QT_MOC_LITERAL(17, 236, 4), // "hide"
 QT_MOC_LITERAL(18, 241, 9), // "hideParam"
-QT_MOC_LITERAL(19, 251, 9) // "hideCarte"
+QT_MOC_LITERAL(19, 251, 9), // "hideCarte"
+QT_MOC_LITERAL(20, 261, 13), // "hideControles"
+QT_MOC_LITERAL(21, 275, 11), // "hideErosion"
+QT_MOC_LITERAL(22, 287, 28), // "onSpinBox_nbRaindropsChanged"
+QT_MOC_LITERAL(23, 316, 29), // "onSpinBox_nbIteErosionChanged"
+QT_MOC_LITERAL(24, 346, 23) // "onSpinBox_impactChanged"
 
     },
     "MainWindow\0onResolutionSliderReleased\0"
@@ -61,7 +66,10 @@ QT_MOC_LITERAL(19, 251, 9) // "hideCarte"
     "uploadMap\0changerVuePremierePersonne\0"
     "updatePreviewPenSize\0penSize\0updateMarker\0"
     "x\0y\0hideParamMesh\0hide\0hideParam\0"
-    "hideCarte"
+    "hideCarte\0hideControles\0hideErosion\0"
+    "onSpinBox_nbRaindropsChanged\0"
+    "onSpinBox_nbIteErosionChanged\0"
+    "onSpinBox_impactChanged"
 };
 #undef QT_MOC_LITERAL
 
@@ -71,7 +79,7 @@ static const uint qt_meta_data_MainWindow[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      13,   14, // methods
+      18,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -79,19 +87,24 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   79,    2, 0x08 /* Private */,
-       3,    0,   80,    2, 0x08 /* Private */,
-       4,    0,   81,    2, 0x08 /* Private */,
-       5,    0,   82,    2, 0x08 /* Private */,
-       6,    0,   83,    2, 0x08 /* Private */,
-       7,    1,   84,    2, 0x08 /* Private */,
-       9,    0,   87,    2, 0x08 /* Private */,
-      10,    0,   88,    2, 0x08 /* Private */,
-      11,    1,   89,    2, 0x08 /* Private */,
-      13,    2,   92,    2, 0x08 /* Private */,
-      16,    1,   97,    2, 0x08 /* Private */,
-      18,    1,  100,    2, 0x08 /* Private */,
-      19,    1,  103,    2, 0x08 /* Private */,
+       1,    0,  104,    2, 0x08 /* Private */,
+       3,    0,  105,    2, 0x08 /* Private */,
+       4,    0,  106,    2, 0x08 /* Private */,
+       5,    0,  107,    2, 0x08 /* Private */,
+       6,    0,  108,    2, 0x08 /* Private */,
+       7,    1,  109,    2, 0x08 /* Private */,
+       9,    0,  112,    2, 0x08 /* Private */,
+      10,    0,  113,    2, 0x08 /* Private */,
+      11,    1,  114,    2, 0x08 /* Private */,
+      13,    2,  117,    2, 0x08 /* Private */,
+      16,    1,  122,    2, 0x08 /* Private */,
+      18,    1,  125,    2, 0x08 /* Private */,
+      19,    1,  128,    2, 0x08 /* Private */,
+      20,    1,  131,    2, 0x08 /* Private */,
+      21,    1,  134,    2, 0x08 /* Private */,
+      22,    0,  137,    2, 0x08 /* Private */,
+      23,    0,  138,    2, 0x08 /* Private */,
+      24,    0,  139,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -107,6 +120,11 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void, QMetaType::Bool,   17,
     QMetaType::Void, QMetaType::Bool,   17,
     QMetaType::Void, QMetaType::Bool,   17,
+    QMetaType::Void, QMetaType::Bool,   17,
+    QMetaType::Void, QMetaType::Bool,   17,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -130,6 +148,11 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 10: _t->hideParamMesh((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 11: _t->hideParam((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 12: _t->hideCarte((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 13: _t->hideControles((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 14: _t->hideErosion((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 15: _t->onSpinBox_nbRaindropsChanged(); break;
+        case 16: _t->onSpinBox_nbIteErosionChanged(); break;
+        case 17: _t->onSpinBox_impactChanged(); break;
         default: ;
         }
     }
@@ -164,13 +187,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 13)
+        if (_id < 18)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 13;
+        _id -= 18;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 13)
+        if (_id < 18)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 13;
+        _id -= 18;
     }
     return _id;
 }

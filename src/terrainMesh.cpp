@@ -53,9 +53,9 @@ void TerrainMesh::generatePlan() {
         perlinNoise = new PerlinNoise();
         perlinNoiseCreated = true;
     }
-
     generateGradientMap(perlinNoise->ImgPerlin);
-    simulateHydraulicErosion(nbRainDrops);
+
+    //if (!perlinNoiseCreated) simulateHydraulicErosion(nbRainDrops);
 
     float stepX = static_cast<float>(sizeX) / static_cast<float>(resolution);
     float stepZ = static_cast<float>(sizeZ) / static_cast<float>(resolution);
@@ -69,16 +69,6 @@ void TerrainMesh::generatePlan() {
 
             GLfloat y;
             getHeightAtPerlinPx(y, perlin);
-
-            if (renderErosion) {
-                int gradientValue = getErosionAt(i, j, resolution);
-
-                if (gradientValue == 255) {
-                    if (y - 0.1 >= 0.0) {
-                        y -= 0.1;
-                    }
-                }
-            }
 
             vertex_buffer.push_back(QVector3D(x, y, z));
 
@@ -238,14 +228,13 @@ std::vector<QPoint> TerrainMesh::followGradient(QPoint startPoint)
     return positionsList;
 }
 
-
 void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
     srand(time(NULL));
 
     int width = ImgGradient.width();
     int height = ImgGradient.height();
 
-    ImgErosion = QImage(width, height, QImage::Format_RGB16);
+    ImgErosion = QImage(width, height, QImage::Format_Grayscale8);
 
     QVector<QPointF> dropPositions;
     for (int i = 0; i < dropNumber; ++i) {
@@ -256,7 +245,7 @@ void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
 
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            ImgErosion.setPixel(i, j, qRgb(0, 0, 0));
+            ImgErosion.setPixel(i, j, perlinNoise->ImgPerlin.pixel(i, j));
         }
     }
 
@@ -268,13 +257,59 @@ void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
 
         if (positionsList.size() > 10) {
             for (int i = 0; i < positionsList.size(); i++) {
-                ImgErosion.setPixel(positionsList[i].x(), positionsList[i].y(), qRgb(255, 255, 255));
+                QRgb value = ImgErosion.pixel(positionsList[i].x(), positionsList[i].y());
+                float pxValue = static_cast<float>(qGray(value));
+
+                float px = pxValue;
+
+                if (pxValue - intensiteImpact > intensiteImpact) {
+                    px = pxValue - intensiteImpact;
+                }
+
+                perlinNoise->ImgPerlin.setPixel(positionsList[i].x(), positionsList[i].y(), qRgb(px, px, px));
             }
         }
     }
 
-    ImgErosion.save("hydraulicErosion.png");
+    perlinNoise->ImgPerlin.save("perlinNoise.png");
 }
+
+// void TerrainMesh::simulateHydraulicErosion(int dropNumber) {
+//     srand(time(NULL));
+
+//     int width = ImgGradient.width();
+//     int height = ImgGradient.height();
+
+//     ImgErosion = QImage(width, height, QImage::Format_RGB16);
+
+//     QVector<QPointF> dropPositions;
+//     for (int i = 0; i < dropNumber; ++i) {
+//         double x = std::rand()%width;
+//         double y = std::rand()%height;
+//         dropPositions.append(QPoint(x, y));
+//     }
+
+//     for (int i = 0; i < width; i++) {
+//         for (int j = 0; j < height; j++) {
+//             ImgErosion.setPixel(i, j, qRgb(0, 0, 0));
+//         }
+//     }
+
+//     for (const QPointF& dropPosition : dropPositions) {
+//         double x = dropPosition.x();
+//         double y = dropPosition.y();
+
+//         std::vector<QPoint> positionsList = followGradient(QPoint(x, y));
+
+//         if (positionsList.size() > 10) {
+//             for (int i = 0; i < positionsList.size(); i++) {
+//                 ImgErosion.setPixel(positionsList[i].x(), positionsList[i].y(), qRgb(255, 255, 255));
+//             }
+//         }
+//     }
+
+//     ImgErosion.save("hydraulicErosion.png");
+// }
 
 float TerrainMesh::getErosionAt(int i, int j, int resolution) {
     if (!ImgErosion.isNull()) {
@@ -289,4 +324,6 @@ float TerrainMesh::getErosionAt(int i, int j, int resolution) {
 
     return 0.0f;
 }
+
+
 

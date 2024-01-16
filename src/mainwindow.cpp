@@ -61,6 +61,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->statusbar->hide();
 
+    // AFFICHAGE DU TERRAIN
+    ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
+    ui->widget_affichage_terrain->lower();
+    viewer = new MyViewer();
+    viewer->saveCameraInFile("initCam.txt");
+    viewer->setParent(ui->widget_affichage_terrain);
+    viewer->setGeometry(ui->widget_affichage_terrain->geometry());
+
     // CFG APPARENCE BOUTONS/BARRES
 
     QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect;
@@ -197,8 +205,99 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         hideParamMesh(false);
     });
 
-    //-------------------------------------------------------------------------------------------------------------------------
+    // Barre voir contrôles (A DROITE)-------------------------------------------------------------------------------------
+    QLabel *barreControles = new QLabel();
+    barreControles->setParent(ui->label_controls);
+    barreControles->setStyleSheet("background-color: white;");
+    barreControles->setGeometry(0,0,ui->frame_controls->width(), 40);
 
+    QLabel *textebarreControles = new QLabel();
+    textebarreControles->setParent(barreControles);
+    textebarreControles->setText("Contrôles clavier");
+    textebarreControles->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
+    textebarreControles->setGeometry(0,0,ui->frame_controls->width(), 40);
+    textebarreControles->setContentsMargins(15, 10, 10, 10);
+    textebarreControles->setFont(URWFont);
+
+    QPushButton *fermerControles = new QPushButton();
+    fermerControles->setParent(barreControles);
+    fermerControles->setGeometry(barreControles->width()-30, 10, 20,20);
+    fermerControles->setStyleSheet("QPushButton {background-color: rgb(200, 88, 88); border: none; border-radius: 10px;} "
+                                   "QPushButton:hover {background-color: lightcoral; border: none; border-radius: 10px;} ");
+    fermerControles->setIcon(QIcon("./icons/fermer.png"));
+    QObject::connect(fermerControles, &QPushButton::clicked, this, [=]() {
+        hideControles(true);
+    });
+    hideControles(false);
+
+    ui->button_show_controls->setIcon(QIcon("./icons/clavier_w.png"));
+    QObject::connect(ui->button_show_controls, &QPushButton::clicked, this, [=]() {
+        hideControles(false);
+    });
+
+    ui->label_z->setStyleSheet(toucheOff);
+    ui->label_q->setStyleSheet(toucheOff);
+    ui->label_s->setStyleSheet(toucheOff);
+    ui->label_d->setStyleSheet(toucheOff);
+
+    //Barre fenêtre Erosion (A DROITE)-------------------------------------------------------------
+    QLabel *barreErosion = new QLabel();
+    barreErosion->setParent(ui->label_erosion);
+    barreErosion->setStyleSheet("background-color: white;");
+    barreErosion->setGeometry(0,0,ui->frame_erosion->width(), 40);
+
+    QLabel *textebarreErosion = new QLabel();
+    textebarreErosion->setParent(barreErosion);
+    textebarreErosion->setText("Erosion par gouttes d'eau du terrain");
+    textebarreErosion->setStyleSheet("background-color: rgb(52, 78, 65); border: none; color: white;");
+    textebarreErosion->setGeometry(0,0,ui->frame_erosion->width(), 40);
+    textebarreErosion->setContentsMargins(15, 10, 10, 10);
+    textebarreErosion->setFont(URWFont);
+
+    QPushButton *fermerErosion = new QPushButton();
+    fermerErosion->setParent(barreErosion);
+    fermerErosion->setGeometry(barreErosion->width()-30, 10, 20,20);
+    fermerErosion->setStyleSheet("QPushButton {background-color: rgb(200, 88, 88); border: none; border-radius: 10px;} "
+                                   "QPushButton:hover {background-color: lightcoral; border: none; border-radius: 10px;} ");
+    fermerErosion->setIcon(QIcon("./icons/fermer.png"));
+    QObject::connect(fermerErosion, &QPushButton::clicked, this, [=]() {
+        hideErosion(true);
+    });
+    hideErosion(true);
+
+    ui->button_show_erosion->setIcon(QIcon("./icons/erosion_w.png"));
+    QObject::connect(ui->button_show_erosion, &QPushButton::clicked, this, [=]() {
+        hideErosion(false);
+    });
+
+    ui->spinBox_nbRaindrops->setMinimum(50);
+    ui->spinBox_nbRaindrops->setMaximum(150);
+    ui->spinBox_nbRaindrops->setValue(viewer->terrainMesh.nbRainDrops);
+    connect(ui->spinBox_nbRaindrops, SIGNAL(valueChanged(int)), this, SLOT(onSpinBox_nbRaindropsChanged()));
+
+
+    ui->spinBox_nbIteErosion->setMinimum(20);
+    ui->spinBox_nbIteErosion->setMaximum(100);
+    ui->spinBox_nbIteErosion->setValue(viewer->terrainMesh.nbErosionIterations);
+    connect(ui->spinBox_nbIteErosion, SIGNAL(valueChanged(int)), this, SLOT(onSpinBox_nbIteErosionChanged()));
+
+    ui->spinBox_impact->setMinimum(10);
+    ui->spinBox_impact->setMaximum(40);
+    ui->spinBox_impact->setValue(viewer->terrainMesh.intensiteImpact);
+    connect(ui->spinBox_impact, SIGNAL(valueChanged(int)), this, SLOT(onSpinBox_impactChanged()));
+
+    QObject::connect(ui->pushButton_erosion, &QPushButton::clicked, this, [=]() {
+        viewer->terrainMesh.simulateHydraulicErosion(viewer->terrainMesh.nbRainDrops);
+        editedImage = viewer->terrainMesh.perlinNoise->ImgPerlin.copy();
+        editedImage.convertToFormat(QImage::Format_ARGB32);
+        ui->label_perlinNoise->setPixmap(QPixmap::fromImage(editedImage));
+        updateMesh(editedImage);
+        //viewer->terrainMesh.perlinNoise->ImgPerlin.save("test.png");
+    });
+
+    //-----------------------------------------------------------------------------------------------
+
+    //UNDO ET REDO
     ui->button_undo->setText("");
     ui->button_undo->setIcon(QIcon("./icons/undo.png"));
 
@@ -222,14 +321,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->pushButton_mode_FPS->setIcon(QIcon("./icons/360_w.png"));
     QObject::connect(ui->pushButton_mode_FPS, SIGNAL(clicked()), this, SLOT(changerVuePremierePersonne()));
 
-    // AFFICHAGE DU TERRAIN
-    ui->widget_affichage_terrain->setGeometry(0, 0, width(), height());
-    ui->widget_affichage_terrain->lower();
-    viewer = new MyViewer();
-    viewer->saveCameraInFile("initCam.txt");
-    viewer->setParent(ui->widget_affichage_terrain);
-    viewer->setGeometry(ui->widget_affichage_terrain->geometry());
-
     // CFG SLIDER RESOLUTION
     ui->horizontalSlider_resolution->setValue(viewer->terrainMesh.resolution);
     ui->horizontalSlider_resolution->setMinimum(10);
@@ -245,7 +336,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // CFG GENERER NOUVELLE CARTE
     ui->pushButton_reload->setIcon(QIcon("./icons/regen.png"));
     //ui->pushButton_reload->setStyleSheet("background-color : white");
-    QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));
+    QObject::connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(onReloadButtonClicked()));    
 
     //----- CFG IMAGES CARTE -----//
     //Image originale
@@ -294,6 +385,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //updateMarker((viewer->camPosX/4.)*512., (viewer->camPosZ/4.)*512.);
     viewer->moveMarkerMeshRelativeToTerrain(viewer->camPosX, viewer->getThisPositionHeight(viewer->camPosX,viewer->camPosZ), viewer->camPosZ);
 
+    //ui->widget_affichage_terrain->installEventFilter(this);
+
     // FIN INITIALISATION
     combinePathsImages(pathsImages);
     setFocusPolicy(Qt::StrongFocus);
@@ -327,14 +420,13 @@ void MainWindow::updatePreviewPenSize(int penSize){
     int numRows = 100 / squareSize;
     int numCols = 100 / squareSize;
 
-    for (int row = 0; row < numRows; ++row)
-    {
-        for (int col = 0; col < numCols; ++col)
-        {
-            if ((row + col) % 2 == 0)
+    for (int row = 0; row < numRows; ++row){
+        for (int col = 0; col < numCols; ++col){
+            if ((row + col) % 2 == 0){
                 previewPainter.fillRect(col * squareSize, row * squareSize, squareSize, squareSize, QColor(220, 220, 220));
-            else
+            }else{
                 previewPainter.fillRect(col * squareSize, row * squareSize, squareSize, squareSize, Qt::white);
+            }
         }
     }
 
@@ -379,11 +471,47 @@ void MainWindow::hideCarte(bool hide){
     }
 }
 
+void MainWindow::hideControles(bool hide){
+    if(!hide){
+        ui->frame_controls->show();
+        ui->button_show_controls->hide();
+    }else{
+        ui->frame_controls->hide();
+        ui->button_show_controls->show();
+
+    }
+}
+
+void MainWindow::hideErosion(bool hide){
+    if(!hide){
+        ui->frame_erosion->show();
+        ui->button_show_erosion->hide();
+    }else{
+        ui->frame_erosion->hide();
+        ui->button_show_erosion->show();
+
+    }
+}
+
+void MainWindow::onSpinBox_nbRaindropsChanged(){
+    viewer->terrainMesh.nbRainDrops = ui->spinBox_nbRaindrops->value();
+    //qDebug() << viewer->terrainMesh.nbRainDrops;
+}
+
+void MainWindow::onSpinBox_nbIteErosionChanged(){
+    viewer->terrainMesh.nbErosionIterations = ui->spinBox_nbIteErosion->value();
+}
+
+void MainWindow::onSpinBox_impactChanged(){
+    viewer->terrainMesh.intensiteImpact = ui->spinBox_impact->value();
+    qDebug() << viewer->terrainMesh.intensiteImpact;
+}
+
 // Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
     int value = ui->horizontalSlider_resolution->value();
 
-    qDebug() << "resolution : " << value;
+    //qDebug() << "resolution : " << value;
 
     viewer->terrainMesh.resolution = value;
     viewer->terrainMesh.generateMesh();
@@ -430,6 +558,7 @@ void MainWindow::onReloadButtonClicked() {
 }
 
 // Permet de savoir si la souris est en train de faire un clic gauche + mouvement dans le label de la carte
+// Ou touches clavier
 bool MainWindow::eventFilter(QObject *obj, QEvent *event){
     QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
     if(obj == ui->label_perlinNoise){
@@ -509,11 +638,53 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
                 }
             }
         }else{
-            viewer->isPointerOn = false;
+            //viewer->isPointerOn = false;
         }
+
     }else{ //Hors de la carte
-        viewer->isPointerOn = false;
+        //viewer->isPointerOn = false;
+
     }
+
+    //qDebug() << obj;
+
+    // NE MARCHE PAS CAR FAIT PLANTER SI DESSIN SUR PERLIN NOISE
+    // if (obj == ui->widget_affichage_terrain) {
+    //     QKeyEvent* keyEvent = dynamic_cast<QKeyEvent*>(event);
+    //     if (keyEvent) {
+    //         // Appeler la fonction keyPressEvent de MyViewer.h
+    //         //viewer->keyPressEvent(keyEvent);
+
+    //         // Récupérer la touche pressée
+    //         int keyInt = keyEvent->key();
+    //         Qt::Key key = static_cast<Qt::Key>(keyInt);
+    //         //qDebug() << "Touche pressée dans ui->widget_affichage_terrain : " << key;
+
+
+    //         if(key == Qt::Key_Right || key == Qt::Key_Left || key == Qt::Key_Up || key == Qt::Key_Down){
+    //             //qDebug() << "main " << viewer->camLocked;
+    //             if(viewer->camLocked){
+    //                 ui->label_droite->setStyleSheet(toucheOff);
+    //                 ui->label_gauche->setStyleSheet(toucheOff);
+    //             }else{
+    //                 ui->label_droite->setStyleSheet(toucheOn);
+    //                 ui->label_gauche->setStyleSheet(toucheOn);
+    //             }
+
+    //         }
+
+    //         if(key == Qt::Key_Z || key == Qt::Key_Q || key == Qt::Key_S || key == Qt::Key_D){
+    //             if(viewer->camLockedFPS){
+    //                 ui->label_droite->setStyleSheet(toucheOff);
+    //                 ui->label_gauche->setStyleSheet(toucheOff);
+    //             }else{
+    //                 ui->label_droite->setStyleSheet(toucheOn);
+    //                 ui->label_gauche->setStyleSheet(toucheOn);
+    //             }
+    //         }
+    //     }
+
+    // }
 
     viewer->setFocus();
     return QMainWindow::eventFilter(obj, event);
@@ -555,7 +726,6 @@ void MainWindow::combinePathsImages(QList<QImage> pathsImages){
         cpainter.drawImage(0, 0, pathImage);
     }
     cpainter.end();
-
 
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(combinedImage));
 }
@@ -613,6 +783,7 @@ void MainWindow::redoDrawingPath() {
 void MainWindow::updateMesh(QImage image){
     viewer->terrainMesh.perlinNoise->ImgPerlin = image;
     viewer->terrainMesh.generateMesh();
+    viewer->loadTextures();
     viewer->update();
 
     viewer->setFocus();
@@ -647,21 +818,42 @@ void MainWindow::uploadMap(){
 
     }
 
+    viewer->camPosX = QRandomGenerator::global()->generateDouble();
+    viewer->camPosZ = QRandomGenerator::global()->generateDouble();
+
     originalImage = QImage(filePath);
     ui->label_perlinNoise->setPixmap(QPixmap::fromImage(originalImage));
+    editedImage = originalImage.copy();
+    editedImage = editedImage.convertToFormat(QImage::Format_ARGB32);
+
+    undoPaths.clear();
+    redoPaths.clear();
+
+    pathsImages.clear();
+    combinePathsImages(pathsImages);
+    updateMesh(combinedImage);
+
     updateMesh(originalImage);
     viewer->setFocus();
-
 }
 
 void MainWindow::changerVuePremierePersonne() {
     if (viewer->vueActuelle == viewer->VueTerrain) {
         viewer->vueActuelle = viewer->VuePremierePersonne;
 
+        ui->label_droite->setStyleSheet(toucheOn);
+        ui->label_gauche->setStyleSheet(toucheOn);
+        ui->label_z->setStyleSheet(toucheOn);
+        ui->label_q->setStyleSheet(toucheOn);
+        ui->label_s->setStyleSheet(toucheOn);
+        ui->label_d->setStyleSheet(toucheOn);
+
         hideCarte(true);
         ui->button_show_map->hide();
         hideParamMesh(true);
         ui->button_show_param_mesh->hide();
+        hideErosion(true);
+        ui->button_show_erosion->hide();
 
         ui->pushButton_mode_FPS->setText("Quitter vue FPS");
 
@@ -678,8 +870,16 @@ void MainWindow::changerVuePremierePersonne() {
         ui->pushButton_mode_FPS->setText("Afficher vue FPS");
         viewer->vueActuelle = viewer->VueTerrain;
 
+        ui->label_droite->setStyleSheet(toucheOn);
+        ui->label_gauche->setStyleSheet(toucheOn);
+        ui->label_z->setStyleSheet(toucheOff);
+        ui->label_q->setStyleSheet(toucheOff);
+        ui->label_s->setStyleSheet(toucheOff);
+        ui->label_d->setStyleSheet(toucheOff);
+
         ui->button_show_map->show();
         ui->button_show_param_mesh->show();
+        ui->button_show_erosion->show();
 
         viewer->openCameraFromFile("initCam.txt");
 
@@ -697,4 +897,6 @@ void MainWindow::changerVuePremierePersonne() {
     }
 
 }
+
+
 

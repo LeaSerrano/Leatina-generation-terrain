@@ -17,6 +17,7 @@ public :
     QImage ImgPerlin;
     void generatePerlinNoise();
     float getPerlinAt(int i, int j, int resolution);
+    void setPerlinAt(int i, int j, int resolution, float value);
     int seed;
 
 private :
