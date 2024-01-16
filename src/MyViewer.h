@@ -91,12 +91,16 @@ public :
     bool isPointerOn = false;
     bool isMarkerOn = false;
 
+    bool camLocked = false;
+    bool camLockedFPS = false;
+
     enum Vue { VueTerrain, VuePremierePersonne };
     Vue vueActuelle;
 
     MyViewer(QGLWidget * parent = NULL) : QGLViewer(parent) , QOpenGLFunctions_4_3_Core() {
         vueActuelle = VueTerrain;
     }
+
 
 
 
@@ -805,21 +809,20 @@ public :
     }
 
     void keyPressEvent( QKeyEvent * event ) {
-
-        if( event->key() == Qt::Key_H ) {
-            help();
-        }
-        else if( event->key() == Qt::Key_T ) {
-            if( event->modifiers() & Qt::CTRL )
-            {
-                bool ok;
-                QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
-                if (ok && !text.isEmpty())
-                {
-                    updateTitle(text);
-                }
-            }
-        }
+        // if( event->key() == Qt::Key_H ) {
+        //     help();
+        // }
+        // else if( event->key() == Qt::Key_T ) {
+        //     if( event->modifiers() & Qt::CTRL )
+        //     {
+        //         bool ok;
+        //         QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
+        //         if (ok && !text.isEmpty())
+        //         {
+        //             updateTitle(text);
+        //         }
+        //     }
+        // }
 
         if (vueActuelle == VueTerrain) {
             static int nbMvt = 0;
@@ -832,12 +835,23 @@ public :
             else if (nbMvt < 20 && event->key() == Qt::Key_Up) {
                 rotateObjectUp();
                 nbMvt++;
-                //qDebug() << nbMvt;
+                qDebug() << nbMvt;
             }
             else if (nbMvt > 0 && event->key() == Qt::Key_Down) {
                 rotateObjectDown();
+                //if(nbMvt != 0)
                 nbMvt--;
+                qDebug() << nbMvt;
             }
+
+            if(nbMvt != 0){
+                camLocked = true;
+            }else{
+                camLocked = false;
+            }
+            //qDebug() << "viewer " << camLocked;
+
+
         }
         else if (vueActuelle == VuePremierePersonne) {
             static int nbMvtFPS = 0;
@@ -876,9 +890,10 @@ public :
                     rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                     nbMvtFPS++;
+                    qDebug() << nbMvtFPS;
                 }
             }
-            else if (/*nbMvtFPS > 0 &&*/ event->key() == Qt::Key_Down) {
+            else if (/*nbMvtFPS > -20 &&*/ event->key() == Qt::Key_Down) {
                 qreal pitch = camera()->viewDirection().y;
 
                 if (pitch >= -0.7) {
@@ -886,6 +901,7 @@ public :
                     rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                     nbMvtFPS--;
+                    qDebug() << nbMvtFPS;
                 }
             }
             else if (nbMvtFPS == 0 && event->key() == Qt::Key_Right) {
@@ -899,10 +915,14 @@ public :
                 camera()->frame()->rotate(rotation);
             }
 
+            //Affichage touches
+            if(nbMvtFPS != 0){
+                camLockedFPS = true;
+            }else{
+                camLockedFPS = false;
+            }
             update();
-
-        }
-
+        }    
     }
 
     void rotateObjectLeft() {
@@ -955,8 +975,10 @@ public :
             float zoomFactor = 0.2;
 
             if (delta > 0){
-                camera()->setPosition(cameraPosition + zoomFactor * cameraViewDir); // Zoom in
-                nbZoom++;
+                if(nbZoom < 8){
+                    camera()->setPosition(cameraPosition + zoomFactor * cameraViewDir); // Zoom in
+                    nbZoom++;
+                }
             } else{
                 if(nbZoom > -1){
                     camera()->setPosition(cameraPosition - zoomFactor * cameraViewDir); // Zoom out
@@ -964,7 +986,8 @@ public :
                 }
 
             }
-            qDebug() << nbZoom;
+            //qDebug() << nbZoom;
+            //min -1 max 8
 
 
 

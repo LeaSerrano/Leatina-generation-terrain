@@ -80,6 +80,7 @@ private slots:
 #include <QLabel>
 #include <QRandomGenerator>
 #include <QGraphicsDropShadowEffect>
+#include <QKeyEvent>
 #include "MyViewer.h"
 #include "path.h"
 
@@ -124,6 +125,12 @@ private slots:
     void hideParamMesh(bool hide);
     void hideParam(bool hide);
     void hideCarte(bool hide);
+    void hideControles(bool hide);
+    void hideErosion(bool hide);
+
+    void onSpinBox_nbRaindropsChanged();
+    void onSpinBox_nbIteErosionChanged();
+    void onSpinBox_impactChanged();
 
 private:
     Ui::MainWindow *ui;
@@ -157,6 +164,9 @@ private:
     bool isHidden = true;
 
     bool isMarqueurMode = false;
+
+    QString toucheOn = "background-color : white;\nborder : 1px solid;\nborder-radius : 10px;";
+    QString toucheOff = "background-color : gray;\nborder : 1px solid;\nborder-radius : 10px;";
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);

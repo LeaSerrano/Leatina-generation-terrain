@@ -37,8 +37,9 @@ public:
     float getErosionAt(int i, int j, int resolution);
 
     int nbRainDrops = 50;
-    int nbErosionIterations = 100;
-    bool renderErosion = true;
+    int nbErosionIterations = 20;
+    int intensiteImpact = 40;
+    //bool renderErosion = false;
 
 private:
     void generatePlan();
