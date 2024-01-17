@@ -26,7 +26,6 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 #include <QLineEdit>
-#include <QDebug>
 #include <QOpenGLShaderProgram>
 #include <QtMath>
 #include <algorithm>
@@ -809,20 +808,6 @@ public :
     }
 
     void keyPressEvent( QKeyEvent * event ) {
-        // if( event->key() == Qt::Key_H ) {
-        //     help();
-        // }
-        // else if( event->key() == Qt::Key_T ) {
-        //     if( event->modifiers() & Qt::CTRL )
-        //     {
-        //         bool ok;
-        //         QString text = QInputDialog::getText(this, tr(""), tr("title:"), QLineEdit::Normal,this->windowTitle(), &ok);
-        //         if (ok && !text.isEmpty())
-        //         {
-        //             updateTitle(text);
-        //         }
-        //     }
-        // }
 
         if (vueActuelle == VueTerrain) {
             static int nbMvt = 0;
@@ -835,13 +820,10 @@ public :
             else if (nbMvt < 20 && event->key() == Qt::Key_Up) {
                 rotateObjectUp();
                 nbMvt++;
-                qDebug() << nbMvt;
             }
             else if (nbMvt > 0 && event->key() == Qt::Key_Down) {
                 rotateObjectDown();
-                //if(nbMvt != 0)
                 nbMvt--;
-                qDebug() << nbMvt;
             }
 
             if(nbMvt != 0){
@@ -849,7 +831,6 @@ public :
             }else{
                 camLocked = false;
             }
-            //qDebug() << "viewer " << camLocked;
 
 
         }
@@ -890,7 +871,6 @@ public :
                     rotation.setAxisAngle(qglviewer::Vec(1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                     nbMvtFPS++;
-                    qDebug() << nbMvtFPS;
                 }
             }
             else if (/*nbMvtFPS > -20 &&*/ event->key() == Qt::Key_Down) {
@@ -901,7 +881,6 @@ public :
                     rotation.setAxisAngle(qglviewer::Vec(-1.0, 0.0, 0.0), stepRotate);
                     camera()->frame()->rotate(rotation);
                     nbMvtFPS--;
-                    qDebug() << nbMvtFPS;
                 }
             }
             else if (nbMvtFPS == 0 && event->key() == Qt::Key_Right) {
@@ -986,10 +965,7 @@ public :
                 }
 
             }
-            //qDebug() << nbZoom;
             //min -1 max 8
-
-
 
             update();
         }

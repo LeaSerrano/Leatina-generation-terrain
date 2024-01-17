@@ -62,19 +62,7 @@
 Window::Window(MainWindow *mw)
     : mainWindow(mw)
 {
-    /*glWidget = new GLWidget;
 
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    QHBoxLayout *container = new QHBoxLayout;
-    container->addWidget(glWidget);
-
-    QWidget *w = new QWidget;
-    w->setLayout(container);
-    mainLayout->addWidget(w);
-
-    setLayout(mainLayout);
-
-    setWindowTitle(tr("Qt OpenGL"));*/
 }
 
 void Window::keyPressEvent(QKeyEvent *e)

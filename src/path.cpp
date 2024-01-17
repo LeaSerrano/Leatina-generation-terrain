@@ -31,8 +31,6 @@ void Path::drawingPath(QMouseEvent *mouseEvent, QImage image){
     painter.setPen(pathPen);
     painter.drawPath(path);
     painter.end();
-
-    //qDebug() << "trace.";
 }
 
 void Path::setPixelsPath(){
@@ -44,7 +42,6 @@ void Path::setPixelsPath(){
             if (pixelLayerValue == /*Qt::red*/QColor("lightcoral")) {
                 // Ajouter les coordonnées du pixel à la liste
                 pixelsPath.append(QPoint(x, y));
-                //qDebug() << "X:" << x << ", Y:" << y;
             }
         }
     }
@@ -63,14 +60,12 @@ void Path::setPixelsPath(){
 int Path::blurSize(){
     int size = widthPen / 2;
     if(size%2 == 0) size = size - 1;
-    //qDebug() << size;
     return size;
 }
 
 void Path::addModification(QImage image){
     renderPathImage = QImage(image.size(), image.format());
     renderPathImage.fill(Qt::transparent);
-    //qDebug() << "là";
 
     for(const QPoint& pixel : pixelsPath){
         int x = pixel.x();
@@ -85,7 +80,6 @@ void Path::addModification(QImage image){
         renderPathImage.setPixel(x, y, qRgb(newGrayValue, newGrayValue, newGrayValue));
 
         //renderPathImage = renderPathImage.convertToFormat(QImage::Format_RGB32);
-        //qDebug() << "ici";
     }
 
 //    int size;

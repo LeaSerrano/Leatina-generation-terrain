@@ -495,7 +495,6 @@ void MainWindow::hideErosion(bool hide){
 
 void MainWindow::onSpinBox_nbRaindropsChanged(){
     viewer->terrainMesh.nbRainDrops = ui->spinBox_nbRaindrops->value();
-    //qDebug() << viewer->terrainMesh.nbRainDrops;
 }
 
 void MainWindow::onSpinBox_nbIteErosionChanged(){
@@ -504,14 +503,11 @@ void MainWindow::onSpinBox_nbIteErosionChanged(){
 
 void MainWindow::onSpinBox_impactChanged(){
     viewer->terrainMesh.intensiteImpact = ui->spinBox_impact->value();
-    qDebug() << viewer->terrainMesh.intensiteImpact;
 }
 
 // Modifier résolution
 void MainWindow::onResolutionSliderReleased() {
     int value = ui->horizontalSlider_resolution->value();
-
-    //qDebug() << "resolution : " << value;
 
     viewer->terrainMesh.resolution = value;
     viewer->terrainMesh.generateMesh();
@@ -566,10 +562,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
         float z = mouseEvent->pos().y();
         float x_div = x/512.;
         float z_div = z/512.;
-
-        //qDebug() << "x " << x;
-        //qDebug() << "y " << y;
-        //qDebug() << "z " << z;
 
         float y = viewer->getThisPositionHeight(x_div,z_div);
         if (!isMarqueurMode/* && obj == ui->label_perlinNoise*/) {
@@ -646,8 +638,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
 
     }
 
-    //qDebug() << obj;
-
     // NE MARCHE PAS CAR FAIT PLANTER SI DESSIN SUR PERLIN NOISE
     // if (obj == ui->widget_affichage_terrain) {
     //     QKeyEvent* keyEvent = dynamic_cast<QKeyEvent*>(event);
@@ -658,11 +648,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
     //         // Récupérer la touche pressée
     //         int keyInt = keyEvent->key();
     //         Qt::Key key = static_cast<Qt::Key>(keyInt);
-    //         //qDebug() << "Touche pressée dans ui->widget_affichage_terrain : " << key;
 
 
     //         if(key == Qt::Key_Right || key == Qt::Key_Left || key == Qt::Key_Up || key == Qt::Key_Down){
-    //             //qDebug() << "main " << viewer->camLocked;
     //             if(viewer->camLocked){
     //                 ui->label_droite->setStyleSheet(toucheOff);
     //                 ui->label_gauche->setStyleSheet(toucheOff);
@@ -733,10 +721,8 @@ void MainWindow::combinePathsImages(QList<QImage> pathsImages){
 
 // Enlever le tracé
 void MainWindow::undoDrawingPath() {
-    //qDebug() << "test";
 
     if (!undoPaths.isEmpty()) {
-        //qDebug() << "        undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
         //Enlever le tracé dans la liste des tracés
         pathsImages.removeLast();
 
@@ -750,15 +736,12 @@ void MainWindow::undoDrawingPath() {
 
         //Mettre à jour le currentPath par le "précédent"
         currentPath = undoPaths.takeLast();
-
-        //qDebug() << "UNDO => undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
     }
 }
 
 // Refaire le tracé
 void MainWindow::redoDrawingPath() {
     if (!redoPaths.isEmpty()) {
-        //qDebug() << "        undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
 
         //Ajouter à undo
         undoPaths.append(currentPath);
@@ -774,8 +757,6 @@ void MainWindow::redoDrawingPath() {
 
         //Mettre à jour le currentPath par le "suivant"
         currentPath = redoPaths.takeLast();
-
-        //qDebug() << "REDO => undo " << QString::number(undoPaths.count()) << " redo " << QString::number(redoPaths.count());
     }
 }
 
