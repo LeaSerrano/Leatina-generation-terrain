@@ -8,7 +8,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 #include <QtGui>
-#include <opencv2/opencv.hpp>
+//#include "./extern/opencv2/opencv.hpp"
 
 class Path
 {
