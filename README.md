@@ -14,7 +14,7 @@ Nous avons commencé par générer une carte de bruit de Perlin, à la suite de 
 
 This project is part of the 3D project course in the M2 IMAGINE program. It is a project carried out in pairs, implemented in C++ with OpenGL and QT.
 
-The goal: to create a 3D terrain generation project
+The goal : to create a 3D terrain generation project
 
 We began by generating a Perlin noise map, then we applied this map to a 3D plane, which allowed us to create terrain features. We also added Phong illumination and textures that vary based on altitude. We implemented two types of cameras : the viewer mode and the first-person mode. The viewer mode allows us to see the terrain from a distance, rotate it, and apply various modifications. We can load a Perlin map, generate a new one, or save it. Additionally, it is possible to draw on the current Perlin map to decrease or increase the height where we draw (the brush size can be adjusted). We can also add erosion to simulate the effect of drops falling on the terrain and eroding it. We can modify the terrain's resolution and height range. Finally, in this mode, we can select the location where we will be positioned when we switch to the other camera mode. In this other camera mode, the first-person mode, we can move through the terrain and move the camera.
 
